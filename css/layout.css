@@ -80,6 +80,10 @@ header .banner-text h3 a {
   color: #fff;
   font-style: italic;
 }
+header .banner-text h3 span,
+header .banner-text h3 a:hover {
+  color: #11abb0;
+}
 header .banner-text hr {
   width: 60%;
   margin: 18px auto 24px auto;
