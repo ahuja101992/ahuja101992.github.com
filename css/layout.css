@@ -384,19 +384,19 @@ ul#nav li.current a {
 }
 
 .node-js {
-  width: 75%;
+  width: 85%;
   -moz-animation: node-js 2s ease;
   -webkit-animation: node-js 2s ease;
 }
 .react-js {
-  width: 70%;
+  width: 80%;
   -moz-animation: react-js 2s ease;
   -webkit-animation: react-js 2s ease;
 }
 .java {
   width: 85%;
-  -moz-animation: redux 2s ease;
-  -webkit-animation: redux 2s ease;
+  -moz-animation: java 2s ease;
+  -webkit-animation: java 2s ease;
 }
 .restful {
   width: 80%;
@@ -414,7 +414,7 @@ ul#nav li.current a {
   -webkit-animation: css 2s ease;
 }
 .html5 {
-  width: 50%;
+  width: 60%;
   -moz-animation: html5 2s ease;
   -webkit-animation: html5 2s ease;
 }
@@ -449,7 +449,7 @@ ul#nav li.current a {
   -webkit-animation: hibernate 2s ease;
 }
 
-@-moz-keyframes photoshop {
+@-moz-keyframes restful {
   0% {
     width: 0px;
   }
@@ -457,7 +457,7 @@ ul#nav li.current a {
     width: 60%;
   }
 }
-@-moz-keyframes illustrator {
+@-moz-keyframes java {
   0% {
     width: 0px;
   }
@@ -465,7 +465,7 @@ ul#nav li.current a {
     width: 55%;
   }
 }
-@-moz-keyframes wordpress {
+@-moz-keyframes react-js {
   0% {
     width: 0px;
   }
@@ -489,7 +489,7 @@ ul#nav li.current a {
     width: 80%;
   }
 }
-@-moz-keyframes jquery {
+@-moz-keyframes node-js {
   0% {
     width: 0px;
   }
@@ -498,39 +498,7 @@ ul#nav li.current a {
   }
 }
 
-@-webkit-keyframes photoshop {
-  0% {
-    width: 0px;
-  }
-  100% {
-    width: 60%;
-  }
-}
-@-webkit-keyframes illustrator {
-  0% {
-    width: 0px;
-  }
-  100% {
-    width: 55%;
-  }
-}
-@-webkit-keyframes wordpress {
-  0% {
-    width: 0px;
-  }
-  100% {
-    width: 50%;
-  }
-}
-@-webkit-keyframes css {
-  0% {
-    width: 0px;
-  }
-  100% {
-    width: 90%;
-  }
-}
-@-webkit-keyframes html5 {
+@-webkit-keyframes restful {
   0% {
     width: 0px;
   }
@@ -538,12 +506,84 @@ ul#nav li.current a {
     width: 80%;
   }
 }
-@-webkit-keyframes jquery {
+@-webkit-keyframes java {
   0% {
     width: 0px;
   }
   100% {
-    width: 50%;
+    width: 85%;
+  }
+}
+@-webkit-keyframes react-js {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 80%;
+  }
+}
+@-webkit-keyframes css {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 80%;
+  }
+}
+@-webkit-keyframes html5 {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 60%;
+  }
+}
+@-webkit-keyframes node-js {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 85%;
+  }
+}
+@-webkit-keyframes siebel {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 90%;
+  }
+}
+@-webkit-keyframes kafka {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 80%;
+  }
+}
+@-webkit-keyframes mysql {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 90%;
+  }
+}
+@-webkit-keyframes mongodb {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 80%;
+  }
+}
+@-webkit-keyframes aws {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 70%;
   }
 }
 
