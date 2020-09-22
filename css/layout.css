@@ -412,6 +412,11 @@ ul#nav li.current a {
   -moz-animation: siebel 2s ease;
   -webkit-animation: siebel 2s ease;
 }
+.openshift {
+  width: 70%;
+  -moz-animation: openshift 2s ease;
+  -webkit-animation: openshift 2s ease;
+}
 .css {
   width: 80%;
   -moz-animation: css 2s ease;
@@ -501,6 +506,14 @@ ul#nav li.current a {
     width: 50%;
   }
 }
+@-moz-keyframes openshift {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 70%;
+  }
+}
 
 @-webkit-keyframes restful {
   0% {
@@ -556,6 +569,14 @@ ul#nav li.current a {
   }
   100% {
     width: 90%;
+  }
+}
+@-webkit-keyframes openshift {
+  0% {
+    width: 0px;
+  }
+  100% {
+    width: 70%;
   }
 }
 @-webkit-keyframes kafka {
