@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Market" />
+  <meta name="theme-color" content="#07090c" />
+  <title>Market Brief</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- PWA icons — replace with your own if desired -->
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #07090c;
+      --surface:   #0d1117;
+      --card:      #111820;
+      --border:    #1c2636;
+      --amber:     #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --amber-glow:rgba(245,158,11,0.25);
+      --green:     #3fb950;
+      --red:       #f85149;
+      --red-dim:   rgba(248,81,73,0.10);
+      --red-border:rgba(248,81,73,0.30);
+      --blue:      #58a6ff;
+      --purple:    #bc8cff;
+      --text:      #e6edf3;
+      --muted:     #7d8590;
+      --dim:       #30363d;
+      --mono:      'Space Mono', monospace;
+      --sans:      'Syne', sans-serif;
+      --radius:    12px;
+      --radius-sm: 7px;
+    }
+
+    html { background: var(--bg); }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      padding-bottom: env(safe-area-inset-bottom);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Typography ── */
+    .mono { font-family: var(--mono); }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7,9,12,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 0;
+      padding-top: max(12px, env(safe-area-inset-top));
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .header-title {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .header-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      margin-top: 2px;
+    }
+
+    .vix-block { text-align: right; }
+    .vix-label { font-family: var(--mono); font-size: 9px; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+    .vix-value { font-family: var(--mono); font-weight: 700; font-size: 24px; line-height: 1; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 3px;
+      padding-bottom: 1px;
+    }
+
+    .tab {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+      background: var(--amber-dim);
+    }
+
+    /* ── Content ── */
+    .content {
+      padding: 16px;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── Cards ── */
+    .card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 13px 15px;
+      margin-bottom: 9px;
+    }
+
+    .card-surface {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 13px 15px;
+      margin-bottom: 9px;
+    }
+
+    .anomaly-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--red-border);
+      background: var(--red-dim);
+      padding: 13px 15px;
+      margin-bottom: 9px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .anomaly-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--red);
+    }
+
+    .cash-card {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--amber-dim);
+      padding: 13px 15px;
+      margin-bottom: 9px;
+    }
+
+    /* ── Labels ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-label .sub {
+      font-size: 10px;
+      color: var(--dim);
+    }
+
+    /* ── Pills ── */
+    .pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 400;
+      display: inline-block;
+    }
+
+    .pill-warn    { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .pill-success { background: rgba(63,185,80,0.15);  color: var(--green); }
+    .pill-danger  { background: rgba(248,81,73,0.15);  color: var(--red); }
+    .pill-info    { background: rgba(88,166,255,0.15); color: var(--blue); }
+    .pill-dim     { background: var(--surface); color: var(--muted); }
+
+    /* ── Gain ── */
+    .gain-pos { color: var(--green); font-family: var(--mono); font-size: 12px; font-weight: 700; }
+    .gain-neg { color: var(--red);   font-family: var(--mono); font-size: 12px; font-weight: 700; }
+
+    /* ── Conv bars ── */
+    .conv-bars { display: inline-flex; align-items: center; gap: 3px; }
+    .conv-bar-segment { width: 11px; height: 3px; border-radius: 2px; }
+    .conv-label { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-left: 5px; }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+    /* ── Buy card internals ── */
+    .buy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .buy-ticker-row { display: flex; align-items: center; gap: 8px; }
+    .buy-idx { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+    .buy-ticker { font-family: var(--mono); font-weight: 700; font-size: 19px; color: var(--text); }
+    .buy-amount { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--amber); }
+    .buy-body { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .buy-line { font-size: 13px; line-height: 1.5; }
+    .buy-why  { color: var(--text); }
+    .buy-risk { color: var(--muted); }
+
+    /* ── Anomaly internals ── */
+    .anomaly-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .anomaly-ticker { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--red); }
+    .anomaly-source { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+    .anomaly-body { font-size: 13px; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+    .anomaly-suggestion { font-size: 12px; color: var(--amber); }
+
+    /* ── Table rows ── */
+    .table-wrap {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: 9px;
+    }
+
+    .table-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-row:last-child { border-bottom: none; }
+
+    .table-row .left { display: flex; flex-direction: column; gap: 3px; }
+    .table-row .right { text-align: right; }
+
+    .row-ticker { font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--text); }
+    .row-sub    { font-size: 11px; color: var(--muted); }
+
+    /* ── ETF grid ── */
+    .etf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .etf-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    .etf-name { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+    .etf-val  { font-family: var(--mono); font-weight: 700; font-size: 14px; }
+
+    /* ── Macro rows ── */
+    .macro-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .macro-row:last-child { border-bottom: none; }
+    .macro-key { color: var(--muted); font-family: var(--mono); min-width: 120px; }
+    .macro-val { color: var(--text); text-align: right; flex: 1; }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 40px 20px; }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-title { font-family: var(--mono); font-size: 14px; color: var(--text); margin-bottom: 8px; }
+    .empty-sub   { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+
+    /* ── Refresh FAB ── */
+    .fab {
+      position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom));
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--amber);
+      border: none;
+      color: #000;
+      font-size: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 24px var(--amber-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: transform 0.2s, opacity 0.2s;
+      z-index: 50;
+    }
+
+    .fab:active { transform: scale(0.92); }
+    .fab.spinning { animation: fab-spin 0.7s linear infinite; }
+
+    @keyframes fab-spin { to { transform: rotate(360deg); } }
+
+    /* ── Loading state ── */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 14px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: fab-spin 0.7s linear infinite;
+    }
+
+    .loading-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ── Error state ── */
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      padding: 32px;
+      text-align: center;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      background: var(--amber);
+      border: none;
+      color: #000;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── No alerts banner ── */
+    .no-alerts {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 15px;
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--dim);
+      font-family: var(--mono);
+    }
+  </style>
+</head>
+<body>
+
+<div id="header"></div>
+<div id="content" class="content"></div>
+<button class="fab" id="fab" onclick="refresh()" title="Refresh">↻</button>
+
+<script>
+  // ── CONFIG — replace with your Cloudflare Worker URL after deploying ──────
+  const WORKER_URL = "https://late-firefly-cd42-market-brief.ahuja101992-753.workers.dev/";
+
+  let DATA = null;
+  let activeTab = "brief";
+
+  // ── Fetch ─────────────────────────────────────────────────────────────────
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const res = await fetch(WORKER_URL);
+      if (!res.ok) throw new Error("Worker returned " + res.status);
+      DATA = await res.json();
+      if (DATA.error) throw new Error(DATA.error);
+      renderAll();
+    } catch (e) {
+      renderError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refresh() {
+    const fab = document.getElementById("fab");
+    fab.classList.add("spinning");
+    await fetchData();
+    fab.classList.remove("spinning");
+  }
+
+  function setLoading(on) {
+    if (on) {
+      document.getElementById("content").innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p class="loading-text">Loading from Drive...</p>
+        </div>`;
+      document.getElementById("header").innerHTML = "";
+    }
+  }
+
+  function renderError(msg) {
+    document.getElementById("content").innerHTML = `
+      <div class="error-state">
+        <div style="font-size:40px;margin-bottom:14px">⚠️</div>
+        <p class="mono" style="font-size:13px;color:var(--red);margin-bottom:8px">Could not load brief</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;max-width:300px">${msg}</p>
+        <button class="btn-primary" onclick="refresh()">Retry</button>
+      </div>`;
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function renderAll() {
+    renderHeader();
+    renderTab(activeTab);
+  }
+
+  function renderHeader() {
+    const d = DATA;
+    const vixColor = d.vix > 20 ? "var(--red)" : d.vix > 15 ? "var(--amber)" : "var(--green)";
+    const tone = d.tone || "—";
+    const toneClass = tone.includes("risk-on") ? "pill-success" : tone.includes("off") ? "pill-danger" : "pill-warn";
+    document.getElementById("header").innerHTML = `
+      <div class="header">
+        <div class="header-row">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+              <span class="header-title">Market Brief</span>
+              <span class="pill ${toneClass}">${tone}</span>
+            </div>
+            <p class="header-meta">${d.run_date || ""} ${d.run_time_et || ""} · ${d.market_state || ""}</p>
+          </div>
+          <div class="vix-block">
+            <div class="vix-label">VIX</div>
+            <div class="vix-value" style="color:${vixColor}">${d.vix || "—"}</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab ${activeTab==="brief"?"active":""}" onclick="switchTab('brief')">Brief</button>
+          <button class="tab ${activeTab==="conviction"?"active":""}" onclick="switchTab('conviction')">Conviction</button>
+          <button class="tab ${activeTab==="macro"?"active":""}" onclick="switchTab('macro')">Macro</button>
+        </div>
+      </div>`;
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    renderHeader();
+    renderTab(tab);
+  }
+
+  function renderTab(tab) {
+    if (tab === "brief") renderBrief();
+    else if (tab === "conviction") renderConviction();
+    else renderMacro();
+  }
+
+  // ── Brief tab ─────────────────────────────────────────────────────────────
+  function renderBrief() {
+    const d = DATA;
+    const anomalies = d.anomalies || [];
+    const buys = d.recommended_buys || [];
+    const holdings = (d.holdings || []).filter(h => h.ticker && h.ticker !== "EXAMPLE");
+    let html = "";
+
+    // Anomalies — first
+    html += `<p class="section-label">⚡ Anomaly Alerts <span class="sub">${anomalies.length} today</span></p>`;
+    if (anomalies.length) {
+      anomalies.forEach(a => {
+        html += `<div class="anomaly-card">
+          <div class="anomaly-top">
+            <span class="anomaly-ticker">${a.ticker}</span>
+            <span class="anomaly-source">${a.source || ""}</span>
+          </div>
+          <p class="anomaly-body">${a.headline}</p>
+          <span class="anomaly-suggestion">→ ${a.suggestion}</span>
+        </div>`;
+      });
+    } else {
+      html += `<div class="no-alerts">⚡ No anomaly alerts today</div>`;
+    }
+
+    html += `<div class="divider"></div>`;
+
+    // Buy recommendations
+    const deployed = d.total_deployed_usd || 0;
+    const cash = d.cash_buffer_usd || 0;
+    html += `<p class="section-label">🎯 Buy This Period <span class="sub">$${deployed} deployed · $${cash} cash</span></p>`;
+
+    buys.forEach((b, i) => {
+      if (b.ticker === "CASH") {
+        html += `<div class="cash-card">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="mono" style="font-weight:700;font-size:15px;color:var(--amber)">💵 CASH RESERVE</span>
+            <span class="mono" style="font-weight:700;font-size:14px;color:var(--amber)">$${b.amount_usd}</span>
+          </div>
+          <p style="font-size:13px;line-height:1.5;color:var(--muted)">${b.reason}</p>
+        </div>`;
+        return;
+      }
+      const convRaw = typeof b.conviction === "number" ? b.conviction : parseInt(b.conviction) || 0;
+      html += `<div class="card">
+        <div class="buy-header">
+          <div class="buy-ticker-row">
+            <span class="buy-idx">#${i+1}</span>
+            <span class="buy-ticker">${b.ticker}</span>
+            <span class="buy-amount">$${b.amount_usd}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${b.price_at_flag ? `<span class="mono" style="font-size:11px;color:var(--muted)">$${b.price_at_flag}</span>` : ""}
+            <span class="pill pill-dim">${b.composite || b.conviction || ""}</span>
+          </div>
+        </div>
+        ${convBarsHtml(convRaw)}
+        <div class="buy-body">
+          <p class="buy-line buy-why"><span style="color:var(--green);margin-right:5px">✓</span>${b.why}</p>
+          ${b.risk ? `<p class="buy-line buy-risk"><span style="color:var(--red);margin-right:5px">⚠</span>${b.risk}</p>` : ""}
+        </div>
+      </div>`;
+    });
+
+    // Holdings
+    if (holdings.length) {
+      html += `<div class="divider"></div>`;
+      html += `<p class="section-label">💼 Your Holdings</p>`;
+      html += `<div class="table-wrap">`;
+      holdings.forEach(h => {
+        html += `<div class="table-row">
+          <div class="left">
+            <span class="row-ticker">${h.ticker}</span>
+            ${h.note && h.note !== "quiet" ? `<span class="row-sub">${h.note}</span>` : ""}
+          </div>
+          <div class="right">
+            ${h.current_price ? `<span class="mono" style="font-size:12px;color:var(--muted)">$${h.current_price}</span>` : ""}
+            ${gainHtml(h.gain_pct)}
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:12px">Not investment advice · ${d.run_date || ""}</p>`;
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // ── Conviction tab ────────────────────────────────────────────────────────
+  function renderConviction() {
+    const list = DATA.conviction_list_summary || [];
+    let html = `<p class="section-label">🎯 Conviction List <span class="sub">${list.length} names</span></p>`;
+    html += `<div class="table-wrap">`;
+    list.forEach(c => {
+      const statusClass = c.status && c.status.includes("Active") && !c.status.includes("Watch") ? "pill-success"
+        : c.status && (c.status.includes("Contrarian") || c.status.includes("Low Priority")) ? "pill-danger"
+        : c.status && c.status.includes("Candidate") ? "pill-info" : "pill-warn";
+      const convRaw = typeof c.conviction === "number" ? c.conviction : parseInt(c.conviction) || 0;
+      html += `<div class="table-row">
+        <div class="left">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span class="row-ticker">${c.ticker}</span>
+            <span class="pill ${statusClass}">${c.status || ""}</span>
+          </div>
+          ${c.catalyst ? `<span class="row-sub">${c.catalyst}</span>` : ""}
+        </div>
+        <div class="right">
+          ${c.conviction != null ? convBarsHtml(convRaw) : ""}
+          ${c.runs_flagged != null ? `<div class="mono" style="font-size:10px;color:var(--dim);margin-top:3px">${c.runs_flagged} runs</div>` : ""}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // ── Macro tab ─────────────────────────────────────────────────────────────
+  function renderMacro() {
+    const m = DATA.macro || {};
+    const etfs = Object.entries(DATA.sector_etfs || {}).filter(([,v]) => v.change_pct != null);
+    let html = `<p class="section-label">📊 Macro Snapshot</p>`;
+
+    if (etfs.length) {
+      html += `<div class="etf-grid">`;
+      etfs.forEach(([k, v]) => {
+        const pos = v.change_pct >= 0;
+        html += `<div class="etf-cell">
+          <div class="etf-name">${k}</div>
+          <div class="etf-val" style="color:${pos?"var(--green)":"var(--red)"}">${pos?"+":""}${v.change_pct.toFixed(1)}%</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    const rows = [
+      ["NFP May", m.nfp_may_2026_actual ? `${Math.round(m.nfp_may_2026_actual/1000)}K actual vs ${Math.round(m.nfp_may_2026_consensus/1000)}K expected (+${m.nfp_surprise_pct}% beat)` : null],
+      ["Unemployment", m.unemployment_pct ? `${m.unemployment_pct}%` : null],
+      ["Wages YoY", m.wage_growth_yoy_pct ? `${m.wage_growth_yoy_pct}%` : null],
+      ["Rate hike prob", m.rate_hike_probability_yearend_pct ? `${m.rate_hike_probability_yearend_pct}% year-end` : null],
+      ["10Y yield", m.ten_year_yield_pct ? `${m.ten_year_yield_pct}%` : null],
+      ["BTC", m.btc_usd ? `$${m.btc_usd.toLocaleString()}` : null],
+      ["Geopolitical", m.geopolitical],
+      ["Next CPI", m.cpi_next],
+      ["Next FOMC", m.fomc_next],
+      ["MRK PDUFA", m.mrk_pdufa],
+    ].filter(([,v]) => v);
+
+    html += `<div class="table-wrap" style="padding:0 15px">`;
+    rows.forEach(([k,v]) => {
+      html += `<div class="macro-row"><span class="macro-key">${k}</span><span class="macro-val">${v}</span></div>`;
+    });
+    html += `</div>`;
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function convBarsHtml(v, max) {
+    max = max || 5;
+    let html = `<div class="conv-bars">`;
+    for (let i = 0; i < max; i++) {
+      html += `<div class="conv-bar-segment" style="background:${i < v ? "var(--amber)" : "var(--dim)"}"></div>`;
+    }
+    html += `<span class="conv-label">${v}/${max}</span></div>`;
+    return html;
+  }
+
+  function gainHtml(p) {
+    if (p == null) return "";
+    const pos = p >= 0;
+    return `<span class="${pos?"gain-pos":"gain-neg"}">${pos?"▲ ":"▼ "}${Math.abs(p).toFixed(1)}%</span>`;
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  fetchData();
+</script>
+</body>
+</html>
