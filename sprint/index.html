@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Prep Sprint — Akshit</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;padding:24px 16px 60px}
+  .container{max-width:780px;margin:0 auto}
+
+  .header{margin-bottom:28px}
+  .header h1{font-size:22px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+  .header p{font-size:13px;color:#6b6b67}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px}
+  .stat{background:#fff;border:0.5px solid #ddddd8;border-radius:10px;padding:12px 14px}
+  .stat-label{font-size:11px;color:#9b9b96;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .stat-val{font-size:22px;font-weight:500;color:#1a1a18}
+  .stat-bar{margin-top:8px;height:6px;background:#eeedea;border-radius:20px;overflow:hidden}
+  .stat-bar-fill{height:100%;background:#1D9E75;border-radius:20px;transition:width .3s}
+
+  .phase{margin-bottom:24px}
+  .phase-label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#9b9b96;margin-bottom:10px;padding-left:2px}
+
+  .week{background:#fff;border:0.5px solid #ddddd8;border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .week-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;user-select:none}
+  .week-head:hover{background:#fafaf8}
+  .week-name{font-size:13px;font-weight:500;color:#1a1a18}
+  .week-dates{font-size:12px;color:#9b9b96;margin-left:8px}
+  .week-prog{font-size:12px;color:#6b6b67}
+  .week-chevron{font-size:16px;color:#9b9b96;transition:transform .2s;margin-left:8px}
+  .week.collapsed .week-chevron{transform:rotate(-90deg)}
+  .week-body{border-top:0.5px solid #eeedea}
+  .week.collapsed .week-body{display:none}
+
+  .day{display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:0.5px solid #f0efeb;cursor:pointer;transition:background .1s}
+  .day:last-child{border-bottom:none}
+  .day:hover{background:#fafaf8}
+  .day.done{opacity:.55}
+
+  .cb{width:19px;height:19px;flex-shrink:0;margin-top:1px;border:1.5px solid #ccccc8;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff}
+  .cb.on{background:#1D9E75;border-color:#1D9E75}
+  .cb svg{display:none;width:11px;height:11px}
+  .cb.on svg{display:block}
+
+  .day-info{flex:1;min-width:0}
+  .day-date{font-size:11px;color:#9b9b96;margin-bottom:2px}
+  .day-topic{font-size:13px;font-weight:500;color:#1a1a18;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .day-problems{font-size:12px;color:#6b6b67;margin-top:3px;line-height:1.55}
+
+  .tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .t-dsa{background:#E1F5EE;color:#085041}
+  .t-sd{background:#EEEDFE;color:#3C3489}
+  .t-beh{background:#FAEEDA;color:#633806}
+  .t-mock{background:#FCEBEB;color:#791F1F}
+
+  .actions{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .btn{font-size:12px;color:#6b6b67;cursor:pointer;border:0.5px solid #ddddd8;border-radius:8px;padding:5px 12px;background:#fff}
+  .btn:hover{background:#f5f4f0}
+  .btn-primary{background:#1a1a18;color:#fff;border-color:#1a1a18}
+  .btn-primary:hover{background:#333}
+
+  @media(max-width:520px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(prefers-color-scheme:dark){
+    body{background:#1a1a18;color:#e8e8e4}
+    .header h1{color:#e8e8e4}
+    .stat,.week,.btn{background:#242422;border-color:#38382e}
+    .week-head:hover,.day:hover{background:#2a2a28}
+    .week-body{border-top-color:#38382e}
+    .day{border-bottom-color:#2e2e2c}
+    .stat-bar{background:#38382e}
+    .week-name,.day-topic,.stat-val{color:#e8e8e4}
+    .cb{background:#242422;border-color:#555550}
+    .t-dsa{background:#085041;color:#9FE1CB}
+    .t-sd{background:#26215C;color:#CECBF6}
+    .t-beh{background:#412402;color:#FAC775}
+    .t-mock{background:#501313;color:#F7C1C1}
+    .btn-primary{background:#e8e8e4;color:#1a1a18;border-color:#e8e8e4}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Interview prep sprint</h1>
+    <p>Jun 9 – Jul 26, 2026 &nbsp;·&nbsp; Meta E6 &nbsp;·&nbsp; Google L6 &nbsp;·&nbsp; Apple ICT5 &nbsp;·&nbsp; Amazon SDE III</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Completed</div><div class="stat-val" id="s-done">0</div></div>
+    <div class="stat"><div class="stat-label">Remaining</div><div class="stat-val" id="s-left">39</div></div>
+    <div class="stat"><div class="stat-label">Progress</div><div class="stat-val" id="s-pct">0%</div></div>
+    <div class="stat"><div class="stat-label">Overall</div><div class="stat-bar"><div class="stat-bar-fill" id="pbar" style="width:0%"></div></div></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="collapseAll()">Collapse all</button>
+    <button class="btn" onclick="expandAll()">Expand all</button>
+    <button class="btn" onclick="resetAll()">Reset progress</button>
+  </div>
+
+  <div id="root"></div>
+
+</div>
+<script>
+const plan=[
+  {phase:"Pre-sprint — June (1 hr/day weekdays)",weeks:[
+    {id:"p0w0",label:"Week 1",dates:"Jun 9–13",days:[
+      {date:"Mon Jun 9",topic:"Arrays & two pointers",tag:"dsa",problems:"Two Sum #1 · Valid Palindrome #125"},
+      {date:"Tue Jun 10",topic:"Sliding window",tag:"dsa",problems:"Best Time to Buy Stock #121 · Longest Substring #3"},
+      {date:"Wed Jun 11",topic:"Binary search",tag:"dsa",problems:"Binary Search #704 · Search Rotated Array #33"},
+      {date:"Thu Jun 12",topic:"Trees — DFS",tag:"dsa",problems:"Max Depth Binary Tree #104 · Invert Binary Tree #226"},
+      {date:"Fri Jun 13",topic:"Trees — BFS",tag:"dsa",problems:"Level Order Traversal #102"},
+    ]},
+    {id:"p0w1",label:"Week 2",dates:"Jun 16–20",days:[
+      {date:"Mon Jun 16",topic:"Graphs",tag:"dsa",problems:"Number of Islands #200"},
+      {date:"Tue Jun 17",topic:"Linked lists",tag:"dsa",problems:"Reverse Linked List #206 · Linked List Cycle #141"},
+      {date:"Wed Jun 18",topic:"Merge intervals",tag:"dsa",problems:"Merge Intervals #56 · Insert Interval #57"},
+      {date:"Thu Jun 19",topic:"Heap / priority queue",tag:"dsa",problems:"Kth Largest Element #215 · K Closest Points #973"},
+      {date:"Fri Jun 20",topic:"Dynamic programming — 1D",tag:"dsa",problems:"Climbing Stairs #70 · House Robber #198"},
+    ]},
+    {id:"p0w2",label:"Week 3",dates:"Jun 23–27",days:[
+      {date:"Mon Jun 23",topic:"Backtracking",tag:"dsa",problems:"Subsets #78"},
+      {date:"Tue Jun 24",topic:"Trie",tag:"dsa",problems:"Implement Trie #208"},
+      {date:"Wed Jun 25",topic:"Union-find",tag:"dsa",problems:"Number of Provinces #547"},
+      {date:"Thu Jun 26",topic:"Monotonic stack",tag:"dsa",problems:"Daily Temperatures #739"},
+      {date:"Fri Jun 27",topic:"Revisit weakest pattern",tag:"dsa",problems:"2 problems from your lowest-confidence pattern"},
+    ]},
+    {id:"p0w3",label:"Week 4",dates:"Jun 30",days:[
+      {date:"Mon Jun 30",topic:"Consolidation day",tag:"dsa",problems:"Rate all 14 patterns 1–5 · Note top 3 weakest"},
+    ]},
+  ]},
+  {phase:"July sprint — parental leave (9am–5pm)",weeks:[
+    {id:"p1w0",label:"Week 1 — DSA",dates:"Jul 1–9",days:[
+      {date:"Wed Jul 1",topic:"Arrays & two pointers deep dive",tag:"dsa",problems:"Two Sum #1 · Valid Palindrome #125 · 3Sum #15 · Container With Most Water #11 · Longest Substring #3"},
+      {date:"Thu Jul 2",topic:"Linked lists & fast/slow pointers",tag:"dsa",problems:"Reverse Linked List #206 · Merge Two Sorted Lists #21 · Linked List Cycle #141 · Remove Nth Node #19 · Merge Intervals #56"},
+      {date:"Fri Jul 3",topic:"Binary search",tag:"dsa",problems:"Binary Search #704 · Search 2D Matrix #74 · Search Rotated Array #33 · Find Min in Rotated #153 · Koko Eating Bananas #875"},
+      {date:"Sun Jul 6",topic:"Trees — BFS & DFS",tag:"dsa",problems:"Level Order Traversal #102 · Max Depth #104 · Same Tree #100 · Invert Binary Tree #226 · Validate BST #98 · LCA of BST #235"},
+      {date:"Mon Jul 7",topic:"Graphs",tag:"dsa",problems:"Number of Islands #200 · Clone Graph #133 · Pacific Atlantic #417 · Course Schedule #207 · Connected Components #323"},
+      {date:"Tue Jul 8",topic:"Heap & DP intro",tag:"dsa",problems:"Kth Largest #215 · K Closest Points #973 · Task Scheduler #621 · Climbing Stairs #70 · House Robber #198 · Coin Change #322"},
+      {date:"Wed Jul 9",topic:"Advanced patterns + week 1 review",tag:"dsa",problems:"Subsets #78 · Implement Trie #208 · Number of Provinces #547 · Daily Temperatures #739 · Rate all 14 patterns 1–5"},
+    ]},
+    {id:"p1w1",label:"Week 2 — System design",dates:"Jul 10–18",days:[
+      {date:"Thu Jul 10",topic:"Framework + URL shortener",tag:"sd",problems:"Alex Xu Ch. 1 & 8 · Design TinyURL — hashing, DB choice, caching, 301 vs 302"},
+      {date:"Fri Jul 11",topic:"Rate limiter + distributed cache",tag:"sd",problems:"Alex Xu Ch. 4 · Design rate limiter (token bucket vs sliding window) · Design Redis-like cache (LRU, consistent hashing)"},
+      {date:"Mon Jul 14",topic:"Notification system + news feed",tag:"sd",problems:"Alex Xu Ch. 10 · Design notification system (fan-out, queues) · Design Twitter feed (fan-out on write vs read)"},
+      {date:"Tue Jul 15",topic:"Web crawler + search typeahead",tag:"sd",problems:"Alex Xu Ch. 9 · Design web crawler (BFS, bloom filter) · Design autocomplete (Trie, Cassandra, CDN)"},
+      {date:"Wed Jul 16",topic:"YouTube + distributed message queue",tag:"sd",problems:"Alex Xu Ch. 14 · Design YouTube (CDN, chunking, encoding) · Design Kafka-like queue (partitions, exactly-once)"},
+      {date:"Thu Jul 17",topic:"Your power problems",tag:"sd",problems:"Design audit log system (= your ADP Audit Agent) · Design cloud control plane (= your OCI control plane) — use real Oracle experience"},
+      {date:"Fri Jul 18",topic:"Ride sharing + week 2 review",tag:"sd",problems:"Design Uber (geohash, matching, real-time location) · Review all 8 systems — 3 bullets each"},
+    ]},
+    {id:"p1w2",label:"Week 3 — Behavioral + mock loops",dates:"Jul 21–26",days:[
+      {date:"Mon Jul 21",topic:"System design assessment",tag:"sd",problems:"Full 45-min timed mock · Self-assess on RESHADED rubric · No notes"},
+      {date:"Tue Jul 22",topic:"Story bank — stories 1 & 2",tag:"beh",problems:"Story 1: ADP Audit Agent (complex technical problem) · Story 2: JIT PRD influence (stakeholder without authority) · Read aloud, time each at 2.5 min"},
+      {date:"Wed Jul 23",topic:"Story bank — stories 3 & 4",tag:"beh",problems:"Story 3: NL2SQL vs parameterized SQL decision · Story 4: Pushed back on stakeholder · Map all stories to Amazon LPs"},
+      {date:"Thu Jul 24",topic:"Story bank — stories 5, 6 & 7",tag:"beh",problems:"Story 5: FA Maintenance Agent scale (3,000–6,000 podDBs) · Story 6: Mentorship story · Story 7: Genuine failure with specific lesson"},
+      {date:"Fri Jul 25",topic:"Full mock interview loop",tag:"mock",problems:"9:00 Coding round 1 (2 problems) · 9:55 System design mock · 10:50 Behavioral 6 LPs · 11:45 Coding round 2 · Debrief + score yourself"},
+      {date:"Sat Jul 26",topic:"Transition planning + celebrate",tag:"beh",problems:"Update pattern confidence scores · Run HireLoop Intel Scrape · Write state-of-prep doc · You earned this"},
+    ]},
+  ]},
+];
+
+const KEY='akshit_sprint_v3';
+let checks=JSON.parse(localStorage.getItem(KEY)||'{}');
+function persist(){localStorage.setItem(KEY,JSON.stringify(checks))}
+
+function tagHtml(t){
+  const m={dsa:['t-dsa','DSA'],sd:['t-sd','System design'],beh:['t-beh','Behavioral'],mock:['t-mock','Mock loop']};
+  const[c,l]=m[t]||m.dsa;
+  return `<span class="tag ${c}">${l}</span>`;
+}
+
+function build(){
+  const root=document.getElementById('root');
+  root.innerHTML='';
+  let total=0,allIds=[];
+
+  plan.forEach(ph=>{
+    const pDiv=document.createElement('div');
+    pDiv.className='phase';
+    pDiv.innerHTML=`<div class="phase-label">${ph.phase}</div>`;
+
+    ph.weeks.forEach(wk=>{
+      total+=wk.days.length;
+      allIds.push(...wk.days.map((_,i)=>`${wk.id}d${i}`));
+
+      const wDiv=document.createElement('div');
+      wDiv.className='week';
+      wDiv.id='wk-'+wk.id;
+
+      const wDone=wk.days.filter((_,i)=>checks[`${wk.id}d${i}`]).length;
+
+      wDiv.innerHTML=`
+        <div class="week-head" onclick="toggleWeek('${wk.id}')">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="week-name">${wk.label}</span>
+            <span class="week-dates">${wk.dates}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="week-prog" id="wp-${wk.id}">${wDone}/${wk.days.length}</span>
+            <span class="week-chevron">&#8964;</span>
+          </div>
+        </div>
+        <div class="week-body">
+          ${wk.days.map((d,i)=>{
+            const id=`${wk.id}d${i}`;
+            const on=!!checks[id];
+            return `<div class="day${on?' done':''}" id="row-${id}" onclick="toggle('${id}','${wk.id}',${wk.days.length})">
+              <div class="cb${on?' on':''}" id="cb-${id}">
+                <svg viewBox="0 0 12 10" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,5 4.5,8.5 11,1"/></svg>
+              </div>
+              <div class="day-info">
+                <div class="day-date">${d.date}</div>
+                <div class="day-topic">${tagHtml(d.tag)}<span>${d.topic}</span></div>
+                <div class="day-problems">${d.problems}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+
+      pDiv.appendChild(wDiv);
+    });
+    root.appendChild(pDiv);
+  });
+
+  updateStats(allIds,total);
+}
+
+function toggle(id,wkid,wklen){
+  checks[id]=!checks[id];
+  persist();
+  const cb=document.getElementById('cb-'+id);
+  const row=document.getElementById('row-'+id);
+  if(checks[id]){cb.classList.add('on');row.classList.add('done')}
+  else{cb.classList.remove('on');row.classList.remove('done')}
+  const wDone=Array.from({length:wklen},(_,i)=>checks[`${wkid}d${i}`]).filter(Boolean).length;
+  document.getElementById('wp-'+wkid).textContent=`${wDone}/${wklen}`;
+  refreshStats();
+}
+
+function refreshStats(){
+  const rows=document.querySelectorAll('.day');
+  const total=rows.length;
+  const done=document.querySelectorAll('.day.done').length;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-left').textContent=total-done;
+  const pct=Math.round(done/total*100);
+  document.getElementById('s-pct').textContent=pct+'%';
+  document.getElementById('pbar').style.width=pct+'%';
+}
+
+function updateStats(allIds,total){
+  const done=allIds.filter(id=>checks[id]).length;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-left').textContent=total-done;
+  const pct=Math.round(done/total*100);
+  document.getElementById('s-pct').textContent=pct+'%';
+  document.getElementById('pbar').style.width=pct+'%';
+}
+
+function toggleWeek(id){document.getElementById('wk-'+id).classList.toggle('collapsed')}
+function collapseAll(){document.querySelectorAll('.week').forEach(w=>w.classList.add('collapsed'))}
+function expandAll(){document.querySelectorAll('.week').forEach(w=>w.classList.remove('collapsed'))}
+function resetAll(){if(confirm('Reset all progress?')){checks={};persist();build()}}
+
+build();
+</script>
+</body>
+</html>
