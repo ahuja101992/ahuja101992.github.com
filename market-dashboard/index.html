@@ -123,6 +123,7 @@ function renderHeader() {
   const hasAnomaly = (DATA.anomalies||[]).length > 0;
   const tabs = [
     {id:"brief",label:"Brief"},
+    {id:"overview",label:"📰 Overview"},
     {id:"portfolio",label:"💼 Portfolio"},
     {id:"watchlist",label:"📋 Watchlist"},
     {id:"hitrate",label:"📊 Hit Rate"},
@@ -153,6 +154,7 @@ function switchTab(tab) { activeTab = tab; renderHeader(); renderTab(tab); }
 
 function renderTab(tab) {
   if (tab==="brief") renderBrief();
+  else if (tab==="overview") renderOverview();
   else if (tab==="portfolio") renderPortfolio();
   else if (tab==="watchlist") renderWatchlist();
   else if (tab==="hitrate") renderHitRate();
@@ -245,6 +247,54 @@ function renderBrief() {
   }
 
   html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:12px">Not investment advice · ${DATA.run_date||""}</p>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+// ── Overview ───────────────────────────────────────────────────────────────
+function renderOverview() {
+  const n = DATA.market_narrative;
+  if (!n || (!n.today && !n.this_week && !n.big_picture)) {
+    document.getElementById("content").innerHTML = `<div class="card-surface" style="text-align:center;padding:40px">
+      <p style="font-size:36px;margin-bottom:12px">📰</p>
+      <p class="mono" style="font-size:13px;color:var(--muted)">No overview yet</p>
+      <p style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.6">The market narrative populates<br>on the next routine run</p>
+    </div>`;
+    return;
+  }
+
+  let html = `<p class="section-label">📰 Market Overview <span style="font-size:10px;color:var(--dim)">${DATA.run_date||""} · ${DATA.run_time_et||""}</span></p>`;
+
+  if (n.today) {
+    html += `<div class="card" style="margin-bottom:9px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px">
+        <span style="font-size:15px">🔎</span>
+        <span class="mono" style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:0.1em;font-weight:700">Today</span>
+      </div>
+      <p style="font-size:14px;line-height:1.7;color:var(--text)">${n.today}</p>
+    </div>`;
+  }
+
+  if (n.this_week) {
+    html += `<div class="card" style="margin-bottom:9px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px">
+        <span style="font-size:15px">📅</span>
+        <span class="mono" style="font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:0.1em;font-weight:700">This Week</span>
+      </div>
+      <p style="font-size:14px;line-height:1.7;color:var(--text)">${n.this_week}</p>
+    </div>`;
+  }
+
+  if (n.big_picture) {
+    html += `<div class="card" style="margin-bottom:9px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px">
+        <span style="font-size:15px">🌍</span>
+        <span class="mono" style="font-size:11px;color:var(--purple);text-transform:uppercase;letter-spacing:0.1em;font-weight:700">Big Picture</span>
+      </div>
+      <p style="font-size:14px;line-height:1.7;color:var(--text)">${n.big_picture}</p>
+    </div>`;
+  }
+
+  html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:12px">Written by Claude · Not investment advice</p>`;
   document.getElementById("content").innerHTML = html;
 }
 
