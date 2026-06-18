@@ -14,11 +14,11 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#07090c;--surface:#0d1117;--card:#111820;--border:#1c2636;
-      --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);--amber-glow:rgba(245,158,11,0.25);
-      --green:#3fb950;--green-dim:rgba(63,185,80,0.12);
-      --red:#f85149;--red-dim:rgba(248,81,73,0.10);--red-border:rgba(248,81,73,0.30);
-      --blue:#58a6ff;--purple:#bc8cff;--text:#e6edf3;--muted:#7d8590;--dim:#30363d;
+      --bg:#07090c;--surface:#0d1117;--card:#141c26;--border:#2a3544;
+      --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.16);--amber-glow:rgba(245,158,11,0.25);
+      --green:#46d160;--green-dim:rgba(70,209,96,0.15);
+      --red:#ff6b63;--red-dim:rgba(255,107,99,0.13);--red-border:rgba(255,107,99,0.35);
+      --blue:#6cb6ff;--purple:#c9a3ff;--text:#f3f6f9;--muted:#aab4c0;--dim:#7a8699;
       --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;--radius:12px;--radius-sm:7px;
     }
     html{background:var(--bg)}
@@ -89,7 +89,7 @@ let activeTab = "brief";
 async function fetchData() {
   showLoading();
   try {
-    const res = await fetch(WORKER_URL);
+    const res = await fetch(WORKER_URL + "?t=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error("Worker " + res.status);
     DATA = await res.json();
     if (DATA.error) throw new Error(DATA.error);
@@ -138,7 +138,7 @@ function renderHeader() {
             <span class="pill ${toneClass}">${(tone.split(";")[0]).substring(0,20)}</span>
             ${hasAnomaly?`<span class="pill pill-danger">🚨 ALERT</span>`:""}
           </div>
-          <p class="mono" style="font-size:10px;color:var(--dim)">${DATA.run_date||""} ${DATA.run_time_et||""} · ${DATA.market_state||""}</p>
+          <p class="mono" style="font-size:11px;color:var(--muted);line-height:1.5">${DATA.run_date||""} ${DATA.run_time_et||""} · ${DATA.market_state||""}</p>
         </div>
         <div style="text-align:right">
           <div class="mono" style="font-size:9px;color:var(--dim)">VIX</div>
@@ -196,10 +196,11 @@ function renderBrief() {
         <span class="mono" style="font-size:12px;color:${pos?"var(--green)":"var(--red)"};font-weight:700">${pos?"▲":"▼"} ${Math.abs(p.total_gain_pct||0).toFixed(1)}% ($${Math.abs(p.total_gain_usd||0).toFixed(0)})</span>
       </div>
       ${holdings.map(h=>{
+        const hasGain = h.gain_pct != null;
         const hpos = (h.gain_pct||0)>=0;
-        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
-          <span class="mono" style="font-size:12px">${h.ticker}</span>
-          <span class="mono" style="font-size:11px;color:${hpos?"var(--green)":"var(--red)"}">${hpos?"▲":"▼"} ${Math.abs(h.gain_pct||0).toFixed(1)}%</span>
+        return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span class="mono" style="font-size:12px;color:var(--text)">${h.ticker}</span>
+          <span class="mono" style="font-size:11px;color:${hasGain?(hpos?"var(--green)":"var(--red)"):"var(--dim)"}">${hasGain?`${hpos?"▲":"▼"} ${Math.abs(h.gain_pct).toFixed(1)}%`:"—"}</span>
         </div>`;
       }).join("")}
     </div>`;
