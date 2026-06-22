@@ -86,6 +86,18 @@ const WORKER_URL = "https://late-firefly-cd42-market-brief.ahuja101992-753.worke
 let DATA = null;
 let activeTab = "brief";
 
+function formatFileTime(isoString) {
+  if (!isoString) return null;
+  try {
+    const d = new Date(isoString);
+    return d.toLocaleTimeString("en-US", {
+      hour: "numeric", minute: "2-digit",
+      timeZone: "America/New_York",
+      hour12: true
+    }) + " ET";
+  } catch(e) { return null; }
+}
+
 async function fetchData() {
   showLoading();
   try {
@@ -139,7 +151,7 @@ function renderHeader() {
             <span class="pill ${toneClass}">${(tone.split(";")[0]).substring(0,20)}</span>
             ${hasAnomaly?`<span class="pill pill-danger">🚨 ALERT</span>`:""}
           </div>
-          <p class="mono" style="font-size:11px;color:var(--muted);line-height:1.5">${DATA.run_date||""} ${DATA.run_time_et||""} · ${DATA.market_state||""}</p>
+          <p class="mono" style="font-size:11px;color:var(--muted);line-height:1.5">${DATA.run_date||""} ${formatFileTime(DATA._file_modified)||DATA.run_time_et||""} · ${DATA.market_state||""}</p>
         </div>
         <div style="text-align:right">
           <div class="mono" style="font-size:9px;color:var(--dim)">VIX</div>
