@@ -196,26 +196,6 @@ function renderBrief() {
 
   html += `<div class="divider"></div>`;
 
-  // Holdings summary (compact)
-  if (holdings.length) {
-    const p = DATA.portfolio||{};
-    const pos = (p.total_gain_pct||0) >= 0;
-    html += `<div class="card-surface" style="margin-bottom:9px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span class="mono" style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Portfolio</span>
-        <span class="mono" style="font-size:12px;color:${pos?"var(--green)":"var(--red)"};font-weight:700">${pos?"▲":"▼"} ${Math.abs(p.total_gain_pct||0).toFixed(1)}% ($${Math.abs(p.total_gain_usd||0).toFixed(0)})</span>
-      </div>
-      ${holdings.map(h=>{
-        const hasGain = h.gain_pct != null;
-        const hpos = (h.gain_pct||0)>=0;
-        return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
-          <span class="mono" style="font-size:12px;color:var(--text)">${h.ticker}</span>
-          <span class="mono" style="font-size:11px;color:${hasGain?(hpos?"var(--green)":"var(--red)"):"var(--dim)"}">${hasGain?`${hpos?"▲":"▼"} ${Math.abs(h.gain_pct).toFixed(1)}%`:"—"}</span>
-        </div>`;
-      }).join("")}
-    </div>`;
-  }
-
   // Buys
   html += `<p class="section-label">🎯 Buy This Period <span style="font-size:10px;color:var(--dim)">$${DATA.total_deployed_usd||0} of $500</span></p>`;
   buys.forEach((b,i) => {
@@ -243,16 +223,6 @@ function renderBrief() {
       </div>
     </div>`;
   });
-
-  // Hit rate teaser
-  const hr = DATA.hit_rate;
-  if (hr && hr.total_picks_tracked > 0) {
-    html += `<div class="divider"></div>`;
-    html += `<div class="card-surface" style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:var(--muted)">Hit rate</span>
-      <span class="mono" style="font-size:14px;font-weight:700;color:${hr.hit_rate_pct>=50?"var(--green)":"var(--red)"}">${hr.hit_rate_pct.toFixed(0)}% <span style="font-size:10px;color:var(--dim)">(${hr.wins}/${hr.total_picks_tracked})</span></span>
-    </div>`;
-  }
 
   html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:12px">Not investment advice · ${DATA.run_date||""}</p>`;
   document.getElementById("content").innerHTML = html;
