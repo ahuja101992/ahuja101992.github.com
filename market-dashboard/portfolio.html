@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Portfolio"/>
+  <meta name="theme-color" content="#07090c"/>
+  <title>My Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090c;--surface:#0d1117;--card:#141c26;--border:#2a3544;
+      --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.16);--amber-glow:rgba(245,158,11,0.25);
+      --green:#46d160;--green-dim:rgba(70,209,96,0.15);
+      --red:#ff6b63;--red-dim:rgba(255,107,99,0.13);--red-border:rgba(255,107,99,0.35);
+      --blue:#6cb6ff;--purple:#c9a3ff;--text:#f3f6f9;--muted:#aab4c0;--dim:#7a8699;
+      --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;--radius:12px;--radius-sm:7px;
+    }
+    html{background:var(--bg)}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
+      padding-bottom:env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased}
+    .mono{font-family:var(--mono)}
+    .header{position:sticky;top:0;z-index:100;background:rgba(7,9,12,0.95);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top))}
+    .content{padding:16px;padding-bottom:calc(80px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto}
+    .card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);padding:13px 15px;margin-bottom:9px}
+    .card-surface{border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);padding:13px 15px;margin-bottom:9px}
+    .section-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;
+      letter-spacing:0.15em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+    .pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;display:inline-block}
+    .pill-success{background:rgba(70,209,96,0.15);color:var(--green)}
+    .pill-danger{background:rgba(255,107,99,0.15);color:var(--red)}
+    .hit-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+    .hit-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+    .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px}
+    .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--amber);
+      border-radius:50%;animation:spin 0.7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:20px;
+      width:52px;height:52px;border-radius:50%;background:var(--amber);border:none;
+      color:#000;font-size:22px;cursor:pointer;box-shadow:0 4px 24px var(--amber-glow);
+      display:flex;align-items:center;justify-content:center;font-weight:700;z-index:50}
+    .btn-primary{padding:10px 24px;border-radius:var(--radius-sm);background:var(--amber);
+      border:none;color:#000;font-family:var(--mono);font-size:12px;font-weight:700;cursor:pointer}
+  </style>
+</head>
+<body>
+<div id="header"></div>
+<div id="content" class="content"></div>
+<button class="fab" onclick="refresh()">↻</button>
+
+<script>
+const WORKER_URL = "https://late-firefly-cd42-market-brief.ahuja101992-753.workers.dev";
+let DATA = null;
+
+function formatFileTime(iso) {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleTimeString("en-US",{
+      hour:"numeric",minute:"2-digit",timeZone:"America/New_York",hour12:true
+    }) + " ET";
+  } catch(e){ return null; }
+}
+
+async function fetchData() {
+  document.getElementById("header").innerHTML = "";
+  document.getElementById("content").innerHTML = `<div class="loading"><div class="spinner"></div><p class="mono" style="font-size:11px;color:var(--dim);letter-spacing:0.15em">LOADING...</p></div>`;
+  try {
+    const res = await fetch(WORKER_URL + "?t=" + Date.now(), { cache:"no-store" });
+    DATA = await res.json();
+    if (DATA.error) throw new Error(DATA.error);
+    render();
+  } catch(e) {
+    document.getElementById("content").innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:32px;text-align:center"><p style="font-size:40px;margin-bottom:14px">⚠️</p><p class="mono" style="color:var(--red);font-size:13px;margin-bottom:8px">Could not load</p><p style="color:var(--muted);font-size:12px;margin-bottom:20px">${e.message}</p><button class="btn-primary" onclick="fetchData()">Retry</button></div>`;
+  }
+}
+
+async function refresh() {
+  document.querySelector(".fab").style.animation = "spin 0.7s linear infinite";
+  await fetchData();
+  document.querySelector(".fab").style.animation = "";
+}
+
+function render() {
+  const time = formatFileTime(DATA._file_modified) || DATA.run_time_et || "";
+
+  // Header
+  document.getElementById("header").innerHTML = `
+    <div class="header" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="mono" style="font-weight:800;font-size:12px;letter-spacing:0.12em;margin-bottom:3px">MY PORTFOLIO</div>
+        <div class="mono" style="font-size:10px;color:var(--dim)">${DATA.run_date||""} · ${time}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="mono" style="font-size:9px;color:var(--dim)">VIX</div>
+        <div class="mono" style="font-weight:800;font-size:22px;color:${DATA.vix>20?"var(--red)":DATA.vix>15?"var(--amber)":"var(--green)"}">${DATA.vix||"—"}</div>
+      </div>
+    </div>`;
+
+  const holdings = (DATA.holdings||[]).filter(h=>h.ticker&&h.ticker!=="EXAMPLE");
+  const p = DATA.portfolio||{};
+  const allocation = p.allocation||[];
+
+  if (!holdings.length) {
+    document.getElementById("content").innerHTML = `<div class="card-surface" style="text-align:center;padding:40px">
+      <p style="font-size:36px;margin-bottom:12px">💼</p>
+      <p class="mono" style="font-size:13px;color:var(--muted)">No holdings yet</p>
+      <p style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.6">Add trades to<br><span class="mono" style="color:var(--amber)">market-briefs/holdings.md</span></p>
+    </div>`;
+    return;
+  }
+
+  const totalPos = (p.total_gain_pct||0) >= 0;
+  let html = "";
+
+  // Summary card
+  html += `<div class="card" style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span class="mono" style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">Total Portfolio</span>
+      <span class="mono" style="font-size:11px;color:var(--dim)">$${(p.total_invested||0).toFixed(0)} invested</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px">
+      <div>
+        <div class="mono" style="font-size:28px;font-weight:700">$${(p.total_current_value||0).toFixed(0)}</div>
+        <div class="mono" style="font-size:14px;color:${totalPos?"var(--green)":"var(--red)"};font-weight:700;margin-top:4px">
+          ${totalPos?"▲":"▼"} $${Math.abs(p.total_gain_usd||0).toFixed(0)} (${Math.abs(p.total_gain_pct||0).toFixed(1)}%)
+        </div>
+      </div>
+      ${allocation.length ? donutSVG(allocation) : ""}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${allocation.map((a,i)=>{
+        const colors=["#f59e0b","#6cb6ff","#46d160","#c9a3ff","#ff6b63","#34d399"];
+        return `<div style="display:flex;align-items:center;gap:4px">
+          <div style="width:8px;height:8px;border-radius:2px;background:${colors[i%colors.length]}"></div>
+          <span class="mono" style="font-size:10px;color:var(--muted)">${a.ticker} ${(a.weight_pct||0).toFixed(0)}%</span>
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+
+  // Individual positions
+  html += `<p class="section-label">Positions <span style="color:var(--dim)">${holdings.length} stocks</span></p>`;
+
+  holdings.forEach(h => {
+    const pos = (h.gain_pct||0) >= 0;
+    const alloc = allocation.find(a=>a.ticker===h.ticker)||{};
+    html += `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:${alloc.weight_pct?"10px":"0"}">
+        <div>
+          <div class="mono" style="font-weight:700;font-size:17px;margin-bottom:4px">${h.ticker}</div>
+          <div style="font-size:11px;color:var(--muted)">${h.shares||0} shares · avg $${h.buy_price}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">invested $${((h.buy_price||0)*(h.shares||0)).toFixed(0)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mono" style="font-weight:700;font-size:18px">$${h.current_price||"—"}</div>
+          <div class="mono" style="font-size:13px;color:${pos?"var(--green)":"var(--red)"};font-weight:700;margin-top:2px">
+            ${pos?"▲":"▼"} ${Math.abs(h.gain_pct||0).toFixed(1)}%
+          </div>
+          <div class="mono" style="font-size:11px;color:${pos?"var(--green)":"var(--red)"};margin-top:1px">
+            ${pos?"+":"-"}$${Math.abs(h.gain_usd||0).toFixed(0)}
+          </div>
+        </div>
+      </div>
+      ${alloc.weight_pct?`
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="font-size:10px;color:var(--dim)">Portfolio weight</span>
+            <span class="mono" style="font-size:10px;color:var(--dim)">${alloc.weight_pct.toFixed(1)}%</span>
+          </div>
+          <div class="hit-bar-bg"><div class="hit-bar-fill" style="width:${Math.min(alloc.weight_pct,100)}%;background:var(--amber)"></div></div>
+        </div>`:""}
+      ${h.attention?`<div style="margin-top:8px;padding:6px 10px;background:var(--amber-dim);border-radius:var(--radius-sm);font-size:11px;color:var(--amber)">⚠ ${h.note||"Needs attention"}</div>`:""}
+    </div>`;
+  });
+
+  // Hit rate teaser if available
+  const hr = DATA.hit_rate;
+  if (hr && hr.total_picks_tracked > 0) {
+    const hitColor = hr.hit_rate_pct>=60?"var(--green)":hr.hit_rate_pct>=40?"var(--amber)":"var(--red)";
+    html += `<div class="card-surface" style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Pick hit rate</div>
+        <div style="display:flex;gap:6px">
+          <span class="pill pill-success">${hr.wins}W</span>
+          <span class="pill pill-danger">${hr.losses}L</span>
+          ${hr.pending?`<span class="pill" style="background:var(--surface);color:var(--dim)">${hr.pending} pending</span>`:""}
+        </div>
+      </div>
+      <div class="mono" style="font-size:28px;font-weight:700;color:${hitColor}">${hr.hit_rate_pct.toFixed(0)}%</div>
+    </div>`;
+  }
+
+  html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:14px">Private · Not investment advice</p>`;
+  document.getElementById("content").innerHTML = html;
+}
+
+function donutSVG(allocation) {
+  const colors = ["#f59e0b","#6cb6ff","#46d160","#c9a3ff","#ff6b63","#34d399"];
+  const cx=45,cy=45,r=35,inner=22,circ=2*Math.PI*r;
+  let offset=0, paths="";
+  allocation.forEach((a,i)=>{
+    const pct=Math.min(a.weight_pct||0,100)/100;
+    const dash=pct*circ, gap=circ-dash;
+    paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="10" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset*circ}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset+=pct;
+  });
+  return `<svg width="90" height="90" viewBox="0 0 90 90">${paths}<circle cx="${cx}" cy="${cy}" r="${inner}" fill="var(--card)"/></svg>`;
+}
+
+fetchData();
+</script>
+</body>
+</html>
