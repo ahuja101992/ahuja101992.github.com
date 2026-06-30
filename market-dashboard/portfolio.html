@@ -68,6 +68,116 @@ function formatFileTime(iso) {
   } catch(e){ return null; }
 }
 
+let activePortfolioTab = "portfolio";
+
+function switchPortfolioTab(tab) {
+  activePortfolioTab = tab;
+  // Update tab styles
+  ["portfolio","hitrate"].forEach(t => {
+    const btn = document.getElementById("tab-" + t);
+    if (!btn) return;
+    if (t === tab) {
+      btn.style.background = "var(--amber-dim)";
+      btn.style.color = "var(--amber)";
+      btn.style.borderBottom = "2px solid var(--amber)";
+    } else {
+      btn.style.background = "transparent";
+      btn.style.color = "var(--muted)";
+      btn.style.borderBottom = "2px solid transparent";
+    }
+  });
+  if (tab === "portfolio") renderPortfolioContent();
+  else renderHitRate();
+}
+
+// ── Hit Rate ───────────────────────────────────────────────────────────────
+function renderHitRate() {
+  const hr = DATA.hit_rate;
+  if (!hr || hr.total_picks_tracked === 0) {
+    document.getElementById("content").innerHTML = `<div class="card-surface" style="text-align:center;padding:40px">
+      <p style="font-size:36px;margin-bottom:12px">📊</p>
+      <p class="mono" style="font-size:13px;color:var(--muted)">No tracked picks yet</p>
+      <p style="font-size:12px;color:var(--dim);margin-top:8px;line-height:1.6">Hit rate builds automatically<br>as past recommendations age<br>to T+1d, T+5d, T+30d</p>
+    </div>`;
+    return;
+  }
+
+  const hitColor = hr.hit_rate_pct >= 60 ? "var(--green)" : hr.hit_rate_pct >= 40 ? "var(--amber)" : "var(--red)";
+  const avgColor = (hr.avg_t5d_return_pct||0) >= 0 ? "var(--green)" : "var(--red)";
+  const picks = hr.recent_picks||[];
+
+  let html = `<p class="section-label">📊 Track Record</p>`;
+
+  // Big score card
+  html += `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-around;text-align:center;margin-bottom:16px">
+      <div>
+        <div class="mono" style="font-size:36px;font-weight:700;color:${hitColor}">${hr.hit_rate_pct.toFixed(0)}%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Hit rate</div>
+      </div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div>
+        <div class="mono" style="font-size:36px;font-weight:700;color:${avgColor}">${(hr.avg_t5d_return_pct||0)>=0?"+":""}${(hr.avg_t5d_return_pct||0).toFixed(1)}%</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Avg T+5d</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:12px">
+      <span class="pill pill-success">${hr.wins} wins</span>
+      <span class="pill pill-danger">${hr.losses} losses</span>
+      ${hr.pending?`<span class="pill pill-dim">${hr.pending} pending</span>`:""}
+    </div>
+    <div class="hit-bar-bg"><div class="hit-bar-fill" style="width:${hr.hit_rate_pct}%;background:${hitColor}"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">
+      <span style="font-size:10px;color:var(--dim)">0%</span>
+      <span style="font-size:10px;color:var(--dim)">100%</span>
+    </div>
+  </div>`;
+
+  // Best / worst
+  if (hr.best_pick?.ticker) {
+    html += `<div style="display:flex;gap:9px;margin-bottom:9px">
+      <div class="card" style="flex:1;margin-bottom:0">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">🏆 Best pick</div>
+        <div class="mono" style="font-size:15px;font-weight:700">${hr.best_pick.ticker}</div>
+        <div class="mono" style="font-size:13px;color:var(--green);font-weight:700">+${hr.best_pick.return_pct?.toFixed(1)||0}%</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px">${hr.best_pick.date||""}</div>
+      </div>
+      ${hr.worst_pick?.ticker?`<div class="card" style="flex:1;margin-bottom:0">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">📉 Worst pick</div>
+        <div class="mono" style="font-size:15px;font-weight:700">${hr.worst_pick.ticker}</div>
+        <div class="mono" style="font-size:13px;color:var(--red);font-weight:700">${hr.worst_pick.return_pct?.toFixed(1)||0}%</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:2px">${hr.worst_pick.date||""}</div>
+      </div>`:""}
+    </div>`;
+  }
+
+  // Recent picks table
+  if (picks.length) {
+    html += `<p class="section-label">Recent picks</p>`;
+    html += `<div class="table-wrap">`;
+    picks.forEach(pick => {
+      const oc = pick.outcome==="WIN"?"var(--green)":pick.outcome==="LOSS"?"var(--red)":"var(--dim)";
+      const ret = pick.t5d_return_pct;
+      html += `<div class="table-row">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="mono" style="font-weight:700;font-size:13px">${pick.ticker}</span>
+            <span style="font-size:10px;padding:1px 6px;border-radius:3px;font-family:var(--mono);color:${oc};background:${oc}20">${pick.outcome}</span>
+          </div>
+          <div style="font-size:10px;color:var(--dim);margin-top:2px">${pick.date||""} · $${pick.amount_usd||0}</div>
+        </div>
+        <div style="text-align:right">
+          ${ret!=null?`<div class="mono" style="font-size:13px;font-weight:700;color:${ret>=0?"var(--green)":"var(--red)"}">${ret>=0?"+":""}${ret.toFixed(1)}%</div><div style="font-size:10px;color:var(--dim)">T+5d</div>`:`<div style="font-size:11px;color:var(--dim)">pending</div>`}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:8px">vs SPY benchmark · Past performance ≠ future results</p>`;
+  document.getElementById("content").innerHTML = html;
+}
+
 async function fetchData() {
   document.getElementById("header").innerHTML = "";
   document.getElementById("content").innerHTML = `<div class="loading"><div class="spinner"></div><p class="mono" style="font-size:11px;color:var(--dim);letter-spacing:0.15em">LOADING...</p></div>`;
@@ -92,7 +202,8 @@ function render() {
 
   // Header
   document.getElementById("header").innerHTML = `
-    <div class="header" style="display:flex;justify-content:space-between;align-items:center">
+    <div class="header" style="padding-bottom:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div>
         <div class="mono" style="font-weight:800;font-size:12px;letter-spacing:0.12em;margin-bottom:3px">MY PORTFOLIO</div>
         <div class="mono" style="font-size:10px;color:var(--dim)">${DATA.run_date||""} · ${time}</div>
@@ -100,6 +211,17 @@ function render() {
       <div style="text-align:right">
         <div class="mono" style="font-size:9px;color:var(--dim)">VIX</div>
         <div class="mono" style="font-weight:800;font-size:22px;color:${DATA.vix>20?"var(--red)":DATA.vix>15?"var(--amber)":"var(--green)"}">${DATA.vix||"—"}</div>
+      </div>
+      </div>
+      <div style="display:flex;gap:3px;overflow-x:auto;scrollbar-width:none">
+        <button id="tab-portfolio" onclick="switchPortfolioTab('portfolio')"
+          style="padding:7px 12px;border-radius:7px 7px 0 0;border:none;background:var(--amber-dim);
+          color:var(--amber);font-family:var(--mono);font-size:10px;cursor:pointer;
+          border-bottom:2px solid var(--amber);white-space:nowrap">💼 Portfolio</button>
+        <button id="tab-hitrate" onclick="switchPortfolioTab('hitrate')"
+          style="padding:7px 12px;border-radius:7px 7px 0 0;border:none;background:transparent;
+          color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;
+          border-bottom:2px solid transparent;white-space:nowrap">📊 Hit Rate</button>
       </div>
     </div>`;
 
@@ -199,6 +321,10 @@ function render() {
 
   html += `<p class="mono" style="text-align:center;font-size:10px;color:var(--dim);margin-top:14px">Private · Not investment advice</p>`;
   document.getElementById("content").innerHTML = html;
+  // after render, if hitrate tab was active restore it
+  if (activePortfolioTab === "hitrate") {
+    renderHitRate();
+  }
 }
 
 function donutSVG(allocation) {
