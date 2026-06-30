@@ -136,7 +136,6 @@ function renderHeader() {
   const tabs = [
     {id:"brief",label:"Brief"},
     {id:"overview",label:"📰 Overview"},
-    {id:"portfolio",label:"💼 Portfolio"},
     {id:"watchlist",label:"📋 Watchlist"},
     {id:"hitrate",label:"📊 Hit Rate"},
     {id:"conviction",label:"Conviction"},
@@ -167,7 +166,6 @@ function switchTab(tab) { activeTab = tab; renderHeader(); renderTab(tab); }
 function renderTab(tab) {
   if (tab==="brief") renderBrief();
   else if (tab==="overview") renderOverview();
-  else if (tab==="portfolio") renderPortfolio();
   else if (tab==="watchlist") renderWatchlist();
   else if (tab==="hitrate") renderHitRate();
   else if (tab==="conviction") renderConviction();
