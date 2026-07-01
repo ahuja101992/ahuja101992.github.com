@@ -110,11 +110,11 @@
 const plan=[
   {phase:"Pre-sprint — June (1 hr/day weekdays)",weeks:[
     {id:"p0w0",label:"Week 1",dates:"Jun 9–13",days:[
-      {date:"Mon Jun 9",topic:"Arrays & two pointers",tag:"dsa",problems:"Two Sum #1 · Valid Palindrome #125"},
-      {date:"Tue Jun 10",topic:"Sliding window",tag:"dsa",problems:"Best Time to Buy Stock #121 · Longest Substring #3"},
-      {date:"Wed Jun 11",topic:"Binary search",tag:"dsa",problems:"Binary Search #704 · Search Rotated Array #33"},
-      {date:"Thu Jun 12",topic:"Trees — DFS",tag:"dsa",problems:"Max Depth Binary Tree #104 · Invert Binary Tree #226"},
-      {date:"Fri Jun 13",topic:"Trees — BFS",tag:"dsa",problems:"Level Order Traversal #102"},
+      {date:"Tue Jun 9",topic:"Arrays & two pointers",tag:"dsa",problems:"Two Sum #1 · Valid Palindrome #125"},
+      {date:"Wed Jun 10",topic:"Sliding window",tag:"dsa",problems:"Best Time to Buy Stock #121 · Longest Substring #3"},
+      {date:"Thu Jun 11",topic:"Binary search",tag:"dsa",problems:"Binary Search #704 · Search Rotated Array #33"},
+      {date:"Fri Jun 12",topic:"Trees — DFS",tag:"dsa",problems:"Max Depth Binary Tree #104 · Invert Binary Tree #226"},
+      {date:"Sat Jun 13 (optional)",topic:"Trees — BFS",tag:"dsa",problems:"Level Order Traversal #102"},
     ]},
     {id:"p0w1",label:"Week 2",dates:"Jun 16–20",days:[
       {date:"Mon Jun 16",topic:"Graphs",tag:"dsa",problems:"Number of Islands #200"},
@@ -130,19 +130,20 @@ const plan=[
       {date:"Thu Jun 26",topic:"Monotonic stack",tag:"dsa",problems:"Daily Temperatures #739"},
       {date:"Fri Jun 27",topic:"Revisit weakest pattern",tag:"dsa",problems:"2 problems from your lowest-confidence pattern"},
     ]},
-    {id:"p0w3",label:"Week 4",dates:"Jun 30",days:[
-      {date:"Mon Jun 30",topic:"Consolidation day",tag:"dsa",problems:"Rate all 14 patterns 1–5 · Note top 3 weakest"},
+    {id:"p0w3",label:"Week 4",dates:"Jun 29–30",days:[
+      {date:"Mon Jun 29",topic:"Revisit weakest pattern",tag:"dsa",problems:"Pick weakest pattern from week 3 · Do 2 more problems"},
+      {date:"Tue Jun 30",topic:"Consolidation day",tag:"dsa",problems:"Rate all 14 patterns 1–5 · Note top 3 weakest · Write sprint priorities"},
     ]},
   ]},
   {phase:"July sprint — parental leave (9am–5pm)",weeks:[
-    {id:"p1w0",label:"Week 1 — DSA",dates:"Jul 1–9",days:[
-      {date:"Wed Jul 1",topic:"Arrays & two pointers deep dive",tag:"dsa",problems:"Two Sum #1 · Valid Palindrome #125 · 3Sum #15 · Container With Most Water #11 · Longest Substring #3"},
-      {date:"Thu Jul 2",topic:"Linked lists & fast/slow pointers",tag:"dsa",problems:"Reverse Linked List #206 · Merge Two Sorted Lists #21 · Linked List Cycle #141 · Remove Nth Node #19 · Merge Intervals #56"},
-      {date:"Fri Jul 3",topic:"Binary search",tag:"dsa",problems:"Binary Search #704 · Search 2D Matrix #74 · Search Rotated Array #33 · Find Min in Rotated #153 · Koko Eating Bananas #875"},
-      {date:"Sun Jul 6",topic:"Trees — BFS & DFS",tag:"dsa",problems:"Level Order Traversal #102 · Max Depth #104 · Same Tree #100 · Invert Binary Tree #226 · Validate BST #98 · LCA of BST #235"},
-      {date:"Mon Jul 7",topic:"Graphs",tag:"dsa",problems:"Number of Islands #200 · Clone Graph #133 · Pacific Atlantic #417 · Course Schedule #207 · Connected Components #323"},
-      {date:"Tue Jul 8",topic:"Heap & DP intro",tag:"dsa",problems:"Kth Largest #215 · K Closest Points #973 · Task Scheduler #621 · Climbing Stairs #70 · House Robber #198 · Coin Change #322"},
-      {date:"Wed Jul 9",topic:"Advanced patterns + week 1 review",tag:"dsa",problems:"Subsets #78 · Implement Trie #208 · Number of Provinces #547 · Daily Temperatures #739 · Rate all 14 patterns 1–5"},
+    {id:"p1w0",label:"Week 1 — DSA (harder variants)",dates:"Jul 1–9",days:[
+      {date:"Wed Jul 1 ✅",topic:"Arrays, two pointers & sliding window",tag:"dsa",problems:"DONE: #1 #125 #15 #11 #121 #3 · Extra: Trapping Rain Water #42 · Min Window Substring #76 · REVISION: Arrays, Two Pointers, Sliding Window (1hr)"},
+      {date:"Thu Jul 2",topic:"Linked lists + binary search — harder",tag:"dsa",problems:"Reorder List #143 · Find Duplicate #287 · LRU Cache #146 · Merge K Sorted #23 · Time Based KV #981 · Median Two Sorted #4 · REVISION: Linked Lists, Binary Search (1hr)"},
+      {date:"Fri Jul 3",topic:"Trees — harder problems",tag:"dsa",problems:"Right Side View #199 · Count Good Nodes #1448 · Kth Smallest BST #230 · Max Path Sum #124 · Serialize/Deserialize #297 · REVISION: Trees BFS + DFS (1hr)"},
+      {date:"Sun Jul 6",topic:"Graphs — medium/hard",tag:"dsa",problems:"Rotting Oranges #994 · Walls and Gates #286 · Course Schedule II #210 · Redundant Connection #684 · Word Ladder #127"},
+      {date:"Mon Jul 7",topic:"Union-Find deep dive ⚠️ weak pattern",tag:"dsa",problems:"Implement DSU from scratch · Number of Provinces #547 · Redundant Connection #684 · Graph Valid Tree #261 · Accounts Merge #721 · Number of Islands II #305"},
+      {date:"Tue Jul 8",topic:"Monotonic Stack deep dive ⚠️ weak pattern",tag:"dsa",problems:"Daily Temperatures #739 · Online Stock Span #901 · Next Greater Element II #503 · Car Fleet #853 · Largest Rectangle in Histogram #84"},
+      {date:"Wed Jul 9",topic:"Heap + DP harder + week 1 assessment",tag:"dsa",problems:"Find Median from Data Stream #295 · Merge K Sorted Lists #23 · Task Scheduler #621 · Word Break #139 · Longest Increasing Subsequence #300 · Unique Paths #62 · Rate all 14 patterns 1–5"},
     ]},
     {id:"p1w1",label:"Week 2 — System design",dates:"Jul 10–18",days:[
       {date:"Thu Jul 10",topic:"Framework + URL shortener",tag:"sd",problems:"Alex Xu Ch. 1 & 8 · Design TinyURL — hashing, DB choice, caching, 301 vs 302"},
