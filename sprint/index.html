@@ -90,7 +90,83 @@
     <p>Jun 9 – Jul 26, 2026 &nbsp;·&nbsp; Meta E6 &nbsp;·&nbsp; Google L6 &nbsp;·&nbsp; Apple ICT5 &nbsp;·&nbsp; Amazon SDE III</p>
   </div>
 
-  <div class="stats">
+  <div class="flagged-section">
+  <div class="flagged-header">
+    <div class="flagged-title">🚩 Flagged problems — revisit list</div>
+    <div class="flagged-sub">Problems where you needed a hint or solution. Solve again without help in August maintenance phase.</div>
+  </div>
+
+  <div class="flag-section-label">⚠️ Critical — must fully master</div>
+  <table class="flagged-table">
+    <thead><tr><th>Problem</th><th>#</th><th>Pattern</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://leetcode.com/problems/merge-intervals/" target="_blank"><strong>Merge Intervals</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>56</td><td>Merge Intervals</td>
+        <td><div class="flag-note">Needed light look at solution. Key: sort by start → merge if current start ≤ prev end</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/insert-interval/" target="_blank"><strong>Insert Interval</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>57</td><td>Merge Intervals</td>
+        <td><div class="flag-note">Same pattern as #56. Revisit after #56 is solid</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree/" target="_blank"><strong>Serialize / Deserialize Binary Tree</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>297</td><td>Trees — DFS</td>
+        <td><div class="flag-note">Deserialization was fully guided. Must redo from scratch. Preorder + null markers approach</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/word-ladder/" target="_blank"><strong>Word Ladder</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>127</td><td>Graphs — BFS</td>
+        <td><div class="flag-note">Missed this problem. BFS on implicit graph — transform each character, find shortest path</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/largest-rectangle-in-histogram/" target="_blank"><strong>Largest Rectangle in Histogram</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>84</td><td>Monotonic Stack</td>
+        <td><div class="flag-note">Not attempted. Monotonic stack — track indices of increasing bars, pop and calculate area when smaller bar found</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/task-scheduler/" target="_blank"><strong>Task Scheduler</strong></a><span class="flag-critical" style="margin-left:8px">Critical</span></td>
+        <td>621</td><td>Heap / Greedy</td>
+        <td><div class="flag-note">Not attempted. Greedy approach — max heap by frequency, cooldown interval calculation</div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="flag-section-label">👀 Watch — solve again to confirm it stuck</div>
+  <table class="flagged-table">
+    <thead><tr><th>Problem</th><th>#</th><th>Pattern</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://leetcode.com/problems/linked-list-cycle/" target="_blank"><strong>Linked List Cycle</strong></a><span class="flag-watch" style="margin-left:8px">Watch</span></td>
+        <td>141</td><td>Fast & Slow Pointers</td>
+        <td><div class="flag-note">Needed Claude session to work through</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/binary-tree-maximum-path-sum/" target="_blank"><strong>Binary Tree Max Path Sum</strong></a><span class="flag-watch" style="margin-left:8px">Watch</span></td>
+        <td>124</td><td>Trees — DFS</td>
+        <td><div class="flag-note">Missed negative path case. Watch for global max variable pattern</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/count-good-nodes-in-binary-tree/" target="_blank"><strong>Count Good Nodes</strong></a><span class="flag-watch" style="margin-left:8px">Watch</span></td>
+        <td>1448</td><td>Trees — DFS</td>
+        <td><div class="flag-note">Integer.MIN_VALUE bug — always initialize maxSoFar correctly</div></td>
+      </tr>
+      <tr>
+        <td><strong>Iterative DFS with Stack</strong><span class="flag-watch" style="margin-left:8px">Watch</span></td>
+        <td>—</td><td>Trees — DFS</td>
+        <td><div class="flag-note">Recursive DFS is fine for interviews but worth one more attempt</div></td>
+      </tr>
+      <tr>
+        <td><a href="https://leetcode.com/problems/course-schedule/" target="_blank"><strong>Course Schedule</strong></a><span class="flag-watch" style="margin-left:8px">Watch</span></td>
+        <td>207</td><td>Graphs — BFS + DFS</td>
+        <td><div class="flag-note">Redo both — BFS (Kahn's topological sort) and DFS (cycle detection)</div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="stats">
     <div class="stat"><div class="stat-label">Completed</div><div class="stat-val" id="s-done">0</div></div>
     <div class="stat"><div class="stat-label">Remaining</div><div class="stat-val" id="s-left">39</div></div>
     <div class="stat"><div class="stat-label">Progress</div><div class="stat-val" id="s-pct">0%</div></div>
@@ -145,22 +221,20 @@ const plan=[
       {date:"Tue Jul 8",topic:"Monotonic Stack deep dive ⚠️ weak pattern",tag:"dsa",problems:"Daily Temperatures #739 · Online Stock Span #901 · Next Greater Element II #503 · Car Fleet #853 · Largest Rectangle in Histogram #84"},
       {date:"Wed Jul 9",topic:"Heap + DP harder + week 1 assessment",tag:"dsa",problems:"Find Median from Data Stream #295 · Merge K Sorted Lists #23 · Task Scheduler #621 · Word Break #139 · Longest Increasing Subsequence #300 · Unique Paths #62 · Rate all 14 patterns 1–5"},
     ]},
-    {id:"p1w1",label:"Week 2 — System design",dates:"Jul 10–18",days:[
-      {date:"Thu Jul 10",topic:"Framework + URL shortener",tag:"sd",problems:"Alex Xu Ch. 1 & 8 · Design TinyURL — hashing, DB choice, caching, 301 vs 302"},
-      {date:"Fri Jul 11",topic:"Rate limiter + distributed cache",tag:"sd",problems:"Alex Xu Ch. 4 · Design rate limiter (token bucket vs sliding window) · Design Redis-like cache (LRU, consistent hashing)"},
-      {date:"Mon Jul 14",topic:"Notification system + news feed",tag:"sd",problems:"Alex Xu Ch. 10 · Design notification system (fan-out, queues) · Design Twitter feed (fan-out on write vs read)"},
-      {date:"Tue Jul 15",topic:"Web crawler + search typeahead",tag:"sd",problems:"Alex Xu Ch. 9 · Design web crawler (BFS, bloom filter) · Design autocomplete (Trie, Cassandra, CDN)"},
-      {date:"Wed Jul 16",topic:"YouTube + distributed message queue",tag:"sd",problems:"Alex Xu Ch. 14 · Design YouTube (CDN, chunking, encoding) · Design Kafka-like queue (partitions, exactly-once)"},
-      {date:"Thu Jul 17",topic:"Your power problems",tag:"sd",problems:"Design audit log system (= your ADP Audit Agent) · Design cloud control plane (= your OCI control plane) — use real Oracle experience"},
-      {date:"Fri Jul 18",topic:"Ride sharing + week 2 review",tag:"sd",problems:"Design Uber (geohash, matching, real-time location) · Review all 8 systems — 3 bullets each"},
+        {id:"p1w1",label:"Week 2 — LC + Greedy + 1 SD day",dates:"Jul 10–17",days:[
+      {date:"Fri Jul 10",topic:"Alex Xu Ch 1&2 + TinyURL + DP mediums",tag:"sd",problems:"Alex Xu Ch 1 & 2 · TinyURL design · Word Break #139 · LIS #300 · Unique Paths #62 · Jump Game #55 · Coin Change II #518 · REVISION: Heap"},
+      {date:"Mon Jul 13",topic:"Backtracking — medium/hard",tag:"dsa",problems:"Combination Sum #39 · Combination Sum II #40 · Permutations #46 · Subsets II #90 · Word Search #79 · REVISION: Merge Intervals #56 #57"},
+      {date:"Tue Jul 14",topic:"Greedy ⚠️ not done yet",tag:"dsa",problems:"Jump Game #55 · Jump Game II #45 · Gas Station #134 · Hand of Straights #846 · Task Scheduler #621 · Partition Labels #763 · REVISION: Backtracking"},
+      {date:"Wed Jul 15",topic:"Trie — medium/hard",tag:"dsa",problems:"Implement Trie #208 · Design Add & Search Words #211 · Word Search II #212 · REVISION: Greedy"},
+      {date:"Thu Jul 16",topic:"Graphs — hard problems",tag:"dsa",problems:"Word Ladder #127 · Alien Dictionary #269 · Graph Valid Tree #261 · Accounts Merge #721 · REVISION: Union-Find"},
+      {date:"Fri Jul 17",topic:"Hard problems — mixed patterns",tag:"dsa",problems:"Largest Rectangle in Histogram #84 · Serialize/Deserialize #297 · Median from Data Stream #295 · Merge K Sorted Lists #23 · REVISION: Flagged critical"},
     ]},
-    {id:"p1w2",label:"Week 3 — Behavioral + mock loops",dates:"Jul 21–26",days:[
-      {date:"Mon Jul 21",topic:"System design assessment",tag:"sd",problems:"Full 45-min timed mock · Self-assess on RESHADED rubric · No notes"},
-      {date:"Tue Jul 22",topic:"Story bank — stories 1 & 2",tag:"beh",problems:"Story 1: ADP Audit Agent (complex technical problem) · Story 2: JIT PRD influence (stakeholder without authority) · Read aloud, time each at 2.5 min"},
-      {date:"Wed Jul 23",topic:"Story bank — stories 3 & 4",tag:"beh",problems:"Story 3: NL2SQL vs parameterized SQL decision · Story 4: Pushed back on stakeholder · Map all stories to Amazon LPs"},
-      {date:"Thu Jul 24",topic:"Story bank — stories 5, 6 & 7",tag:"beh",problems:"Story 5: FA Maintenance Agent scale (3,000–6,000 podDBs) · Story 6: Mentorship story · Story 7: Genuine failure with specific lesson"},
-      {date:"Fri Jul 25",topic:"Full mock interview loop",tag:"mock",problems:"9:00 Coding round 1 (2 problems) · 9:55 System design mock · 10:50 Behavioral 6 LPs · 11:45 Coding round 2 · Debrief + score yourself"},
-      {date:"Sat Jul 26",topic:"Transition planning + celebrate",tag:"beh",problems:"Update pattern confidence scores · Run HireLoop Intel Scrape · Write state-of-prep doc · You earned this"},
+    {id:"p1w2",label:"Week 3 — LC Hard + SD Day 2 + Mock Loop",dates:"Jul 20–24",days:[
+      {date:"Mon Jul 20",topic:"DP — hard problems",tag:"dsa",problems:"LCS #1143 · Edit Distance #72 · Burst Balloons #312 · Regular Expression Matching #10 · REVISION: DP mediums"},
+      {date:"Tue Jul 21",topic:"Flagged critical problems revisit",tag:"dsa",problems:"Merge Intervals #56 · Insert Interval #57 · Serialize/Deserialize #297 · Word Ladder #127 · Largest Rectangle #84 · Task Scheduler #621 · Score: clean / hint / stuck"},
+      {date:"Wed Jul 22",topic:"SD Day 2 — OCI control plane + rate limiter",tag:"sd",problems:"Design OCI control plane (no Oracle jargon) · Design rate limiter (token bucket vs sliding window) · Full 45-min cold mock with Claude"},
+      {date:"Thu Jul 23",topic:"Full mock loop — final assessment",tag:"mock",problems:"9:00 Coding round 1 (2 medium timed) · 9:55 Coding round 2 (2 med/hard) · 10:50 System design mock (random) · Debrief + update pattern confidence scores"},
+      {date:"Fri Jul 24",topic:"Buffer + sprint wrap + celebrate",tag:"dsa",problems:"Extra flagged problems if needed · HireLoop Intel Scrape · Aug maintenance plan · State-of-prep doc · Celebrate"},
     ]},
   ]},
 ];
