@@ -1,933 +1,1063 @@
 <!DOCTYPE html>
-<!--[if lt IE 8]><html class="no-js ie ie7" lang="en"> <![endif]-->
-<!--[if IE 8]><html class="no-js ie ie8" lang="en"> <![endif]-->
-<!--[if (gte IE 8)|!(IE)]><!-->
-<html class="no-js" lang="en">
-<!--<![endif]-->
-
+<html lang="en">
 <head>
-  <!--- Basic Page Needs
-   ================================================== -->
-  <meta charset="utf-8" />
-  <title>Akshit Ahuja</title>
-  <meta name="description" content="" />
-  <meta name="author" content="" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akshit Ahuja — AI Infrastructure & Systems Engineer</title>
+  <meta name="description" content="Principal Member of Technical Staff at Oracle. Building agentic AI infrastructure, database platforms, and systems at scale." />
+  <meta name="theme-color" content="#0a0e27" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  <!-- Mobile Specific Metas
-   ================================================== -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    html {
+      scroll-behavior: smooth;
+    }
 
-  <!-- CSS
-    ================================================== -->
-  <link rel="stylesheet" href="css/default.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/media-queries.css" />
-  <link rel="stylesheet" href="css/magnific-popup.css" />
+    body {
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      background: #0a0e27;
+      color: #c9d1e0;
+      line-height: 1.5;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
 
-  <!-- Script
-   ================================================== -->
-  <script src="js/modernizr.js"></script>
+    a {
+      color: #00dd00;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
 
-  <!-- Favicons
-	================================================== -->
-  <link rel="shortcut icon" href="favicon.png" />
+    a:hover {
+      color: #00ffff;
+      text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 14, 39, 0.98);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+      z-index: 100;
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0px;
+      color: #00dd00;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .logo::before {
+      content: '$ ';
+      color: #8892b0;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 32px;
+    }
+
+    nav a {
+      font-size: 13px;
+      color: #8892b0;
+      transition: color 0.2s;
+      font-weight: 500;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      letter-spacing: 0.5px;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: #00dd00;
+    }
+
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+      }
+    }
+
+    /* Hero */
+    .hero {
+      margin-top: 64px;
+      padding: 140px 0;
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 6vw, 56px);
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: 0px;
+      color: #e0e6ed;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .hero h1::before {
+      content: '>> ';
+      color: #00dd00;
+    }
+
+    .hero .subtitle {
+      font-size: clamp(12px, 2vw, 16px);
+      color: #8892b0;
+      margin-bottom: 32px;
+      font-weight: 400;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      letter-spacing: 0.2px;
+    }
+
+    .hero .subtitle::before {
+      content: '# ';
+      color: #00dd00;
+    }
+
+    .hero .subtitle::after {
+      content: '';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #a1aac7;
+      max-width: 620px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: 1px solid #00dd00;
+      border-radius: 0px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .btn::before {
+      content: '> ';
+    }
+
+    .btn-primary {
+      background: #00dd00;
+      color: #0a0e27;
+      border-color: #00dd00;
+    }
+
+    .btn-primary:hover {
+      background: #00ffff;
+      border-color: #00ffff;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #00dd00;
+      border-color: #00dd00;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 217, 255, 0.1);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+    }
+
+    /* Section */
+    section {
+      padding: 100px 0;
+      border-top: 1px solid rgba(0, 217, 255, 0.1);
+    }
+
+    section h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      margin-bottom: 56px;
+      letter-spacing: 0px;
+      color: #e0e6ed;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    section h2::before {
+      content: '[ ';
+      color: #00dd00;
+    }
+
+    section h2::after {
+      content: ' ]';
+      color: #00dd00;
+    }
+
+    /* Featured Work */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .project-card {
+      background: rgba(20, 25, 50, 0.6);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      border-radius: 0px;
+      padding: 32px;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #00dd00, transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, #00dd00);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card:hover::before,
+    .project-card:hover::after {
+      opacity: 1;
+    }
+
+    .project-card:hover {
+      border-color: rgba(0, 217, 255, 0.4);
+      background: rgba(20, 25, 50, 0.8);
+      box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.05);
+    }
+
+    .project-tag {
+      display: inline-block;
+      background: transparent;
+      color: #00dd00;
+      padding: 2px 6px;
+      border-radius: 0px;
+      font-size: 9px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .project-tag::before {
+      content: '@';
+      margin-right: 3px;
+    }
+
+    .project-card h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #e0e6ed;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .project-card h3::before {
+      content: '▸ ';
+      color: #00dd00;
+    }
+
+    .project-card p {
+      color: #a1aac7;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tech-badge {
+      background: transparent;
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      color: #8892b0;
+      padding: 3px 8px;
+      border-radius: 0px;
+      font-size: 10px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      letter-spacing: 0.3px;
+    }
+
+    .tech-badge:hover {
+      border-color: #00dd00;
+      color: #00dd00;
+    }
+
+    /* Current Role */
+    .role-section {
+      background: rgba(20, 25, 50, 0.6);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      border-radius: 0px;
+      padding: 40px;
+      position: relative;
+    }
+
+    .role-section::before {
+      content: '┌─ ADP ─────────────────┐';
+      position: absolute;
+      top: -18px;
+      left: 20px;
+      background: #0a0e27;
+      padding: 0 4px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      font-size: 10px;
+      color: #00dd00;
+      letter-spacing: 0px;
+      font-weight: 700;
+    }
+
+    .role-section::after {
+      content: '';
+    }
+
+    .role-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .role-company {
+      font-size: 20px;
+      font-weight: 700;
+      color: #00dd00;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .role-company::after {
+      content: ' ✓';
+      font-size: 16px;
+      color: #00dd00;
+    }
+
+    .role-title {
+      color: #8892b0;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .role-section > p {
+      color: #a1aac7;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    .role-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+    }
+
+    .detail-item h4 {
+      color: #00dd00;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      font-weight: 700;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .detail-item h4::before {
+      content: '▪ ';
+    }
+
+    .detail-item p {
+      color: #8892b0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Skills */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 32px;
+    }
+
+    .skill-category h3 {
+      font-size: 10px;
+      color: #00dd00;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill {
+      background: transparent;
+      color: #8892b0;
+      padding: 5px 10px;
+      border-radius: 0px;
+      font-size: 11px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      position: relative;
+    }
+
+    .skill::before {
+      content: '<';
+      color: #00dd00;
+      margin-right: 2px;
+    }
+
+    .skill::after {
+      content: '>';
+      color: #00dd00;
+      margin-left: 2px;
+    }
+
+    .skill:hover {
+      border-color: #00dd00;
+      color: #00dd00;
+      box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+    }
+
+    /* Career Goals */
+    .goals-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .goals-text p {
+      color: #a1aac7;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    .goals-targets {
+      background: rgba(20, 25, 50, 0.6);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      border-radius: 0px;
+      padding: 32px;
+    }
+
+    .goals-targets h3 {
+      font-size: 10px;
+      color: #00dd00;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      font-weight: 700;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .goal-item {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+    }
+
+    .goal-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .goal-company {
+      font-weight: 600;
+      color: #e0e6ed;
+      font-size: 14px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .goal-level {
+      color: #00dd00;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    @media (max-width: 768px) {
+      .goals-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Resume */
+    .resume-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      background: rgba(20, 25, 50, 0.6);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      border-radius: 0px;
+      padding: 40px;
+    }
+
+    .resume-text p {
+      color: #a1aac7;
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+
+    .resume-download {
+      display: flex;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .resume-section {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .resume-download {
+        justify-content: flex-start;
+      }
+    }
+
+    /* Contact */
+    .contact-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+    }
+
+    .contact-text p {
+      color: #a1aac7;
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .contact-label {
+      color: #00dd00;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    .contact-label::before {
+      content: '> ';
+    }
+
+    .contact-value {
+      color: #c9d1e0;
+      font-size: 15px;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+      list-style: none;
+      margin-top: 16px;
+    }
+
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid rgba(0, 217, 255, 0.3);
+      color: #00dd00;
+      border-radius: 0px;
+      transition: all 0.2s;
+      font-weight: 600;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+      font-size: 11px;
+    }
+
+    .social-links a:hover {
+      border-color: #00dd00;
+      background: rgba(0, 217, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .contact-content {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 80px 0;
+      }
+
+      .hero {
+        padding: 120px 0;
+      }
+
+      section h2 {
+        margin-bottom: 48px;
+      }
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(0, 217, 255, 0.1);
+      padding: 40px 0;
+      text-align: center;
+      color: #495670;
+      font-size: 12px;
+      font-family: "Monaco", "Menlo", "Courier New", monospace;
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: #00dd00;
+      width: 0%;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+    }
+
+    /* Grid background effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: -1;
+    }
+  </style>
 </head>
-
 <body>
-  <!-- Header
-   ================================================== -->
-  <header id="home">
-    <nav id="nav-wrap">
-      <a class="mobile-btn" href="#nav-wrap" title="Show navigation">Show navigation</a>
-      <a class="mobile-btn" href="#" title="Hide navigation">Hide navigation</a>
-
-      <ul id="nav" class="nav">
-        <li class="current"><a class="smoothscroll" href="#home">Home</a></li>
-        <li><a class="smoothscroll" href="#about">About</a></li>
-        <li><a class="smoothscroll" href="#resume">Resume</a></li>
-        <li><a class="smoothscroll" href="#portfolio">Projects</a></li>
-        <li><a class="smoothscroll" href="#testimonials">Testimonials</a></li>
-        <li><a class="smoothscroll" href="#contact">Contact</a></li>
+  <nav>
+    <div class="container">
+      <div class="logo">Akshit Ahuja</div>
+      <ul>
+        <li><a href="#work" class="nav-link">work</a></li>
+        <li><a href="#current" class="nav-link">current</a></li>
+        <li><a href="#skills" class="nav-link">skills</a></li>
+        <li><a href="#goals" class="nav-link">goals</a></li>
+        <li><a href="#resume" class="nav-link">resume</a></li>
+        <li><a href="#contact" class="nav-link">contact</a></li>
       </ul>
-      <!-- end #nav -->
-    </nav>
-    <!-- end #nav-wrap -->
-
-    <div class="row banner">
-      <div class="banner-text">
-        <h1 class="responsive-headline">I'm Akshit Ahuja.</h1>
-        <h3>
-          I'm a software developer, with more than five years of experience. I
-          love to analyze the geo-political impact of international politics
-          on developing countries. Lets
-          <a class="smoothscroll" href="#about">start scrolling</a> and learn
-          more <a class="smoothscroll" href="#about">about me</a>.
-        </h3>
-        <hr />
-        <h3>ahuja101992@gmail.com</h3>
-        <!-- <hr /> -->
-        <ul class="social">
-          <li>
-            <a href="https://www.facebook.com/akshit.ahuja"><i class="fa fa-facebook"></i></a>
-          </li>
-          <li>
-            <a href="https://twitter.com/ahuja101992"><i class="fa fa-twitter"></i></a>
-          </li>
-          <li>
-            <a href="https://www.linkedin.com/in/akshitahuja92/"><i class="fa fa-linkedin"></i></a>
-          </li>
-          <li>
-            <a href="https://github.com/ahuja101992"><i class="fa fa-github"></i></a>
-          </li>
-          <li>
-            <a href="https://join.skype.com/invite/wqRhDMcDf8p2"><i class="fa fa-skype"></i></a>
-          </li>
-        </ul>
-      </div>
     </div>
+  </nav>
 
-    <p class="scrolldown">
-      <a class="smoothscroll" href="#about"><i class="icon-down-circle"></i></a>
-    </p>
-  </header>
-  <!-- Header End -->
-
-  <!-- About Section
-   ================================================== -->
-  <section id="about">
-    <div class="row">
-      <div class="three columns">
-        <img class="profile-pic" src="images/profilepic.jpg" alt="" />
+  <section class="hero">
+    <div class="container">
+      <h1>Building AI Infrastructure at Scale</h1>
+      <p class="subtitle">$ pmts @ oracle &gt; designing agentic platforms</p>
+      <p>
+        I work on the infrastructure that powers observability, access control, and maintenance automation across thousands of Oracle Cloud databases. When I'm not building at work, I'm exploring LLM-powered architectures and personal tools.
+      </p>
+      <div class="cta-buttons">
+        <a href="#work" class="btn btn-primary">explore work</a>
+        <a href="#contact" class="btn btn-secondary">get in touch</a>
       </div>
-
-      <div class="nine columns main-col">
-        <h2>About Me</h2>
-
-        <p>
-          I am a software developer, with 5 years of experience. Most
-          recently, I worked on Oracle Siebel development for Dassault
-          Systemes, where my responsibilities included creating a lead scoring
-          algorithm, upgrading Siebel system to the latest Stable version,
-          IP18, and designing custom functionalities for Japanese users.
-          Previously, I worked with software consultants like Accenture and
-          Bristlecone as a Senior Developer and Senior Consultant.
-        </p>
-        <p>
-          During the past year, I have been pursuing my master’s at San Jose
-          State University, where I have had the opportunity of working on
-          diverse technologies like Node.js, React.js, Docker, Java, Redis
-          caching, and Kafka Messaging. In my project Eventify, I used RFID to
-          track the movement of attendees in an event and provide them with
-          live event updates. The same data was used to generate leads for
-          vendors thus, generating revenue for organizers. I used Apache Kafka
-          and Redis caching to make applications like Grubhub and Twitter
-          scalable as a part of my Distributed Systems class. I also developed
-          an application that intends to reduce the number of visits to
-          grocery stores. A pool is created among neighbors, who live in the
-          same locality and can pick orders for pool members. An email
-          notification is sent for each step of the order, also data privacy
-          is highly taken care of during email communications.
-        </p>
-
-        <div class="row">
-          <div class="columns contact-details">
-            <h2>Contact Details</h2>
-            <p class="address">
-              <span>Akshit Ahuja</span><br />
-              <span>1326 The Alameda<br />
-                San Jose, California, 95126, US</span><br />
-              <span>925-922-5828</span><br />
-              <span>ahuja101992@gmail.com</span>
-            </p>
-          </div>
-
-          <div class="columns download">
-            <p>
-              <a href="Resume-Akshit_Ahuja.pdf" download class="button"><i class="fa fa-download"></i>Download
-                Resume</a>
-            </p>
-          </div>
-        </div>
-        <!-- end row -->
-      </div>
-      <!-- end .main-col -->
     </div>
   </section>
-  <!-- About Section End-->
 
-  <!-- Resume Section
-   ================================================== -->
+  <section id="work">
+    <div class="container">
+      <h2>featured projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <span class="project-tag">Current</span>
+          <h3>ADP Audit Agent</h3>
+          <p>Multi-surface observability platform combining OCI Audit, host logs, and database audit trails. Conversational interface with cited evidence and deterministic controls.</p>
+          <div class="tech-stack">
+            <span class="tech-badge">Java</span>
+            <span class="tech-badge">LLM</span>
+            <span class="tech-badge">OCI</span>
+            <span class="tech-badge">Agentic AI</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <span class="project-tag">Personal</span>
+          <h3>HireLoop</h3>
+          <p>Autonomous career tracking platform. Config-driven backend with pluggable LLM providers. Tracks job search, interview prep, and career milestones. Live on Railway.</p>
+          <div class="tech-stack">
+            <span class="tech-badge">Java/Spring Boot</span>
+            <span class="tech-badge">React</span>
+            <span class="tech-badge">Railway</span>
+            <span class="tech-badge">Claude API</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <span class="project-tag">Personal</span>
+          <h3>OrderAI</h3>
+          <p>Open-source AI food truck ordering system. MCP integration with Square POS, full web UI. Real-time order processing with smart recommendations.</p>
+          <div class="tech-stack">
+            <span class="tech-badge">MCP</span>
+            <span class="tech-badge">React</span>
+            <span class="tech-badge">Square API</span>
+            <span class="tech-badge">LLM</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <span class="project-tag">Personal</span>
+          <h3>Market Research Dashboard</h3>
+          <p>AI-powered personal stock dashboard. Claude Code cloud routine runs market analysis, writes JSON briefs to Google Drive, served via Cloudflare Worker.</p>
+          <div class="tech-stack">
+            <span class="tech-badge">Claude Code</span>
+            <span class="tech-badge">Cloudflare Workers</span>
+            <span class="tech-badge">Google Drive API</span>
+            <span class="tech-badge">AI Analysis</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="current">
+    <div class="container">
+      <h2>current work</h2>
+      <div class="role-section">
+        <div class="role-header">
+          <span class="role-title">PMTS (Principal Member of Technical Staff)</span>
+          <div class="role-company">Oracle Cloud Infrastructure</div>
+        </div>
+        <p>
+          I own and design mission-critical platforms for the ADP (Application Data Platform) team. My work spans infrastructure for observability, access control, maintenance automation, and reliability across ExaCS and Autonomous Database ecosystems. I also lead the AI-agent platform direction, moving conversational AI from POC to productizable workflows with safety-first design.
+        </p>
+        <div class="role-details">
+          <div class="detail-item">
+            <h4>Core Ownership</h4>
+            <p>ADP Audit Agent, JIT Access Control, FA Maintenance workflows, KMS/BYOK platform, Data Guard orchestration</p>
+          </div>
+          <div class="detail-item">
+            <h4>Infrastructure</h4>
+            <p>OCI, ExaCS, Autonomous Databases, control plane APIs, workflow reliability, state management, periodic execution</p>
+          </div>
+          <div class="detail-item">
+            <h4>AI & Agentic</h4>
+            <p>Conversational UI, multi-agent orchestration, LLM-powered summarization, deterministic control enforcement</p>
+          </div>
+          <div class="detail-item">
+            <h4>Impact</h4>
+            <p>Production reliability, 40% automation effort reduction, 15M+ operational touchpoints, cross-team mentorship</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="container">
+      <h2>technical skills</h2>
+      <div class="skills-grid">
+        <div class="skill-category">
+          <h3>Platforms & Infrastructure</h3>
+          <div class="skill-list">
+            <span class="skill">OCI</span>
+            <span class="skill">ExaCS</span>
+            <span class="skill">Autonomous Databases</span>
+            <span class="skill">Kubernetes</span>
+            <span class="skill">Docker</span>
+            <span class="skill">AWS</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <h3>Backend & Databases</h3>
+          <div class="skill-list">
+            <span class="skill">Java</span>
+            <span class="skill">Spring Boot</span>
+            <span class="skill">MySQL</span>
+            <span class="skill">PL/SQL</span>
+            <span class="skill">Node.js</span>
+            <span class="skill">Kafka</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <h3>AI & Agentic</h3>
+          <div class="skill-list">
+            <span class="skill">Claude API</span>
+            <span class="skill">Claude Code</span>
+            <span class="skill">MCP</span>
+            <span class="skill">LLM Integration</span>
+            <span class="skill">Agentic Workflows</span>
+            <span class="skill">Prompt Engineering</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <h3>Frontend & Tooling</h3>
+          <div class="skill-list">
+            <span class="skill">React</span>
+            <span class="skill">Cloudflare Workers</span>
+            <span class="skill">Google Drive API</span>
+            <span class="skill">GitHub Pages</span>
+            <span class="skill">Railway</span>
+            <span class="skill">Vercel</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <h3>Core Systems</h3>
+          <div class="skill-list">
+            <span class="skill">Distributed Systems</span>
+            <span class="skill">Database Design</span>
+            <span class="skill">Workflow Orchestration</span>
+            <span class="skill">Access Control</span>
+            <span class="skill">Reliability Engineering</span>
+            <span class="skill">State Management</span>
+          </div>
+        </div>
+
+        <div class="skill-category">
+          <h3>Practices</h3>
+          <div class="skill-list">
+            <span class="skill">System Design</span>
+            <span class="skill">Production Support</span>
+            <span class="skill">Mentorship</span>
+            <span class="skill">Agile</span>
+            <span class="skill">Documentation</span>
+            <span class="skill">Cross-team Collaboration</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="goals">
+    <div class="container">
+      <h2>career direction</h2>
+      <div class="goals-content">
+        <div class="goals-text">
+          <p>
+            I'm focused on systems at scale, agentic AI infrastructure, and distributed data platforms. The work that excites me most: designing platforms that operate reliably across thousands of customers, building systems where LLMs improve UX without compromising safety, and mentoring engineers through complex production challenges.
+          </p>
+          <p>
+            I'm interested in senior IC roles where I can own critical infrastructure, drive architectural decisions, and shape how organizations interact with AI systems. The ideal fit combines technical depth with cross-team impact and mentorship opportunities.
+          </p>
+          <p>
+            I'm always open to conversations about interesting technical problems, whether that's optimizing existing systems, building new infrastructure, or exploring emerging paradigms in agentic AI and distributed systems.
+          </p>
+        </div>
+        <div class="goals-targets">
+          <h3>What I'm Focused On</h3>
+          <div class="goal-item">
+            <div class="goal-company">Systems at Scale</div>
+            <div class="goal-level">Multi-region, high-reliability, thousands of customers</div>
+          </div>
+          <div class="goal-item">
+            <div class="goal-company">Agentic AI Architecture</div>
+            <div class="goal-level">LLM-powered workflows with deterministic control</div>
+          </div>
+          <div class="goal-item">
+            <div class="goal-company">Distributed Data Platforms</div>
+            <div class="goal-level">Database lifecycle, orchestration, operations</div>
+          </div>
+          <div class="goal-item">
+            <div class="goal-company">Mentorship & Leadership</div>
+            <div class="goal-level">Growing engineers and shaping technical direction</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="resume">
-    <!-- Education
-      ----------------------------------------------- -->
-    <div class="row education">
-      <div class="three columns header-col">
-        <h1><span>Education</span></h1>
-      </div>
-
-      <div class="nine columns main-col">
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>San Jose State University</h3>
-            <p class="info">
-              Master in Software Engineering <span>&bull;</span>
-              <em class="date">August 2019 - May 2021</em>
-            </p>
-            <p class="education-details">
-              I am mastering in Software Engineering with my majors in
-              Enterprise Distributed Systems. I have had the opportunity of
-              working on diverse technologies like Node.js, React.js, Java
-              MongoDB, Redis caching, and Kafka Messaging.
-            </p>
-            <p class="project-name">
-              CartPool<span>&bull;</span><em class="tech-stack">
-                Node.js, React.js, Python, Arduino, MongoDB, GitHub, AWS,
-                Docker, Kafka</em>
-            </p>
-            <p class="project-details">
-              CartPool intends to reduce trips to grocery stores by sharing
-              the extra boot space in the car. People in the same locality can
-              place orders at grocery stores and have them delivered to your
-              home. OAuth authentication to sign up using Google and Facebook.
-              To protect the data, only order details are visible until the
-              order is ready to be delivered. A nominal fee of .5% and a
-              service charge of 9.25% is charged, which is used to provide
-              insurance on delivery.
-            </p>
-            <p class="project-name">
-              Eventify <span>&bull;</span><em class="tech-stack">
-                Node.js, React.js, Python, Arduino, MongoDB, GitHub, AWS,
-                Docker, Kafka</em>
-            </p>
-
-            <p class="project-details">
-              Eventify utilizes RFID to track the movement of people at events
-              and deliver live updates to the users. This data is used to
-              generate leads for vendors, reports of events/speakers. The
-              leads would be sold to vendors and are expected to enhance the
-              organizer’s revenue by at least 15%. A mobile app provides
-              attendees the ability to scan QR codes containing information
-              about events, speakers, and vendors. This saves time and makes
-              navigation effective.
-            </p>
-            <p class="project-name">
-              Grubhub Mock-Up <span>&bull;</span><em class="tech-stack">
-                Node.js, React.js, Redux, Kafka Messaging, MYSQL, MongoDB,
-                GitHub, AWS, Docker</em>
-            </p>
-            <p class="project-details">
-              Developed major functionalities of Grubhub, where customers
-              could search for restaurants bases on zipcode or dishes, and
-              order from results. Owners could accept the orders, or reject
-              it. Live status of the orders is also provided. A messaging
-              service was also provided for customers to contact the owners.
-              Both resturants and customers could view all their current and
-              past ordes.
-            </p>
-          </div>
+    <div class="container">
+      <h2>resume</h2>
+      <div class="resume-section">
+        <div class="resume-text">
+          <p>
+            Comprehensive overview of my professional experience, technical expertise, and key achievements across 11+ years. Detailed work history from Adeptia through Oracle, with emphasis on platform engineering, AI infrastructure, and production reliability.
+          </p>
+          <p>
+            Includes Oracle/OCI work, personal projects, technical skills, and past roles at Dassault Systèmes, Bristlecone, Accenture, and First Republic.
+          </p>
         </div>
-        <!-- item end -->
-
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>Hindustan College of Science and Technology</h3>
-            <p class="info">
-              Btech. Degree in Computer Science <span>&bull;</span>
-              <em class="date">April 2010 - may 2014</em>
-            </p>
-
-            <p>
-              Bachelors in Computer Science with multiple projects in java. I
-              participated in IBM TGMC twice and was moved to the state level
-              along with teams in 2013. I coordinated with the training and
-              placement cell to provide a great working environment for both
-              recruiters and students. I was also the incharge of discipline
-              committee for the college fest.
-            </p>
-          </div>
+        <div class="resume-download">
+          <a href="Resume-Akshit_Ahuja.pdf" download class="btn btn-primary" style="display: inline-block;">
+            ↓ Download Resume
+          </a>
         </div>
-        <!-- item end -->
       </div>
-      <!-- main-col end -->
     </div>
-    <!-- End Education -->
-
-    <!-- Work
-      ----------------------------------------------- -->
-    <div class="row work">
-      <div class="three columns header-col">
-        <h1><span>Work</span></h1>
-      </div>
-
-
-      <div class="nine columns main-col">
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>First Republic Bank</h3>
-            <p class="info">
-              Middleware Engineering Intern<span>&bull;</span>
-              <em class="date">June 2020 - Present</em>
-            </p>
-
-            <p>
-              Working with the middleware team to provide openshift platform to all the teams across FRB to run
-              microservices. I was responible for automating the process of onboarding a new client to openshift
-              environent.
-              <br><span>&bull;</span> Service Catalogue Automation for client onboarding which reduced effort by 40% and time by 45%.
-              <br><span>&bull;</span> Worked with Enterprise Architecture team to prepare the design of OpenShift 4.5 to complete setup within 4 weeks.
-              <br><span>&bull;</span> Post installation automation for OpenShift which reduced effort by 20%.
-              <br>Technologies: RedHat Linux, Ansible, Prometheus, Docker, OpenShift, Kubernetes, AWS, Confluent Kafka, Agile.
-
-            </p>
-          </div>
-        </div>
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>Dassault Systèmes</h3>
-            <p class="info">
-              DSX Development Engineer <span>&bull;</span>
-              <em class="date">July 2018 - July 2019</em>
-            </p>
-
-            <p>
-              Designed and developed Lead Scoring for automating lead assignment, resulting in a 30% effort reduction.
-              Created a custom export functionality for Japanese users, now serving 10K+ agents daily. <br>Technologies:
-              Siebel, EAI, Siebel Workflow, JavaScript, MYSQL, HTML5.
-            </p>
-          </div>
-        </div>
-        <!-- item end -->
-
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>Bristlecone</h3>
-            <p class="info">
-              Senior Consultant <span>&bull;</span>
-              <em class="date">March 2017 - July 2018</em>
-            </p>
-
-            <p>
-              Created an integration for Advance Assurance Insurance, that expanded after warranty service by 55%. It
-              was expected to enhance after-sales revenue by up to 20%. Automated return order process, bringing
-              return order time from 5 days to 2 hours. <br>Technologies: Siebel, EAI, Siebel Workflow, OpenUi,
-              JavaScript, Deployment, AWS.
-            </p>
-          </div>
-        </div>
-        <!-- item end -->
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>Accenture Solutions Pvt. Ltd</h3>
-            <p class="info">
-              Software Engineer <span>&bull;</span>
-              <em class="date">October 2014 - March 2017</em>
-            </p>
-
-            <p>
-              Added order type FTTH and migration capability, that added 1M+ customers in the first month of release.
-              Created a credit verification service, that delivered reports in 2 minutes, against previous 10 minutes.
-              <br>Technologies: Siebel, EAI, Siebel Workflow, JavaScript, MYSQL.
-            </p>
-          </div>
-        </div>
-        <!-- item end -->
-        <div class="row item">
-          <div class="twelve columns">
-            <h3>Adeptia Inc.</h3>
-            <p class="info">
-              Software Trainee<span>&bull;</span>
-              <em class="date">March 2014 - October 2014</em>
-            </p>
-
-            <p>
-              Worked on the EXTJS framework, java and Rest API to devise integration with apps like Drive and Dropbox.
-              Followed the Agile development model, which involved understanding user story, development, and testing.
-              <br>Technologies: Java, Hibernate framework, Node.js, EXTJS framework, Restful Services.
-            </p>
-          </div>
-        </div>
-        <!-- item end -->
-      </div>
-      <!-- main-col end -->
-    </div>
-    <!-- End Work -->
-
-    <!-- Skills
-      ----------------------------------------------- -->
-    <div class="row skill">
-      <div class="three columns header-col">
-        <h1><span>Skills</span></h1>
-      </div>
-
-      <div class="nine columns main-col">
-        <!-- <p>
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-            quae ab illo inventore veritatis et quasi architecto beatae vitae
-            dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-            aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
-            eos qui ratione voluptatem sequi nesciunt.
-          </p> -->
-
-        <div class="bars">
-          <ul class="skills">
-            <li><span class="bar-expand node-js"></span><em>Node.js</em></li>
-            <li>
-              <span class="bar-expand react-js"></span><em>React.js</em>
-            </li>
-            <li><span class="bar-expand openshift"></span><em>OpenShift</em></li>
-            <li><span class="bar-expand java"></span><em>Java</em></li>
-            <li>
-              <span class="bar-expand restful"></span><em>Restful API</em>
-            </li>
-            <li><span class="bar-expand siebel"></span><em>Siebel</em></li>
-            <li>
-              <span class="bar-expand kafka"></span><em>Apache Kafka</em>
-            </li>
-            <li><span class="bar-expand mysql"></span><em>MYSQL</em></li>
-            <li><span class="bar-expand mongodb"></span><em>MongoDB</em></li>
-            <li><span class="bar-expand aws"></span><em>AWS</em></li>
-            <li><span class="bar-expand css"></span><em>CSS</em></li>
-            <li><span class="bar-expand html5"></span><em>HTML5</em></li>
-          </ul>
-        </div>
-        <!-- end skill-bars -->
-      </div>
-      <!-- main-col end -->
-    </div>
-    <!-- End skills -->
   </section>
-  <!-- Resume Section End-->
 
-  <!-- Portfolio Section
-   ================================================== -->
-  <section id="portfolio">
-    <div class="row">
-      <div class="twelve columns collapsed">
-        <h1>Check Out Some of My Works.</h1>
-        <!-- portfolio-wrapper -->
-        <div id="portfolio-wrapper" class="bgrid-quarters s-bgrid-thirds cf">
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-01" title="">
-                <img alt="" src="images/portfolio/cartpool.jpg" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>CartPool</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-02" title="">
-                <img alt="" src="images/portfolio/Grubhub.jpg" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Grubhub - Mockup</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-03" title="">
-                <img alt="" src="images/portfolio/gaming.jpg" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Gaming Service</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-04" title="">
-                <img alt="" src="images/portfolio/twitter.png" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Twitter - Mockup</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-05" title="">
-                <img alt="" src="images/portfolio/eventify.png" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Eventify</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-06" title="">
-                <img alt="" src="images/portfolio/starbucks.png" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Starbucks</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-07" title="">
-                <img alt="" src="images/portfolio/banking.jpg" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Banking System</h5>
-                    <p>Web Development</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-
-          <div class="columns portfolio-item">
-            <div class="item-wrap">
-              <a href="#modal-08" title="">
-                <img alt="" src="images/portfolio/movie.jpg" />
-                <div class="overlay">
-                  <div class="portfolio-item-meta">
-                    <h5>Movie Recommendation System</h5>
-                    <p>Data Analytics</p>
-                  </div>
-                </div>
-                <div class="link-icon"><i class="icon-plus"></i></div>
-              </a>
-            </div>
-          </div>
-          <!-- item end -->
-        </div>
-        <!-- portfolio-wrapper end -->
-      </div>
-      <!-- twelve columns end -->
-
-      <!-- Modal Popup
-	      --------------------------------------------------------------- -->
-
-      <div id="modal-01" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-cartpool.png" alt="" />
-
-        <div class="description-box">
-          <h4>CartPool</h4>
-          <p>
-            CartPool intends to reduce trips to grocery stores by sharing the
-            extra boot space in the car. People in the same locality can place
-            orders at grocery stores and have them delivered to your home.
-            OAuth authentication to sign up using Google and Facebook. To
-            protect the data, only order details are visible until the order
-            is ready to be delivered. A nominal fee of .5% and a service
-            charge of 9.25% is charged, which is used to provide insurance on
-            delivery.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-01 End -->
-
-      <div id="modal-02" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-Grubhub.jpg" alt="" />
-
-        <div class="description-box">
-          <h4>Grubhub - Mockup</h4>
-          <p>
-            Developed major functionalities of Grubhub, where customers could
-            search for restaurants bases on zipcode or dishes, and order from
-            results. Owners could accept the orders, or reject it. Live status
-            of the orders is also provided. A messaging service was also
-            provided for customers to contact the owners. Both resturants and
-            customers could view all their current and past ordes.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-02 End -->
-
-      <div id="modal-03" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-gaming.jpg" alt="" />
-
-        <div class="description-box">
-          <h4>Gaming Service</h4>
-          <p>
-            It provides ability to create Sponsors, players, and opponents.
-            There can be multiple players under a single sponsor, with each
-            player being an opponent to multiple players.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-03 End -->
-
-      <div id="modal-04" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-twitter.png" alt="" />
-
-        <div class="description-box">
-          <h4>Twitter - Mockup</h4>
-          <p>
-            Distributed system, emulating all the functionalities of twitter.
-            Apart from all the major functionalities for twitter, there was a
-            statistics module, which presented major stats to the admin. It
-            was Deployed on multiple AWS instances utilizing docker
-            containers.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-04 End -->
-
-      <div id="modal-05" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-eventify.png" alt="" />
-
-        <div class="description-box">
-          <h4>Eventify</h4>
-          <p>
-            Eventify utilizes RFID to track the movement of people at events
-            and deliver live updates to the users. This data is used to
-            generate leads for vendors, reports of events/speakers. The leads
-            would be sold to vendors and are expected to enhance the
-            organizer’s revenue by at least 15%. A mobile app provides
-            attendees the ability to scan QR codes containing information
-            about events, speakers, and vendors. This saves time and makes
-            navigation effective.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-05 End -->
-
-      <div id="modal-06" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-starbucks.png" alt="" />
-
-        <div class="description-box">
-          <h4>Starbucks</h4>
-          <p>
-            It is an emulation of starbucks app, designed and developend using
-            different deign patters.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-06 End -->
-
-      <div id="modal-07" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-banking.jpg" alt="" />
-
-        <div class="description-box">
-          <h4>Banking System</h4>
-          <p>
-            It is a banking system backend developed with the intent of
-            implementing different design patterns. It uses MYSQL as the
-            database, and node.js as backedn. There are multiple check that
-            have been implemented to make sure only valid transactions are
-            permitted.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-07 End -->
-
-      <div id="modal-08" class="popup-modal mfp-hide">
-        <img class="scale-with-grid" src="images/portfolio/modals/m-movie.jpg" alt="" />
-
-        <div class="description-box">
-          <h4>Movie Recommendation System</h4>
-          <p>
-            It is a movie recommendation system based on R. It provides a
-            visual diplay of corelation between the differnt datapoints in a
-            movie. It also uses an algorithm to suggest movies based on
-            previous ratings.
-          </p>
-          <span class="categories"><i class="fa fa-tag"></i>Web Development</span>
-        </div>
-
-        <div class="link-box">
-          <!-- <a href="http://www.behance.net">Details</a> -->
-          <a class="popup-modal-dismiss">Close</a>
-        </div>
-      </div>
-      <!-- modal-01 End -->
-    </div>
-    <!-- row End -->
-  </section>
-  <!-- Portfolio Section End-->
-
-  <!-- Testimonials Section
-   ================================================== -->
-  <section id="testimonials">
-    <div class="text-container">
-      <div class="row">
-        <div class="two columns header-col">
-          <h1><span>Testimonials</span></h1>
-        </div>
-
-        <div class="ten columns flex-container">
-          <div class="flexslider">
-            <ul class="slides">
-              <li>
-                <blockquote>
-                  <p>
-                    Bombs and pistols do not make a revolution. The sword of
-                    revolution is sharpened on the whetting stone of ideas
-                  </p>
-                  <cite>Bhagat Singh</cite>
-                </blockquote>
-              </li>
-              <!-- slide ends -->
-
-              <li>
-                <blockquote>
-                  <p>
-                    Success is a lousy teacher. It seduces smart people into
-                    thinking they can't lose.
-                  </p>
-                  <cite>Bill Gates</cite>
-                </blockquote>
-              </li>
-              <!-- slide ends -->
-              <li>
-                <blockquote>
-                  <p>
-                    Hard work never brings fatigue. It brings satisfaction.
-                  </p>
-                  <cite>Narendra Modi</cite>
-                </blockquote>
-              </li>
-              <!-- slide ends -->
-            </ul>
-          </div>
-          <!-- div.flexslider ends -->
-        </div>
-        <!-- div.flex-container ends -->
-      </div>
-      <!-- row ends -->
-    </div>
-    <!-- text-container ends -->
-  </section>
-  <!-- Testimonials Section End-->
-
-  <!-- Contact Section
-   ================================================== -->
   <section id="contact">
-    <div class="row section-head">
-      <div class="two columns header-col">
-        <h1><span>Get In Touch.</span></h1>
-      </div>
-
-      <div class="ten columns">
-        <p class="lead">
-          If you would like to know more about me, or you have any
-          suggestions, please feel free to leave a message. I will definately
-          get back you.
-        </p>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="eight columns">
-        <!-- form -->
-        <form action="sendEmail" method="post" id="contactForm" name="contactForm">
-          <fieldset>
-            <div>
-              <label for="contactName">Name <span class="required">*</span></label>
-              <input type="text" value="" size="35" id="contactName" name="contactName" required="true" />
-            </div>
-
-            <div>
-              <label for="contactEmail">Email <span class="required">*</span></label>
-              <input type="text" value="" size="35" id="contactEmail" name="contactEmail" required />
-            </div>
-
-            <div>
-              <label for="contactSubject">Subject</label>
-              <input type="text" value="" size="35" id="contactSubject" name="contactSubject" />
-            </div>
-
-            <div>
-              <label for="contactMessage">Message <span class="required">*</span></label>
-              <textarea cols="50" rows="15" id="contactMessage" name="contactMessage" required></textarea>
-            </div>
-
-            <div>
-              <button class="submit">Submit</button>
-              <span id="image-loader">
-                <img alt="" src="images/loader.gif" />
-              </span>
-            </div>
-          </fieldset>
-        </form>
-        <!-- Form End -->
-
-        <!-- contact-warning -->
-        <div id="message-warning">Error boy</div>
-        <!-- contact-success -->
-        <div id="message-success">
-          <i class="fa fa-check"></i>Your message was sent, thank you!<br />
-        </div>
-      </div>
-
-      <aside class="four columns footer-widgets">
-        <div class="widget widget_contact">
-          <h4>Address and Phone</h4>
-          <p class="address">
-            Akshit Ahuja<br />
-            1326 The Alameda<br />
-            San Jose, California, US<br />
-            <span>(925) 922-5828</span>
+    <div class="container">
+      <h2>get in touch</h2>
+      <div class="contact-content">
+        <div class="contact-text">
+          <p>
+            Interested in collaborating, discussing systems design, or just having a conversation? I'm always open to meaningful technical discussions and opportunities where I can contribute to building great infrastructure.
+          </p>
+          <p>
+            Whether it's about agentic AI, distributed systems, or career growth—reach out.
           </p>
         </div>
-
-        <!-- <div class="widget widget_tweets">
-            <h4 class="widget-title">Latest Tweets</h4>
-
-            <ul id="twitter">
-              <li>
-                <span>
-                  This is Photoshop's version of Lorem Ipsum. Proin gravida nibh
-                  vel velit auctor aliquet. Aenean sollicitudin, lorem quis
-                  bibendum auctor, nisi elit consequat ipsum
-                  <a href="#">http://t.co/CGIrdxIlI3</a>
-                </span>
-                <b><a href="#">2 Days Ago</a></b>
-              </li>
-              <li>
-                <span>
-                  Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-                  accusantium doloremque laudantium, totam rem aperiam, eaque
-                  ipsa quae ab illo inventore veritatis et quasi
-                  <a href="#">http://t.co/CGIrdxIlI3</a>
-                </span>
-                <b><a href="#">3 Days Ago</a></b>
-              </li>
+        <div class="contact-info">
+          <div class="contact-item">
+            <span class="contact-label">Email</span>
+            <span class="contact-value"><a href="mailto:ahuja101992@gmail.com">ahuja101992@gmail.com</a></span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-label">Location</span>
+            <span class="contact-value">Austin, TX</span>
+          </div>
+          <div class="contact-item">
+            <span class="contact-label">Connect</span>
+            <ul class="social-links">
+              <li><a href="https://www.linkedin.com/in/akshitahuja92/">in</a></li>
+              <li><a href="https://github.com/ahuja101992">gh</a></li>
+              <li><a href="https://twitter.com/ahuja101992">𝕏</a></li>
             </ul>
-          </div> -->
-      </aside>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
-  <!-- Contact Section End-->
 
-  <!-- footer
-   ================================================== -->
   <footer>
-    <div class="row">
-      <div class="twelve columns">
-        <ul class="social-links">
-          <li>
-            <a href="https://www.facebook.com/akshit.ahuja"><i class="fa fa-facebook"></i></a>
-          </li>
-          <li>
-            <a href="https://twitter.com/ahuja101992"><i class="fa fa-twitter"></i></a>
-          </li>
-          <li>
-            <a href="https://www.linkedin.com/in/akshitahuja92/"><i class="fa fa-linkedin"></i></a>
-          </li>
-          <li>
-            <a href="https://github.com/ahuja101992"><i class="fa fa-github"></i></a>
-          </li>
-          <li>
-            <a href="https://join.skype.com/invite/wqRhDMcDf8p2"><i class="fa fa-skype"></i></a>
-          </li>
-        </ul>
-        <ul class="copyright">
-          <li>&copy; Copyright 2014 CeeVee</li>
-          <li>
-            Design by
-            <a title="Styleshout" href="http://www.styleshout.com/">Styleshout</a>
-          </li>
-        </ul>
-      </div>
-
-      <div id="go-top">
-        <a class="smoothscroll" title="Back to Top" href="#home"><i class="icon-up-open"></i></a>
-      </div>
+    <div class="container">
+      <p>&copy; 2026 akshit ahuja | built for clarity &amp; impact</p>
     </div>
   </footer>
-  <!-- Footer End-->
 
-  <!-- Java Script
-   ================================================== -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <div class="scroll-indicator"></div>
+
   <script>
-    window.jQuery ||
-      document.write('<script src="js/jquery-1.10.2.min.js"><\/script>');
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        const href = anchor.getAttribute('href');
+        if (href !== '#') {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+
+    const updateNav = () => {
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('nav a[href^="#"]');
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (window.pageYOffset >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    };
+
+    const updateScrollProgress = () => {
+      const scrollIndicator = document.querySelector('.scroll-indicator');
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      scrollIndicator.style.width = scrollPercent + '%';
+    };
+
+    window.addEventListener('scroll', () => {
+      updateNav();
+      updateScrollProgress();
+    });
+
+    updateNav();
   </script>
-  <script type="text/javascript" src="js/jquery-migrate-1.2.1.min.js"></script>
-
-  <script src="js/jquery.flexslider.js"></script>
-  <script src="js/waypoints.js"></script>
-  <script src="js/jquery.fittext.js"></script>
-  <script src="js/magnific-popup.js"></script>
-  <script src="js/init.js"></script>
 </body>
-
 </html>
