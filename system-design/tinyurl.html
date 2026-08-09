@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design TinyURL — System Design Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #FFFFFF; --bg: #F7F8FA; --bg-card: #FFFFFF;
+      --border: #E2E6EF; --border-mid: #C8D0E0;
+      --text: #1C2333; --text-mid: #4A5568; --text-muted: #8896AA;
+      --blue: #3D5A99; --blue-light: #EBF0FA; --blue-mid: #6B85BD;
+      --amber: #C87533; --amber-light: #FDF3E9;
+      --green: #2E7D52; --green-light: #E8F5EE;
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Playfair Display', Georgia, serif;
+      --mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 3px rgba(28,35,51,0.06);
+      --shadow: 0 4px 12px rgba(28,35,51,0.08);
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+    .nav-brand { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--text-mid); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--blue); }
+
+    .hero { max-width: 860px; margin: 0 auto; padding: 60px 40px 40px; border-bottom: 1px solid var(--border); }
+    .breadcrumb { font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .hero h1 { font-family: var(--serif); font-size: clamp(26px, 4vw, 40px); font-weight: 700; line-height: 1.2; color: var(--text); margin-bottom: 14px; }
+    .hero h1 em { font-style: italic; color: var(--amber); }
+    .hero-desc { font-size: 16px; color: var(--text-mid); max-width: 600px; line-height: 1.8; margin-bottom: 24px; }
+    .hero-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .meta-tag { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
+    .meta-tag.wip { color: var(--amber); background: var(--amber-light); border-color: #EDCFA8; }
+
+    .layout { max-width: 860px; margin: 0 auto; padding: 40px 40px 80px; }
+
+    /* section nav */
+    .section-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+    .snav-item { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); text-decoration: none; transition: all 0.15s; }
+    .snav-item:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-light); }
+    .snav-item.done { color: var(--green); border-color: #B8DCCA; background: var(--green-light); }
+    .snav-item.wip { color: var(--amber); border-color: #EDCFA8; background: var(--amber-light); }
+
+    /* section blocks */
+    .design-section { margin-bottom: 48px; }
+    .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--amber); }
+    .section-num { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--amber); }
+    .section-title { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--text); }
+    .section-time { font-family: var(--mono); font-size: 11px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; margin-left: auto; }
+
+    /* placeholder state */
+    .placeholder-block { background: var(--bg); border: 2px dashed var(--border-mid); border-radius: 10px; padding: 40px 32px; text-align: center; }
+    .placeholder-icon { font-size: 32px; margin-bottom: 12px; }
+    .placeholder-block h3 { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+    .placeholder-block p { font-size: 13.5px; color: var(--text-muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
+
+    /* content cards */
+    .content-card { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--amber); border-radius: 10px; padding: 24px 28px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+    .content-card p { font-size: 14.5px; color: var(--text-mid); line-height: 1.8; margin-bottom: 14px; }
+    .content-card p:last-child { margin-bottom: 0; }
+
+    /* table */
+    .req-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 4px; }
+    .req-table th { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: left; padding: 8px 14px; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .req-table td { padding: 10px 14px; color: var(--text-mid); border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+    .req-table tr:last-child td { border-bottom: none; }
+    .req-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--blue); white-space: nowrap; font-weight: 500; }
+    .req-table tr.nfr td:first-child { color: var(--amber); }
+    .req-table tr.out td { opacity: 0.5; }
+    .req-table tr.out td:first-child { text-decoration: line-through; color: var(--text-muted); }
+
+    /* scale grid */
+    .scale-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .scale-cell { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .scale-cell-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .scale-cell-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text); }
+    .scale-cell-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+    /* diagram */
+    .diagram-wrap { margin-bottom: 20px; }
+    .diagram-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .diagram-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; }
+
+    code { font-family: var(--mono); font-size: 12.5px; background: var(--blue-light); color: var(--blue); border: 1px solid #D3DCF0; border-radius: 4px; padding: 1px 6px; }
+
+    .callout { border-left: 3px solid var(--blue); background: var(--blue-light); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 20px; }
+    .callout-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+    .callout p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; }
+    .callout p strong { color: var(--text); font-weight: 600; }
+    .callout.amber { border-left-color: var(--amber); background: var(--amber-light); }
+    .callout.amber .callout-label { color: var(--amber); }
+
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+    .checklist li::before { content: '▸'; color: var(--blue); font-size: 11px; margin-top: 4px; flex-shrink: 0; }
+    .checklist li strong { color: var(--text); font-weight: 600; }
+
+    footer { border-top: 1px solid var(--border); padding: 28px 40px; margin-top: 40px; }
+    .footer-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-copy { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--blue); }
+
+    @media (max-width: 680px) {
+      nav { padding: 0 20px; } .nav-links { display: none; }
+      .hero, .layout { padding-left: 20px; padding-right: 20px; }
+      .scale-grid { grid-template-columns: repeat(2, 1fr); }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="index.html">← All Designs</a></li>
+    <li><a href="framework.html">Framework</a></li>
+    <li><a href="https://github.com/akshit101" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="index.html">System Design Notes</a> / <a href="index.html">Worked Examples</a> / 01</div>
+  <h1>Design <em>TinyURL</em></h1>
+  <p class="hero-desc">A URL shortening service handling 100M URL creates per day and 1B redirects per day. Covers short code generation, caching strategy, redirect semantics, consistency tradeoffs, and abuse prevention.</p>
+  <div class="hero-meta">
+    <span class="meta-tag wip">In Progress</span>
+    <span class="meta-tag">URL Shortener</span>
+    <span class="meta-tag">Read-Heavy 10:1</span>
+    <span class="meta-tag">Caching · Hashing</span>
+    <span class="meta-tag">~45 min interview</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SECTION NAV -->
+  <div class="section-nav">
+    <a class="snav-item done" href="#s1">01 Requirements</a>
+    <a class="snav-item done" href="#s2">02 Estimation</a>
+    <a class="snav-item done" href="#s3">03 API Design</a>
+    <a class="snav-item done" href="#s4">04 Data Model</a>
+    <a class="snav-item wip"  href="#s5">05 High-Level Design</a>
+    <a class="snav-item"      href="#s6">06 Deep Dive</a>
+    <a class="snav-item"      href="#s7">Component Deep Dives</a>
+  </div>
+
+  <!-- ── STEP 1 ── -->
+  <section id="s1" class="design-section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Requirements Clarification</span>
+      <span class="section-time">⏱ ~5 min</span>
+    </div>
+    <div class="content-card">
+      <table class="req-table">
+        <thead><tr><th>Requirement</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td>Create short URL</td><td>Given a long URL, return a unique short alias — e.g. <code>tinyurl.com/abc1234</code></td></tr>
+          <tr><td>Redirect short URL</td><td>HTTP 301 or 302 redirect to the original long URL</td></tr>
+          <tr><td>Custom alias</td><td>In scope — user can optionally specify their own short code</td></tr>
+          <tr><td>URL expiry / TTL</td><td>In scope — URLs can have an optional time-to-live</td></tr>
+          <tr class="out"><td>Analytics</td><td>Out of scope — click counts, geo, referrers deferred</td></tr>
+          <tr class="out"><td>User accounts</td><td>Out of scope — no auth required to create or use URLs</td></tr>
+          <tr class="nfr"><td>Scale</td><td>100M URLs created/day · 10:1 read:write → 1B redirects/day</td></tr>
+          <tr class="nfr"><td>Latency</td><td>Redirect p99 &lt; 50ms — speed is the product</td></tr>
+          <tr class="nfr"><td>Availability</td><td>99.99% — a down TinyURL is very visible</td></tr>
+          <tr class="nfr"><td>Consistency</td><td>Eventual OK for reads; write uniqueness must be guaranteed</td></tr>
+          <tr class="nfr"><td>Durability</td><td>Short codes must not be lost — permanent links expected</td></tr>
+        </tbody>
+      </table>
+      <div class="callout amber" style="margin-top:16px;margin-bottom:0">
+        <div class="callout-label">Key scope call</div>
+        <p><strong>301 vs 302 is a product decision, not just a technical one.</strong> 301 (permanent) is cached by browsers — reduces server load but kills analytics. 302 (temporary) hits the server every time — enables tracking. Since analytics is out of scope here, 302 + aggressive server-side cache gives the best balance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 2 ── -->
+  <section id="s2" class="design-section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Capacity Estimation</span>
+      <span class="section-time">⏱ ~5 min</span>
+    </div>
+    <div class="content-card">
+      <div class="scale-grid">
+        <div class="scale-cell">
+          <div class="scale-cell-label">Write RPS</div>
+          <div class="scale-cell-val">~1,160</div>
+          <div class="scale-cell-sub">100M URLs ÷ 86,400s</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-cell-label">Read RPS</div>
+          <div class="scale-cell-val">~11,600</div>
+          <div class="scale-cell-sub">10:1 read:write ratio</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-cell-label">Storage / year</div>
+          <div class="scale-cell-val">~1.8 TB</div>
+          <div class="scale-cell-sub">500 bytes × 100M × 365</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-cell-label">Storage / 5 yr</div>
+          <div class="scale-cell-val">~9 TB</div>
+          <div class="scale-cell-sub">Manageable single cluster</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-cell-label">Code space (7 chars)</div>
+          <div class="scale-cell-val">3.5T</div>
+          <div class="scale-cell-sub">62⁷ with [a-zA-Z0-9]</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-cell-label">Cache memory</div>
+          <div class="scale-cell-val">~170 GB</div>
+          <div class="scale-cell-sub">20% daily reads × 500B</div>
+        </div>
+      </div>
+      <div class="callout" style="margin-bottom:0">
+        <div class="callout-label">What the numbers tell us</div>
+        <p>Write load is moderate (~1K RPS) — manageable without exotic solutions. Read load is heavy (~12K RPS) — the design must be read-optimized with <strong>aggressive caching on the redirect path</strong>. The 3.5T code space gives us ~97 years of runway at current scale before exhaustion.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 3 ── -->
+  <section id="s3" class="design-section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">API Design</span>
+      <span class="section-time">⏱ ~5 min</span>
+    </div>
+    <div class="content-card">
+      <p>REST API. Three endpoints covering the full functional scope.</p>
+      <table class="req-table">
+        <thead><tr><th>Method + Path</th><th>Request</th><th>Response</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>POST /urls</td>
+            <td>Body: <code>long_url</code>, optional <code>alias</code>, optional <code>ttl_days</code></td>
+            <td><code>{ short_url, expires_at }</code> — 201</td>
+          </tr>
+          <tr>
+            <td>GET /{short_code}</td>
+            <td>—</td>
+            <td>HTTP 302 → <code>Location: long_url</code></td>
+          </tr>
+          <tr>
+            <td>DELETE /urls/{short_code}</td>
+            <td>—</td>
+            <td>204 No Content</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout amber" style="margin-top:16px; margin-bottom:0">
+        <div class="callout-label">Design decisions</div>
+        <p><strong>No auth for MVP.</strong> Rate limiting at the load balancer (token bucket per IP) substitutes. <strong>Custom alias:</strong> if alias is taken, return 409 Conflict — don't silently override. <strong>DELETE:</strong> soft-delete in DB + cache invalidation, not hard purge, so we can detect reuse attempts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 4 ── -->
+  <section id="s4" class="design-section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Data Model</span>
+      <span class="section-time">⏱ ~5 min</span>
+    </div>
+    <div class="content-card">
+      <p>Single primary entity. Primary access pattern: given a <code>short_code</code>, return <code>long_url</code>. This is a pure key-value lookup — O(1), no joins, no range scans on the hot path.</p>
+      <table class="req-table" style="margin-top:14px">
+        <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>short_code</td><td>VARCHAR(7)</td><td>Primary key / partition key. Base62 [a-zA-Z0-9].</td></tr>
+          <tr><td>long_url</td><td>TEXT (≤2048 chars)</td><td>Target URL. Validated on write.</td></tr>
+          <tr><td>created_at</td><td>TIMESTAMP</td><td>UTC. Immutable after creation.</td></tr>
+          <tr><td>expires_at</td><td>TIMESTAMP NULL</td><td>Null = no expiry. Used by cleanup worker + TTL index.</td></tr>
+          <tr><td>is_deleted</td><td>BOOLEAN</td><td>Soft delete flag. Prevents code reuse on deleted URLs.</td></tr>
+          <tr><td>user_id</td><td>VARCHAR NULL</td><td>Reserved for future auth. Null for now.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:16px; margin-bottom:0">
+        <div class="callout-label">Storage choice</div>
+        <p><strong>Cassandra or DynamoDB.</strong> Access is by <code>short_code</code> (point lookup), write throughput is ~1K RPS, schema is simple, and no joins are needed. NoSQL wide-column handles this cleanly with built-in TTL support and horizontal scaling. Could use Postgres at this scale — the write volume is comfortable — but NoSQL removes connection pool pressure at 12K read RPS and gives us clean sharding when we need it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 5 (placeholder) ── -->
+  <section id="s5" class="design-section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">High-Level Design</span>
+      <span class="section-time">⏱ ~10 min</span>
+    </div>
+    <div class="placeholder-block">
+      <div class="placeholder-icon">🏗️</div>
+      <h3>Architecture diagram — coming from our discussion session</h3>
+      <p>This section will include the full write path + read path architecture diagram, component table with decisions, and the short code generation approach (hash vs. token service).</p>
+    </div>
+  </section>
+
+  <!-- ── STEP 6 (placeholder) ── -->
+  <section id="s6" class="design-section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Deep Dive &amp; Tradeoffs</span>
+      <span class="section-time">⏱ ~15 min</span>
+    </div>
+    <div class="placeholder-block">
+      <div class="placeholder-icon">🔬</div>
+      <h3>Deep dives — built from our session</h3>
+      <p>Will cover: short code uniqueness at scale, cache warming + thundering herd, 301 vs 302 tradeoff analysis, DB bottleneck at 10× scale, and abuse prevention strategy.</p>
+    </div>
+  </section>
+
+  <!-- ── COMPONENT DEEP DIVES (placeholder) ── -->
+  <section id="s7" class="design-section">
+    <div class="section-header">
+      <span class="section-num">↳</span>
+      <span class="section-title">Component Deep Dives</span>
+    </div>
+    <div class="placeholder-block">
+      <div class="placeholder-icon">⚙️</div>
+      <h3>Component-level design — added after the session</h3>
+      <p>Planned components: Short Code Generation Service (hash + retry vs. token pre-generation), Cache Layer design (write-through, eviction, warming), Cleanup Worker (TTL scanning + soft delete), and Rate Limiter (token bucket per IP at LB layer).</p>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copy">akshit.ahuja.js.org · system-design · 2026</div>
+    <div class="footer-links">
+      <a href="index.html">← All Designs</a>
+      <a href="framework.html">Framework</a>
+      <a href="https://github.com/akshit101" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
