@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The 6-Step Interview Framework — System Design Notes</title>
+  <title>System Design Notes — Akshit Ahuja</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -26,909 +26,224 @@
     body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
 
     /* NAV */
-    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
     .nav-brand { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; }
     .nav-links { display: flex; gap: 28px; list-style: none; }
     .nav-links a { font-size: 13px; font-weight: 500; color: var(--text-mid); text-decoration: none; transition: color 0.15s; }
     .nav-links a:hover { color: var(--blue); }
-    .nav-back { font-size: 13px; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.15s; }
-    .nav-back:hover { color: var(--blue); }
 
     /* HERO */
-    .hero { max-width: 100%; padding: 60px 48px 40px; border-bottom: 1px solid var(--border); }
-    .breadcrumb { font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-    .breadcrumb a { color: var(--blue); text-decoration: none; }
-    .breadcrumb a:hover { text-decoration: underline; }
-    .hero h1 { font-family: var(--serif); font-size: clamp(28px, 4.5vw, 42px); font-weight: 700; line-height: 1.2; color: var(--text); margin-bottom: 14px; }
+    .hero { max-width: 100%; padding: 64px 48px 48px; }
+    .hero-eyebrow { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 48px); font-weight: 700; line-height: 1.2; color: var(--text); margin-bottom: 16px; }
     .hero h1 em { font-style: italic; color: var(--blue); }
-    .hero-desc { font-size: 16px; color: var(--text-mid); max-width: 600px; line-height: 1.8; margin-bottom: 24px; }
-    .hero-meta { display: flex; gap: 20px; flex-wrap: wrap; }
-    .meta-tag { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
+    .hero-desc { font-size: 16px; color: var(--text-mid); max-width: 560px; line-height: 1.8; margin-bottom: 32px; }
+    .hero-rule { width: 48px; height: 3px; background: var(--amber); border-radius: 2px; }
 
-    /* LAYOUT */
-    .layout { max-width: 100%; padding: 40px 48px 80px; display: flex; gap: 48px; align-items: flex-start; }
+    /* SECTION LABEL */
+    .section-label { max-width: 100%; margin: 48px 0 20px; padding: 0 48px; display: flex; align-items: center; gap: 14px; }
+    .section-label-text { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+    .section-label-line { flex: 1; height: 1px; background: var(--border); }
 
-    /* SPINE */
-    .spine { position: sticky; top: 72px; width: 164px; flex-shrink: 0; }
-    .spine-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
-    .spine-track { position: relative; padding-left: 18px; }
-    .spine-line { position: absolute; left: 5px; top: 10px; bottom: 10px; width: 1px; background: var(--border); }
-    .spine-item { position: relative; margin-bottom: 2px; }
-    .spine-dot { position: absolute; left: -15px; top: 8px; width: 7px; height: 7px; border-radius: 50%; border: 2px solid var(--border-mid); background: var(--white); transition: all 0.2s; }
-    .spine-item.active .spine-dot { border-color: var(--amber); background: var(--amber); }
-    .spine-link { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); text-decoration: none; padding: 4px 0; line-height: 1.4; transition: color 0.15s; }
-    .spine-item.active .spine-link { color: var(--amber); font-weight: 600; }
-    .spine-link:hover { color: var(--text-mid); }
-    .spine-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    /* CARDS GRID */
+    .cards { max-width: 100%; padding: 0 48px; display: grid; gap: 16px; }
 
-    /* CONTENT */
-    .content { flex: 1; min-width: 0; }
+    /* FRAMEWORK CARD — featured */
+    .card-featured {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 10px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s, border-left-color 0.2s;
+    }
+    .card-featured:hover { box-shadow: var(--shadow); border-left-color: var(--amber); }
+    .card-featured-badge { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); background: var(--blue-light); border: 1px solid #D3DCF0; border-radius: 4px; padding: 3px 8px; margin-bottom: 10px; display: inline-block; }
+    .card-featured h2 { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+    .card-featured p { font-size: 14px; color: var(--text-mid); line-height: 1.7; max-width: 520px; }
+    .card-featured-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .card-arrow { font-size: 20px; color: var(--text-muted); transition: color 0.15s, transform 0.15s; }
+    .card-featured:hover .card-arrow { color: var(--blue); transform: translateX(3px); }
+    .card-steps { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .step-dot { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--amber); background: var(--amber-light); border: 1px solid #EDCFA8; border-radius: 4px; padding: 2px 7px; }
 
-    /* OVERVIEW DIAGRAM SECTION */
-    .overview-section { margin-bottom: 40px; }
-    .section-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
-
-    /* STEP CARDS — signature left amber rule */
-    .step-card {
+    /* DESIGN CARDS */
+    .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-left: 4px solid var(--amber);
       border-radius: 10px;
+      padding: 24px 28px;
       box-shadow: var(--shadow-sm);
-      margin-bottom: 28px;
-      overflow: hidden;
-      transition: box-shadow 0.2s, border-left-color 0.2s;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s;
     }
-    .step-card:hover { box-shadow: var(--shadow); }
-    .step-card:target { border-left-color: var(--blue); }
+    .card:hover { box-shadow: var(--shadow); }
+    .card-num { font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--border-mid); line-height: 1; padding-top: 4px; min-width: 32px; }
+    .card-body { flex: 1; }
+    .card-tag { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .card h3 { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
+    .card p { font-size: 13.5px; color: var(--text-mid); line-height: 1.65; }
+    .card-status { font-family: var(--mono); font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; margin-top: 12px; display: inline-block; }
+    .status-done { background: var(--green-light); color: var(--green); border: 1px solid #B8DCCA; }
+    .status-wip  { background: var(--amber-light); color: var(--amber); border: 1px solid #EDCFA8; }
+    .status-soon { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
 
-    .step-header { padding: 22px 28px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 16px; background: var(--white); }
-    .step-num { flex-shrink: 0; font-family: var(--mono); font-size: 28px; font-weight: 600; color: var(--amber); line-height: 1; padding-top: 4px; min-width: 36px; }
-    .step-header-text { flex: 1; }
-    .step-eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-    .step-title { font-family: var(--serif); font-size: 21px; font-weight: 700; color: var(--text); margin-bottom: 3px; line-height: 1.25; }
-    .step-sub { font-size: 13.5px; color: var(--text-mid); }
-    .step-time { flex-shrink: 0; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; white-space: nowrap; margin-top: 4px; }
+    /* COMING SOON CARDS */
+    .card-placeholder {
+      background: var(--bg);
+      border: 1px dashed var(--border-mid);
+      border-radius: 10px;
+      padding: 20px 28px;
+      display: flex; gap: 20px; align-items: center;
+      opacity: 0.7;
+    }
+    .card-placeholder .card-num { font-size: 22px; }
+    .card-placeholder h3 { font-size: 16px; font-family: var(--sans); font-weight: 500; color: var(--text-muted); margin-bottom: 0; }
 
-    .step-body { padding: 24px 28px; }
-    .step-desc { font-size: 14.5px; color: var(--text-mid); line-height: 1.8; margin-bottom: 22px; }
-
-    /* SUBHEADINGS inside step */
-    .sub-heading { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
-
-    /* CHECKLIST */
-    .checklist { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 22px; }
-    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-mid); line-height: 1.65; }
-    .checklist li::before { content: '▸'; color: var(--blue); font-size: 11px; margin-top: 4px; flex-shrink: 0; }
-    .checklist li strong { color: var(--text); font-weight: 600; }
-
-    /* TWO-COL */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
-    .mini-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-    .mini-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
-    .mini-card ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-    .mini-card ul li { font-size: 13px; color: var(--text-mid); padding-left: 14px; position: relative; }
-    .mini-card ul li::before { content: '—'; position: absolute; left: 0; color: var(--text-muted); font-size: 10px; top: 1px; }
-
-    /* CALLOUT */
-    .callout { border-left: 3px solid var(--blue); background: var(--blue-light); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 22px; }
-    .callout-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
-    .callout p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; }
-    .callout p strong { color: var(--text); font-weight: 600; }
-    .callout.amber { border-left-color: var(--amber); background: var(--amber-light); }
-    .callout.amber .callout-label { color: var(--amber); }
-
-    /* INLINE CODE */
-    code { font-family: var(--mono); font-size: 12.5px; background: var(--blue-light); color: var(--blue); border: 1px solid #D3DCF0; border-radius: 4px; padding: 1px 6px; }
-
-    /* DIAGRAM WRAPPER */
-    .diagram-wrap { margin-bottom: 24px; }
-    .diagram-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
-    .diagram-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; }
-
-    /* EXPANDABLE DIAGRAM */
-    .diagram-expand { cursor: pointer; }
-    .diagram-expand .diagram-box { max-height: 220px; overflow: hidden; position: relative; transition: max-height 0.3s ease; }
-    .diagram-expand.open .diagram-box { max-height: 1200px; }
-    .diagram-expand .diagram-box::after { content: 'Click to expand ↕'; position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(247,248,250,0.95)); padding: 32px 16px 10px; font-family: var(--mono); font-size: 11px; color: var(--blue); text-align: center; pointer-events: none; transition: opacity 0.2s; }
-    .diagram-expand.open .diagram-box::after { opacity: 0; pointer-events: none; }
-
-    /* TIMING DIAGRAM */
-    .timing-bar { display: flex; height: 36px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; border: 1px solid var(--border); }
-    .timing-seg { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 600; color: white; transition: filter 0.15s; }
-    .timing-seg:hover { filter: brightness(0.9); }
-    .timing-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    /* HOW THIS WORKS STRIP */
+    .how-strip { max-width: 100%; margin: 56px 0 0; padding: 0 48px; }
+    .how-box { background: var(--blue-light); border: 1px solid #D3DCF0; border-radius: 10px; padding: 24px 28px; display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .how-icon { font-size: 28px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .how-text h4 { font-family: var(--serif); font-size: 17px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+    .how-text p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; max-width: 580px; }
 
     /* FOOTER */
-    footer { border-top: 1px solid var(--border); padding: 28px 40px; margin-top: 40px; }
+    footer { border-top: 1px solid var(--border); padding: 28px 40px; margin-top: 80px; }
     .footer-inner { max-width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .footer-copy { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
     .footer-links a:hover { color: var(--blue); }
 
-    @media (max-width: 720px) {
-      .spine { display: none; }
-      .layout { padding: 24px 20px 60px; }
-      .hero { padding: 40px 20px 32px; }
-      .two-col { grid-template-columns: 1fr; }
+    @media (max-width: 680px) {
       nav { padding: 0 20px; } .nav-links { display: none; }
+      .hero, .section-label, .cards, .how-strip { padding-left: 20px; padding-right: 20px; }
+      .card-featured { grid-template-columns: 1fr; }
+      .card-featured-meta { flex-direction: row; align-items: center; }
       footer { padding: 24px 20px; }
     }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-brand" href="index.html">System Design Notes</a>
+  <a class="nav-brand" href="/">akshit.ahuja.js.org</a>
   <ul class="nav-links">
-    <li><a href="index.html">← All Designs</a></li>
+    <li><a href="/system-design/">System Design</a></li>
     <li><a href="/market-dashboard/">Market Dashboard</a></li>
     <li><a href="https://github.com/akshit101" target="_blank">GitHub ↗</a></li>
   </ul>
 </nav>
 
 <header class="hero">
-  <div class="breadcrumb"><a href="index.html">System Design Notes</a> / Framework</div>
-  <h1>The <em>6-Step</em> Interview Framework</h1>
-  <p class="hero-desc">A structured approach for Staff-level system design interviews. Every design on this site follows these six steps — in order, with time discipline. Read this first.</p>
-  <div class="hero-meta">
-    <span class="meta-tag">~45 min interview</span>
-    <span class="meta-tag">Adapted from RESHADED</span>
-    <span class="meta-tag">Staff / FAANG level</span>
-  </div>
+  <div class="hero-eyebrow">System Design Notes</div>
+  <h1>Learning systems<br/><em>by building them.</em></h1>
+  <p class="hero-desc">
+    A working study log for Staff-level system design interviews. Each entry documents the full design process — requirements through deep dives — with diagrams, tradeoffs, and honest reasoning throughout.
+  </p>
+  <div class="hero-rule"></div>
 </header>
 
-<div class="layout">
+<!-- FOUNDATION -->
+<div class="section-label">
+  <span class="section-label-text">Foundation</span>
+  <div class="section-label-line"></div>
+</div>
 
-  <!-- SPINE -->
-  <aside class="spine" id="spine">
-    <div class="spine-label">Steps</div>
-    <div class="spine-track">
-      <div class="spine-line"></div>
-      <div class="spine-item" data-target="overview"><div class="spine-dot"></div><a class="spine-link" href="#overview">Overview</a></div>
-      <div class="spine-item" data-target="step1"><div class="spine-dot"></div><a class="spine-link" href="#step1">01 · Requirements</a></div>
-      <div class="spine-item" data-target="step2"><div class="spine-dot"></div><a class="spine-link" href="#step2">02 · Estimation</a></div>
-      <div class="spine-item" data-target="step3"><div class="spine-dot"></div><a class="spine-link" href="#step3">03 · API Design</a></div>
-      <div class="spine-item" data-target="step4"><div class="spine-dot"></div><a class="spine-link" href="#step4">04 · Data Model</a></div>
-      <div class="spine-item" data-target="step5"><div class="spine-dot"></div><a class="spine-link" href="#step5">05 · High-Level Design</a></div>
-      <div class="spine-item" data-target="step6"><div class="spine-dot"></div><a class="spine-link" href="#step6">06 · Deep Dive</a></div>
+<div class="cards">
+  <a class="card-featured" href="framework.html">
+    <div>
+      <div class="card-featured-badge">Framework · Read First</div>
+      <h2>The 6-Step Interview Framework</h2>
+      <p>The structured approach behind every design on this site. Requirements, estimation, interface, data model, high-level design, and deep dives — with timing guidance and interview signals for each step.</p>
     </div>
-  </aside>
-
-  <main class="content">
-
-    <!-- ── OVERVIEW ── -->
-    <section id="overview" class="overview-section">
-      <div class="section-eyebrow">How the framework fits together</div>
-
-      <!-- FLOW DIAGRAM -->
-      <div class="diagram-wrap">
-        <div class="diagram-label">Interview flow — 45 minutes</div>
-        <div class="diagram-box">
-          <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-            <defs>
-              <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-                <polygon points="0 0,8 3,0 6" fill="#8896AA"/>
-              </marker>
-            </defs>
-
-            <!-- step boxes -->
-            <!-- 01 -->
-            <rect x="10" y="60" width="108" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-            <text x="64" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">01</text>
-            <text x="64" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Requirements</text>
-            <text x="64" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
-
-            <!-- arrow -->
-            <line x1="118" y1="95" x2="138" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- 02 -->
-            <rect x="140" y="60" width="108" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-            <text x="194" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">02</text>
-            <text x="194" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Estimation</text>
-            <text x="194" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
-
-            <!-- arrow -->
-            <line x1="248" y1="95" x2="268" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- 03 -->
-            <rect x="270" y="60" width="108" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-            <text x="324" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">03</text>
-            <text x="324" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">API Design</text>
-            <text x="324" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
-
-            <!-- arrow -->
-            <line x1="378" y1="95" x2="398" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- 04 -->
-            <rect x="400" y="60" width="108" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-            <text x="454" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">04</text>
-            <text x="454" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Data Model</text>
-            <text x="454" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
-
-            <!-- arrow -->
-            <line x1="508" y1="95" x2="528" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- 05 -->
-            <rect x="530" y="60" width="108" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-            <text x="584" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">05</text>
-            <text x="584" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">High-Level</text>
-            <text x="584" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~10 min</text>
-
-            <!-- arrow down to 06 -->
-            <line x1="584" y1="130" x2="584" y2="170" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- 06 -->
-            <rect x="400" y="172" width="348" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-            <text x="574" y="194" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">06</text>
-            <text x="574" y="210" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Deep Dive &amp; Tradeoffs</text>
-            <text x="574" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~15 min · interviewer-guided</text>
-
-            <!-- feedback arrow: deep dive back to high-level -->
-            <path d="M 400 207 Q 360 207 360 155 Q 360 95 400 95" fill="none" stroke="#C8D0E0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-            <text x="348" y="158" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8896AA">revise</text>
-            <text x="348" y="170" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8896AA">if needed</text>
-
-            <!-- Preparation phase label -->
-            <text x="65" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Scope</text>
-            <text x="194" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Size</text>
-            <text x="324" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Contract</text>
-            <text x="454" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Schema</text>
-            <text x="584" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Architecture</text>
-
-            <!-- phase bracket -->
-            <line x1="10" y1="155" x2="508" y2="155" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="260" y="167" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#C8D0E0">Foundation (~20 min) — do these well before drawing boxes</text>
-          </svg>
-        </div>
+    <div class="card-featured-meta">
+      <div class="card-arrow">→</div>
+      <div class="card-steps">
+        <span class="step-dot">01 Req</span>
+        <span class="step-dot">02 Est</span>
+        <span class="step-dot">03 API</span>
+        <span class="step-dot">04 Data</span>
+        <span class="step-dot">05 HLD</span>
+        <span class="step-dot">06 Deep</span>
       </div>
-
-      <!-- TIMING BAR -->
-      <div class="diagram-wrap">
-        <div class="diagram-label">Time allocation across 45 minutes</div>
-        <div class="diagram-box">
-          <div class="timing-bar">
-            <div class="timing-seg" style="width:11%;background:#C87533;" title="Requirements ~5min">Req</div>
-            <div class="timing-seg" style="width:11%;background:#D4894A;" title="Estimation ~5min">Est</div>
-            <div class="timing-seg" style="width:11%;background:#DC9660;" title="API ~5min">API</div>
-            <div class="timing-seg" style="width:11%;background:#E3A070;" title="Data ~5min">Data</div>
-            <div class="timing-seg" style="width:22%;background:#3D5A99;" title="High-Level ~10min">High-Level Design</div>
-            <div class="timing-seg" style="width:34%;background:#2A4180;" title="Deep Dive ~15min">Deep Dive &amp; Tradeoffs</div>
-          </div>
-          <div class="timing-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#C87533"></div>Requirements (5m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#D4894A"></div>Estimation (5m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#DC9660"></div>API Design (5m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#E3A070"></div>Data Model (5m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#3D5A99"></div>High-Level Design (10m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#2A4180"></div>Deep Dive (15m)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="callout">
-        <div class="callout-label">The core principle</div>
-        <p>The first four steps are <strong>foundation work</strong> — they exist so that your High-Level Design is grounded in real constraints, not wishful thinking. Most candidates rush to step 5. The ones who spend the first 20 minutes well draw better diagrams and defend them better in step 6.</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 1                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step1" class="step-card">
-      <div class="step-header">
-        <div class="step-num">01</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step One</div>
-          <div class="step-title">Requirements Clarification</div>
-          <div class="step-sub">Scope the problem before touching the whiteboard</div>
-        </div>
-        <div class="step-time">⏱ ~5 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">The most common mistake in design interviews is jumping to solutions. Interviewers deliberately leave the problem ambiguous — your first job is to compress that ambiguity into an agreed-upon scope, without asking so many questions you appear lost.</p>
-
-        <!-- DIAGRAM: FR vs NFR split -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">Functional vs Non-Functional — what to ask</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <!-- FR box -->
-              <rect x="10" y="10" width="310" height="180" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="10" y="10" width="310" height="36" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <rect x="10" y="34" width="310" height="12" fill="#FDF3E9"/>
-              <text x="165" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">FUNCTIONAL</text>
-              <text x="28" y="70" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ What can users do?</text>
-              <text x="28" y="90" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ What is explicitly out of scope?</text>
-              <text x="28" y="110" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ What does success look like?</text>
-              <text x="28" y="130" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Real-time or eventual updates?</text>
-              <text x="28" y="150" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Read-heavy or write-heavy?</text>
-              <text x="28" y="170" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Any hard consistency needs?</text>
-
-              <!-- NFR box -->
-              <rect x="360" y="10" width="310" height="180" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="360" y="10" width="310" height="36" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <rect x="360" y="34" width="310" height="12" fill="#EBF0FA"/>
-              <text x="515" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">NON-FUNCTIONAL</text>
-              <text x="378" y="70" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Scale: DAU, RPS, data volume</text>
-              <text x="378" y="90" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Latency SLA (p99 target?)</text>
-              <text x="378" y="110" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Availability (99.9% vs 99.99%)</text>
-              <text x="378" y="130" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Consistency model</text>
-              <text x="378" y="150" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Durability requirements</text>
-              <text x="378" y="170" font-family="Inter,sans-serif" font-size="12" fill="#4A5568">▸ Security / compliance needs</text>
-            </svg>
-          </div>
-        </div>
-
-        <div class="sub-heading">Functional Requirements</div>
-        <ul class="checklist">
-          <li><strong>Core user actions:</strong> What does the user actually do? Create, read, search, stream, delete?</li>
-          <li><strong>Carve out scope explicitly:</strong> "For this interview I'll focus on X and Y, not Z." Name what's out of scope — don't let it haunt later steps.</li>
-          <li><strong>Clarify the happy path:</strong> What does success look like for the primary use case?</li>
-          <li><strong>Edge cases up front:</strong> Real-time vs. eventual? Read-heavy or write-heavy? Hard consistency requirements?</li>
-        </ul>
-
-        <div class="sub-heading">Non-Functional Requirements</div>
-        <ul class="checklist">
-          <li><strong>Scale targets:</strong> Users, RPS, data volume — get an order of magnitude, not exactness.</li>
-          <li><strong>Latency SLAs:</strong> Is <code>p99 &lt; 100ms</code> a hard requirement or a nice-to-have?</li>
-          <li><strong>Availability target:</strong> 99.9% vs 99.99% changes the design significantly — single-region vs multi-region.</li>
-          <li><strong>Consistency model:</strong> Strong vs. eventual — especially critical for distributed state.</li>
-          <li><strong>Durability:</strong> What's the cost of data loss? Financial records vs. social media drafts are very different.</li>
-        </ul>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Explicitly labeling the FR/NFR split shows Staff-level systems thinking — most candidates conflate them. End step 1 with a verbal confirm: <strong>"So to confirm scope: users can do X, the system must handle Y scale, and strong consistency isn't required. Sound right?"</strong> This demonstrates structured thinking and gives the interviewer a checkpoint.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 2                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step2" class="step-card">
-      <div class="step-header">
-        <div class="step-num">02</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step Two</div>
-          <div class="step-title">Capacity Estimation</div>
-          <div class="step-sub">Order-of-magnitude thinking, not precision arithmetic</div>
-        </div>
-        <div class="step-time">⏱ ~5 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">Estimation isn't a math test — it's a reasoning signal. The interviewer wants to see that you can derive architecture constraints from numbers. A system at 1K RPS and one at 1M RPS need fundamentally different designs. Get the numbers on the board early so every decision that follows is grounded.</p>
-
-        <!-- ESTIMATION FLOW DIAGRAM -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">Estimation chain — how numbers connect to decisions</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs>
-                <marker id="arr2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                  <polygon points="0 0,7 2.5,0 5" fill="#8896AA"/>
-                </marker>
-              </defs>
-              <!-- boxes -->
-              <rect x="10" y="30" width="120" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="70" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Users / DAU</text>
-              <text x="70" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">starting point</text>
-
-              <line x1="130" y1="55" x2="150" y2="55" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr2)"/>
-
-              <rect x="152" y="30" width="120" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="212" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Read / Write</text>
-              <text x="212" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">RPS per type</text>
-
-              <line x1="272" y1="55" x2="292" y2="55" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr2)"/>
-
-              <rect x="294" y="30" width="120" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="354" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Storage</text>
-              <text x="354" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">per record × volume</text>
-
-              <line x1="414" y1="55" x2="434" y2="55" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr2)"/>
-
-              <rect x="436" y="30" width="120" height="50" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <text x="496" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Bandwidth</text>
-              <text x="496" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">inbound / outbound</text>
-
-              <line x1="556" y1="55" x2="576" y2="55" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr2)"/>
-
-              <rect x="578" y="30" width="112" height="50" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <text x="634" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#3D5A99">Architecture</text>
-              <text x="634" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#3D5A99">decisions ↓</text>
-
-              <text x="350" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Numbers drive: # servers · cache size · DB sharding · CDN vs origin split</text>
-            </svg>
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="mini-card">
-            <div class="mini-label">Traffic</div>
-            <ul>
-              <li>Daily Active Users (DAU)</li>
-              <li>Read RPS vs Write RPS</li>
-              <li>Read:Write ratio</li>
-              <li>Peak traffic multiplier (2–3×)</li>
-            </ul>
-          </div>
-          <div class="mini-card">
-            <div class="mini-label">Storage</div>
-            <ul>
-              <li>Bytes per record</li>
-              <li>Records created per day</li>
-              <li>Retention / TTL policy</li>
-              <li>5-year total storage</li>
-            </ul>
-          </div>
-          <div class="mini-card">
-            <div class="mini-label">Network</div>
-            <ul>
-              <li>Bandwidth per request</li>
-              <li>Inbound vs outbound</li>
-              <li>CDN vs origin split</li>
-            </ul>
-          </div>
-          <div class="mini-card">
-            <div class="mini-label">Cache</div>
-            <ul>
-              <li>% reads served from cache</li>
-              <li>Cache memory needed</li>
-              <li>Eviction pressure</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="callout amber">
-          <div class="callout-label">Useful constants to memorize</div>
-          <p>
-            <strong>1M req/day ≈ 12 RPS.</strong> &nbsp;
-            <strong>1B req/day ≈ 12K RPS.</strong><br/>
-            Char = 1 byte &nbsp;·&nbsp; Int = 4 bytes &nbsp;·&nbsp; UUID = 16 bytes &nbsp;·&nbsp; Timestamp = 8 bytes<br/>
-            1TB = 10¹² bytes. Round aggressively — precision is noise.
-          </p>
-        </div>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Don't just produce numbers — narrate your reasoning: <strong>"I'm assuming 10% of users are active daily, that gives us…"</strong> The interviewer is scoring your reasoning process, not your arithmetic accuracy. Sanity-check final numbers out loud before moving on.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 3                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step3" class="step-card">
-      <div class="step-header">
-        <div class="step-num">03</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step Three</div>
-          <div class="step-title">System Interface Design</div>
-          <div class="step-sub">Define the contract before the implementation</div>
-        </div>
-        <div class="step-time">⏱ ~5 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">Define the API before drawing boxes. This forces you to think from the consumer's perspective, surfaces ambiguities missed in step 1, and creates a stable contract that anchors the rest of the design. You're not writing production code — sketch the signature, key parameters, and response shape.</p>
-
-        <!-- API ANATOMY DIAGRAM -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">What a well-defined API endpoint covers</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <!-- center endpoint box -->
-              <rect x="250" y="60" width="180" height="60" rx="8" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
-              <text x="340" y="86" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#3D5A99">POST /resource</text>
-              <text x="340" y="104" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#6B85BD">endpoint definition</text>
-
-              <!-- spokes -->
-              <!-- method -->
-              <line x1="250" y1="80" x2="160" y2="50" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="60" y="30" width="100" height="36" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="110" y="50" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">HTTP method</text>
-              <text x="110" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8896AA">GET POST PUT DELETE</text>
-
-              <!-- request params -->
-              <line x1="250" y1="90" x2="160" y2="90" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="60" y="72" width="100" height="36" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="110" y="90" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">Request params</text>
-              <text x="110" y="102" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8896AA">path · query · body</text>
-
-              <!-- auth -->
-              <line x1="250" y1="100" x2="160" y2="130" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="60" y="112" width="100" height="36" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="110" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">Auth / Identity</text>
-              <text x="110" y="142" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8896AA">JWT · API key · session</text>
-
-              <!-- response -->
-              <line x1="430" y1="80" x2="520" y2="50" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="520" y="30" width="110" height="36" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
-              <text x="575" y="50" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#2E7D52">Response shape</text>
-              <text x="575" y="62" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#2E7D52">{ id, status, data }</text>
-
-              <!-- errors -->
-              <line x1="430" y1="90" x2="520" y2="90" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="520" y="72" width="110" height="36" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="575" y="90" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">Error codes</text>
-              <text x="575" y="102" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8896AA">4xx · 5xx · rate limit</text>
-
-              <!-- pagination -->
-              <line x1="430" y1="100" x2="520" y2="130" stroke="#E2E6EF" stroke-width="1.5"/>
-              <rect x="520" y="112" width="110" height="36" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="575" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">Pagination</text>
-              <text x="575" y="142" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#8896AA">cursor · offset · stream</text>
-            </svg>
-          </div>
-        </div>
-
-        <ul class="checklist">
-          <li><strong>API style:</strong> REST, gRPC, GraphQL, WebSocket — pick the right tool and justify it briefly.</li>
-          <li><strong>Core endpoints:</strong> One per major functional requirement. Name, method, key params, response shape.</li>
-          <li><strong>Auth/Identity:</strong> Where does user identity come from? API key, JWT, session token?</li>
-          <li><strong>Error contract:</strong> What does failure look like? Rate limits, not-found, auth failure.</li>
-          <li><strong>Pagination / streaming:</strong> How does the client consume large result sets?</li>
-        </ul>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>This step reveals whether you think product-first or infrastructure-first. Strong candidates define the interface the way a platform engineer would — they think about <strong>what changes independently</strong>: client contract vs. internal routing vs. storage layer. Weak candidates skip this and start drawing load balancers without knowing what the system actually does.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 4                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step4" class="step-card">
-      <div class="step-header">
-        <div class="step-num">04</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step Four</div>
-          <div class="step-title">Data Model</div>
-          <div class="step-sub">Schema, storage type, and access patterns</div>
-        </div>
-        <div class="step-time">⏱ ~5 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">Most design flaws trace back to a mismatched data model. Define your entities, their relationships, and — critically — your read/write access patterns <em>before</em> choosing a storage technology. Storage choice should follow access pattern, not the other way around.</p>
-
-        <!-- STORAGE DECISION DIAGRAM -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">Storage decision tree — start with access patterns</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs>
-                <marker id="arr3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                  <polygon points="0 0,7 2.5,0 5" fill="#8896AA"/>
-                </marker>
-              </defs>
-
-              <!-- ROOT -->
-              <rect x="260" y="10" width="180" height="42" rx="8" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
-              <text x="350" y="35" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#3D5A99">What's your primary access pattern?</text>
-
-              <!-- branches -->
-              <line x1="295" y1="52" x2="200" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-              <line x1="350" y1="52" x2="350" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-              <line x1="405" y1="52" x2="500" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-
-              <text x="220" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Key lookup</text>
-              <text x="350" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Complex joins</text>
-              <text x="480" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Full-text / range</text>
-
-              <!-- KV box -->
-              <rect x="120" y="92" width="160" height="50" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="200" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#C87533">Key-Value / NoSQL</text>
-              <text x="200" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Redis · DynamoDB · Cassandra</text>
-
-              <!-- SQL box -->
-              <rect x="270" y="92" width="160" height="50" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <text x="350" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#3D5A99">Relational SQL</text>
-              <text x="350" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Postgres · MySQL · Aurora</text>
-
-              <!-- Search box -->
-              <rect x="420" y="92" width="160" height="50" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
-              <text x="500" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#2E7D52">Search / Time-Series</text>
-              <text x="500" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Elasticsearch · InfluxDB</text>
-
-              <!-- consideration row -->
-              <line x1="200" y1="142" x2="200" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="200" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">High write throughput</text>
-              <text x="200" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Flexible schema</text>
-              <text x="200" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Horizontal sharding</text>
-
-              <line x1="350" y1="142" x2="350" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="350" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">ACID transactions</text>
-              <text x="350" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Relational integrity</text>
-              <text x="350" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Complex queries</text>
-
-              <line x1="500" y1="142" x2="500" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="500" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Text search / ranking</text>
-              <text x="500" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Time-series queries</text>
-              <text x="500" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Analytics aggregations</text>
-            </svg>
-          </div>
-        </div>
-
-        <ul class="checklist">
-          <li><strong>Core entities:</strong> What are the 3–5 primary data objects? Sketch their key fields.</li>
-          <li><strong>Relationships:</strong> One-to-many, many-to-many — does this need foreign keys or denormalization?</li>
-          <li><strong>Access patterns:</strong> Read by ID? Range scans? Full-text search? This drives the storage choice.</li>
-          <li><strong>SQL vs NoSQL:</strong> Don't default — justify. ACID needs? SQL. Flexible schema + scale? NoSQL.</li>
-          <li><strong>Indexes:</strong> What are your hot query patterns? Which fields need indexing?</li>
-          <li><strong>Partitioning key:</strong> For distributed storage — what's your shard key and why?</li>
-        </ul>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Picking a storage type without mentioning access patterns is a yellow flag. The best candidates say: <strong>"My primary read pattern is lookup by short code, O(1) — this maps naturally to a key-value store."</strong> The choice follows the reasoning, not the other way around.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 5                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step5" class="step-card">
-      <div class="step-header">
-        <div class="step-num">05</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step Five</div>
-          <div class="step-title">High-Level Design</div>
-          <div class="step-sub">Draw the system end-to-end before going deep</div>
-        </div>
-        <div class="step-time">⏱ ~10 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">This is where you put boxes on the board — but only after the four steps above have grounded you. Your goal is a working end-to-end sketch that satisfies the core functional requirements at the estimated scale. Resist the urge to go deep on any single component here.</p>
-
-        <!-- GENERIC HLD DIAGRAM -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">Generic high-level architecture — standard building blocks</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs>
-                <marker id="arr4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                  <polygon points="0 0,7 2.5,0 5" fill="#8896AA"/>
-                </marker>
-                <marker id="arr4b" markerWidth="7" markerHeight="5" refX="0" refY="2.5" orient="auto">
-                  <polygon points="7 0,0 2.5,7 5" fill="#8896AA"/>
-                </marker>
-              </defs>
-
-              <!-- Client -->
-              <rect x="10" y="120" width="80" height="50" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="50" y="142" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#4A5568">Client</text>
-              <text x="50" y="157" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Web / Mobile</text>
-
-              <!-- CDN -->
-              <rect x="120" y="60" width="80" height="50" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="160" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#4A5568">CDN</text>
-              <text x="160" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">static assets</text>
-
-              <!-- LB -->
-              <rect x="120" y="125" width="80" height="50" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="160" y="147" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#C87533">Load Balancer</text>
-              <text x="160" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">L7 · round robin</text>
-
-              <!-- App servers -->
-              <rect x="250" y="105" width="90" height="90" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <text x="295" y="140" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#3D5A99">App Servers</text>
-              <text x="295" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#6B85BD">stateless</text>
-              <text x="295" y="170" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#6B85BD">auto-scaling</text>
-              <text x="295" y="185" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#8896AA">multiple instances</text>
-
-              <!-- Cache -->
-              <rect x="390" y="60" width="90" height="50" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
-              <text x="435" y="82" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#2E7D52">Cache</text>
-              <text x="435" y="97" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#2E7D52">Redis / Memcached</text>
-
-              <!-- Primary DB -->
-              <rect x="390" y="130" width="90" height="50" rx="8" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
-              <text x="435" y="152" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#3D5A99">Primary DB</text>
-              <text x="435" y="167" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#6B85BD">SQL / NoSQL</text>
-
-              <!-- DB Replica -->
-              <rect x="390" y="200" width="90" height="42" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="435" y="218" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="500" fill="#8896AA">Read Replica</text>
-              <text x="435" y="232" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">×N instances</text>
-
-              <!-- Message Queue -->
-              <rect x="390" y="260" width="90" height="42" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="435" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#C87533">Msg Queue</text>
-              <text x="435" y="292" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Kafka / SQS</text>
-
-              <!-- Worker -->
-              <rect x="540" y="260" width="90" height="42" rx="8" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
-              <text x="585" y="278" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4A5568">Workers</text>
-              <text x="585" y="292" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">async processing</text>
-
-              <!-- ARROWS -->
-              <!-- client → CDN -->
-              <line x1="90" y1="132" x2="120" y2="95" stroke="#8896AA" stroke-width="1.3" stroke-dasharray="3,2" marker-end="url(#arr4)"/>
-              <!-- client → LB -->
-              <line x1="90" y1="150" x2="120" y2="150" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr4)"/>
-              <!-- LB → app servers -->
-              <line x1="200" y1="150" x2="250" y2="150" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr4)"/>
-              <!-- app → cache -->
-              <line x1="340" y1="130" x2="390" y2="100" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr4)"/>
-              <!-- cache miss → DB -->
-              <line x1="435" y1="110" x2="435" y2="130" stroke="#8896AA" stroke-width="1.3" stroke-dasharray="3,2" marker-end="url(#arr4)"/>
-              <!-- app → primary DB write -->
-              <line x1="340" y1="155" x2="390" y2="155" stroke="#3D5A99" stroke-width="1.8" marker-end="url(#arr4)"/>
-              <!-- primary DB → replica -->
-              <line x1="435" y1="180" x2="435" y2="200" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr4)"/>
-              <!-- app → queue -->
-              <line x1="340" y1="175" x2="435" y2="268" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr4)"/>
-              <!-- queue → worker -->
-              <line x1="480" y1="281" x2="540" y2="281" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr4)"/>
-
-              <!-- labels on arrows -->
-              <text x="215" y="144" font-family="Inter,sans-serif" font-size="9" fill="#8896AA">route</text>
-              <text x="356" y="140" font-family="Inter,sans-serif" font-size="9" fill="#2E7D52">read</text>
-              <text x="353" y="151" font-family="Inter,sans-serif" font-size="9" fill="#3D5A99">write</text>
-              <text x="441" y="122" font-family="Inter,sans-serif" font-size="9" fill="#8896AA">miss</text>
-
-              <!-- write path label -->
-              <rect x="545" y="100" width="155" height="80" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1"/>
-              <text x="622" y="118" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" font-weight="600" fill="#C87533">DRAW BOTH PATHS</text>
-              <text x="622" y="133" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Write path: Client →</text>
-              <text x="622" y="146" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">LB → App → DB</text>
-              <text x="622" y="162" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Read path: Client →</text>
-              <text x="622" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">LB → App → Cache → DB</text>
-            </svg>
-          </div>
-        </div>
-
-        <ul class="checklist">
-          <li><strong>Client layer:</strong> Web, mobile, SDK — what initiates requests?</li>
-          <li><strong>DNS + CDN:</strong> Where does traffic enter? Static assets vs. dynamic routing?</li>
-          <li><strong>Load balancer:</strong> L4 vs L7, routing strategy, sticky sessions needed?</li>
-          <li><strong>Application servers:</strong> Stateless + auto-scaling. How many at peak RPS?</li>
-          <li><strong>Cache layer:</strong> Read-through, write-through, or aside? Redis vs Memcached?</li>
-          <li><strong>Primary datastore:</strong> Your choice from step 4, with replicas called out.</li>
-          <li><strong>Message queue:</strong> Do any operations need to be async? Kafka, SQS, Pub/Sub?</li>
-        </ul>
-
-        <div class="callout amber">
-          <div class="callout-label">Drawing Discipline</div>
-          <p>Label every arrow with the protocol or data being passed. Show data flow for <strong>both the write path and the read path</strong> — they're often different. If you have a cache, explicitly show cache hit vs. cache miss flow. An unlabeled diagram is an unclear design.</p>
-        </div>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>At Staff level, proactively call out the <strong>bottleneck in your own design</strong> before they ask: <em>"The datastore is the bottleneck at this write rate — I'll address that in the deep dive."</em> This shows architectural ownership, not just pattern recognition.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════ -->
-    <!--  STEP 6                                -->
-    <!-- ══════════════════════════════════════ -->
-    <section id="step6" class="step-card">
-      <div class="step-header">
-        <div class="step-num">06</div>
-        <div class="step-header-text">
-          <div class="step-eyebrow">Step Six</div>
-          <div class="step-title">Deep Dive &amp; Tradeoffs</div>
-          <div class="step-sub">Own the hard problems — don't hide from them</div>
-        </div>
-        <div class="step-time">⏱ ~15 min</div>
-      </div>
-      <div class="step-body">
-        <p class="step-desc">This is where Staff-level candidates separate themselves. You've drawn a working system — now you and the interviewer go deep on the hardest parts. The best candidates proactively steer this conversation toward the most interesting tradeoffs, rather than waiting to be asked.</p>
-
-        <!-- DEEP DIVE DECISION MAP -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">How to prioritize deep dive areas</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs>
-                <marker id="arr5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                  <polygon points="0 0,7 2.5,0 5" fill="#8896AA"/>
-                </marker>
-              </defs>
-              <!-- Start with your own bottleneck -->
-              <rect x="10" y="70" width="160" height="60" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
-              <text x="90" y="92" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#C87533">Your bottleneck</text>
-              <text x="90" y="107" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">called out in step 5</text>
-              <text x="90" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">→ start here always</text>
-
-              <line x1="170" y1="100" x2="196" y2="100" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr5)"/>
-
-              <!-- Pick 2-3 -->
-              <rect x="198" y="60" width="150" height="80" rx="8" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
-              <text x="273" y="85" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#3D5A99">Pick 2–3 areas</text>
-              <text x="273" y="100" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">go deep on each</text>
-              <text x="273" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">depth beats breadth</text>
-              <text x="273" y="128" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">name tradeoffs explicitly</text>
-
-              <line x1="348" y1="100" x2="374" y2="100" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr5)"/>
-
-              <!-- Reserve time -->
-              <rect x="376" y="70" width="140" height="60" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
-              <text x="446" y="92" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#2E7D52">Reserve ~10 min</text>
-              <text x="446" y="107" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">for interviewer questions</text>
-              <text x="446" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">best signal is here</text>
-
-              <!-- Common areas strip -->
-              <text x="340" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600" fill="#8896AA">Common deep dive areas →</text>
-              <rect x="10" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="54" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Scalability</text>
-              <rect x="104" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="148" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Failure modes</text>
-              <rect x="198" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="242" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Consistency</text>
-              <rect x="292" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="336" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Hot spots</text>
-              <rect x="386" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="430" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">ID generation</text>
-              <rect x="480" y="178" width="88" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="524" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Security</text>
-              <rect x="574" y="178" width="96" height="18" rx="4" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
-              <text x="622" y="191" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Observability</text>
-            </svg>
-          </div>
-        </div>
-
-        <ul class="checklist">
-          <li><strong>Scalability bottlenecks:</strong> Where does the system break under 10× load? What's the mitigation?</li>
-          <li><strong>Failure modes:</strong> What happens when a DB replica lags? A cache is cold? A service goes down?</li>
-          <li><strong>Consistency tradeoffs:</strong> Where did you accept eventual consistency? What's the user-visible impact?</li>
-          <li><strong>Hot spots / thundering herd:</strong> What if one resource gets 100× normal traffic?</li>
-          <li><strong>ID generation:</strong> UUID vs auto-increment vs Snowflake — why does it matter here?</li>
-          <li><strong>Security:</strong> Auth, rate limiting, input validation — where are the attack surfaces?</li>
-          <li><strong>Monitoring &amp; observability:</strong> What metrics matter? How do you know the system is healthy?</li>
-        </ul>
-
-        <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>The mark of a Staff-level engineer in this step is <strong>intellectual honesty about the tradeoffs in their own design</strong>. Saying <em>"this design has a write bottleneck at the DB layer — here are three ways to address it and why I'd start with read replicas"</em> is far stronger than pretending the design is perfect. Interviewers probe for exactly this.</p>
-        </div>
-      </div>
-    </section>
-
-  </main>
+    </div>
+  </a>
+</div>
+
+<!-- WORKED EXAMPLES -->
+<div class="section-label">
+  <span class="section-label-text">Worked Examples</span>
+  <div class="section-label-line"></div>
+</div>
+
+<div class="cards">
+
+  <a class="card" href="tinyurl.html">
+    <div class="card-num">01</div>
+    <div class="card-body">
+      <div class="card-tag">URL Shortener · Read-Heavy · Caching · Hashing</div>
+      <h3>Design TinyURL</h3>
+      <p>A URL shortening service handling 100M creates/day and 1B redirects/day. Covers short code generation, cache strategy, redirect semantics, and abuse prevention.</p>
+      <span class="card-status status-wip">In Progress</span>
+    </div>
+  </a>
+
+  <div class="card-placeholder">
+    <div class="card-num">02</div>
+    <div class="card-body">
+      <h3>Design a Rate Limiter — coming soon</h3>
+    </div>
+  </div>
+
+  <div class="card-placeholder">
+    <div class="card-num">03</div>
+    <div class="card-body">
+      <h3>Design Instagram Feed — coming soon</h3>
+    </div>
+  </div>
+
+  <div class="card-placeholder">
+    <div class="card-num">04</div>
+    <div class="card-body">
+      <h3>Design a Notification Service — coming soon</h3>
+    </div>
+  </div>
+
+</div>
+
+<!-- HOW THIS WORKS -->
+<div class="how-strip">
+  <div class="how-box">
+    <div class="how-icon">📐</div>
+    <div class="how-text">
+      <h4>How these notes are structured</h4>
+      <p>Every design follows the 6-step framework. Each page starts simple — a base case that works — then adds complexity in layers. Diagrams are always inline. Tradeoffs are named explicitly, not buried. The goal is a page you can study from, not just skim.</p>
+    </div>
+  </div>
 </div>
 
 <footer>
   <div class="footer-inner">
     <div class="footer-copy">akshit.ahuja.js.org · system-design · 2026</div>
     <div class="footer-links">
-      <a href="index.html">← All Designs</a>
-      <a href="tinyurl.html">Next: TinyURL →</a>
+      <a href="/market-dashboard/">Market Dashboard</a>
       <a href="https://github.com/akshit101" target="_blank">GitHub ↗</a>
     </div>
   </div>
 </footer>
 
-<script>
-  const spineItems = document.querySelectorAll('.spine-item');
-  const targets = {};
-  spineItems.forEach(item => {
-    const id = item.dataset.target;
-    if (id) { const el = document.getElementById(id); if (el) targets[id] = el; }
-  });
-  function updateSpine() {
-    const y = window.scrollY + 100;
-    let active = null;
-    for (const [id, el] of Object.entries(targets)) { if (el.offsetTop <= y) active = id; }
-    spineItems.forEach(item => item.classList.toggle('active', item.dataset.target === active));
-  }
-  window.addEventListener('scroll', updateSpine, { passive: true });
-  updateSpine();
-
-  // Expandable diagrams
-  document.querySelectorAll('.diagram-expand').forEach(el => {
-    el.addEventListener('click', () => el.classList.toggle('open'));
-  });
-</script>
 </body>
 </html>
