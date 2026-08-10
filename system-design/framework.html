@@ -6,6 +6,8 @@
   <title>The 6-Step Interview Framework — System Design Notes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Analytics: replace YOUR-DOMAIN with your Plausible site domain when ready -->
+  <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,7 +28,7 @@
     body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
 
     /* NAV */
-    nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+    nav { border-top: 3px solid var(--amber); position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 57px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; }
     .nav-brand { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; }
     .nav-links { display: flex; gap: 28px; list-style: none; }
     .nav-links a { font-size: 13px; font-weight: 500; color: var(--text-mid); text-decoration: none; transition: color 0.15s; }
