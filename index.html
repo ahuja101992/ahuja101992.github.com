@@ -1,1063 +1,403 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Akshit Ahuja — AI Infrastructure & Systems Engineer</title>
-  <meta name="description" content="Principal Member of Technical Staff at Oracle. Building agentic AI infrastructure, database platforms, and systems at scale." />
-  <meta name="theme-color" content="#0a0e27" />
+  <meta name="description" content="Principal Member of Technical Staff at Oracle. Building agentic AI infrastructure, database platforms, and systems at scale."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <!-- Analytics: replace YOUR-DOMAIN with your Plausible site domain when ready -->
+  <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F8FA; --bg-card: #FFFFFF; --bg-alt: #F0F2F7;
+      --border: #E2E6EF; --border-mid: #C8D0E0;
+      --text: #1C2333; --text-mid: #4A5568; --text-muted: #8896AA;
+      --blue: #3D5A99; --blue-light: #EBF0FA; --blue-mid: #6B85BD;
+      --amber: #C87533; --amber-light: #FDF3E9;
+      --green: #2E7D52; --green-light: #E8F5EE;
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Playfair Display', Georgia, serif;
+      --mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 3px rgba(28,35,51,0.06);
+      --shadow: 0 4px 16px rgba(28,35,51,0.09);
     }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      background: #0a0e27;
-      color: #c9d1e0;
-      line-height: 1.5;
-      font-size: 14px;
-      letter-spacing: 0.3px;
-    }
-
-    a {
-      color: #00dd00;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    a:hover {
-      color: #00ffff;
-      text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-    }
-
-    .container {
-      max-width: 1024px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* Navigation */
+    /* ── NAV — amber top rule is the site signature ── */
     nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: rgba(10, 14, 39, 0.98);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
-      z-index: 100;
+      border-top: 3px solid var(--amber);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      height: 54px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px;
     }
+    .nav-brand { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; letter-spacing: 0.01em; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--text-mid); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--blue); }
+    .nav-links a.active { color: var(--blue); font-weight: 600; }
 
-    nav .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 64px;
-    }
-
-    .logo {
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 0px;
-      color: #00dd00;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .logo::before {
-      content: '$ ';
-      color: #8892b0;
-    }
-
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 32px;
-    }
-
-    nav a {
-      font-size: 13px;
-      color: #8892b0;
-      transition: color 0.2s;
-      font-weight: 500;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      letter-spacing: 0.5px;
-    }
-
-    nav a:hover,
-    nav a.active {
-      color: #00dd00;
-    }
-
-    @media (max-width: 768px) {
-      nav ul {
-        display: none;
-      }
-    }
-
-    /* Hero */
+    /* ── HERO ── */
     .hero {
-      margin-top: 64px;
-      padding: 140px 0;
-      min-height: calc(100vh - 64px);
-      display: flex;
+      padding: 80px 48px 64px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 64px;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .hero h1 {
-      font-size: clamp(40px, 6vw, 56px);
-      font-weight: 700;
-      margin-bottom: 12px;
-      letter-spacing: 0px;
-      color: #e0e6ed;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      line-height: 1.3;
-      word-break: break-word;
-    }
-
-    .hero h1::before {
-      content: '>> ';
-      color: #00dd00;
-    }
-
-    .hero .subtitle {
-      font-size: clamp(12px, 2vw, 16px);
-      color: #8892b0;
-      margin-bottom: 32px;
-      font-weight: 400;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      letter-spacing: 0.2px;
-    }
-
-    .hero .subtitle::before {
-      content: '# ';
-      color: #00dd00;
-    }
-
-    .hero .subtitle::after {
-      content: '';
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-
-    .hero p {
-      font-size: 15px;
-      color: #a1aac7;
-      max-width: 620px;
-      margin: 0 auto 40px;
-      line-height: 1.8;
-    }
-
-    .cta-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 10px 24px;
-      border: 1px solid #00dd00;
-      border-radius: 0px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-block;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      letter-spacing: 0.5px;
-    }
-
-    .btn::before {
-      content: '> ';
-    }
-
-    .btn-primary {
-      background: #00dd00;
-      color: #0a0e27;
-      border-color: #00dd00;
-    }
-
-    .btn-primary:hover {
-      background: #00ffff;
-      border-color: #00ffff;
-      box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: #00dd00;
-      border-color: #00dd00;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(0, 217, 255, 0.1);
-      box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
-    }
-
-    /* Section */
-    section {
-      padding: 100px 0;
-      border-top: 1px solid rgba(0, 217, 255, 0.1);
-    }
-
-    section h2 {
-      font-size: clamp(24px, 4vw, 36px);
-      font-weight: 700;
-      margin-bottom: 56px;
-      letter-spacing: 0px;
-      color: #e0e6ed;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    section h2::before {
-      content: '[ ';
-      color: #00dd00;
-    }
-
-    section h2::after {
-      content: ' ]';
-      color: #00dd00;
-    }
-
-    /* Featured Work */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-
-    .project-card {
-      background: rgba(20, 25, 50, 0.6);
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      border-radius: 0px;
-      padding: 32px;
-      transition: all 0.3s;
-      position: relative;
-    }
-
-    .project-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, #00dd00, transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .project-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 2px;
-      height: 100%;
-      background: linear-gradient(180deg, transparent, #00dd00);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .project-card:hover::before,
-    .project-card:hover::after {
-      opacity: 1;
-    }
-
-    .project-card:hover {
-      border-color: rgba(0, 217, 255, 0.4);
-      background: rgba(20, 25, 50, 0.8);
-      box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.05);
-    }
-
-    .project-tag {
-      display: inline-block;
-      background: transparent;
-      color: #00dd00;
-      padding: 2px 6px;
-      border-radius: 0px;
-      font-size: 9px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(0, 217, 255, 0.3);
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .project-tag::before {
-      content: '@';
-      margin-right: 3px;
-    }
-
-    .project-card h3 {
-      font-size: 15px;
-      margin-bottom: 12px;
-      font-weight: 600;
-      color: #e0e6ed;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .project-card h3::before {
-      content: '▸ ';
-      color: #00dd00;
-    }
-
-    .project-card p {
-      color: #a1aac7;
-      font-size: 13px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-
-    .tech-stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .tech-badge {
-      background: transparent;
-      border: 1px solid rgba(0, 217, 255, 0.3);
-      color: #8892b0;
-      padding: 3px 8px;
-      border-radius: 0px;
-      font-size: 10px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      letter-spacing: 0.3px;
-    }
-
-    .tech-badge:hover {
-      border-color: #00dd00;
-      color: #00dd00;
-    }
-
-    /* Current Role */
-    .role-section {
-      background: rgba(20, 25, 50, 0.6);
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      border-radius: 0px;
-      padding: 40px;
-      position: relative;
-    }
-
-    .role-section::before {
-      content: '┌─ ADP ─────────────────┐';
-      position: absolute;
-      top: -18px;
-      left: 20px;
-      background: #0a0e27;
-      padding: 0 4px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      font-size: 10px;
-      color: #00dd00;
-      letter-spacing: 0px;
-      font-weight: 700;
-    }
-
-    .role-section::after {
-      content: '';
-    }
-
-    .role-header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-
-    .role-company {
-      font-size: 20px;
-      font-weight: 700;
-      color: #00dd00;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .role-company::after {
-      content: ' ✓';
-      font-size: 16px;
-      color: #00dd00;
-    }
-
-    .role-title {
-      color: #8892b0;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .role-section > p {
-      color: #a1aac7;
-      margin-bottom: 32px;
-      line-height: 1.7;
-    }
-
-    .role-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 32px;
-    }
-
-    .detail-item h4 {
-      color: #00dd00;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      font-weight: 700;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .detail-item h4::before {
-      content: '▪ ';
-    }
-
-    .detail-item p {
-      color: #8892b0;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    /* Skills */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 32px;
-    }
-
-    .skill-category h3 {
-      font-size: 10px;
-      color: #00dd00;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 700;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .skill-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .skill {
-      background: transparent;
-      color: #8892b0;
-      padding: 5px 10px;
-      border-radius: 0px;
-      font-size: 11px;
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      transition: all 0.2s;
-      letter-spacing: 0.3px;
-      position: relative;
-    }
-
-    .skill::before {
-      content: '<';
-      color: #00dd00;
-      margin-right: 2px;
-    }
-
-    .skill::after {
-      content: '>';
-      color: #00dd00;
-      margin-left: 2px;
-    }
-
-    .skill:hover {
-      border-color: #00dd00;
-      color: #00dd00;
-      box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
-    }
-
-    /* Career Goals */
-    .goals-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: start;
-    }
-
-    .goals-text p {
-      color: #a1aac7;
-      margin-bottom: 20px;
-      line-height: 1.8;
-    }
-
-    .goals-targets {
-      background: rgba(20, 25, 50, 0.6);
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      border-radius: 0px;
-      padding: 32px;
-    }
-
-    .goals-targets h3 {
-      font-size: 10px;
-      color: #00dd00;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
-      font-weight: 700;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .goal-item {
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
-    }
-
-    .goal-item:last-child {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-
-    .goal-company {
-      font-weight: 600;
-      color: #e0e6ed;
-      font-size: 14px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .goal-level {
-      color: #00dd00;
-      font-size: 11px;
-      font-weight: 600;
-      margin-top: 4px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    @media (max-width: 768px) {
-      .goals-content {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Resume */
-    .resume-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: center;
-      background: rgba(20, 25, 50, 0.6);
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      border-radius: 0px;
-      padding: 40px;
-    }
-
-    .resume-text p {
-      color: #a1aac7;
-      margin-bottom: 16px;
-      line-height: 1.8;
-    }
-
-    .resume-download {
-      display: flex;
-      justify-content: center;
-    }
-
-    @media (max-width: 768px) {
-      .resume-section {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-
-      .resume-download {
-        justify-content: flex-start;
-      }
-    }
-
-    /* Contact */
-    .contact-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-    }
-
-    .contact-text p {
-      color: #a1aac7;
-      margin-bottom: 24px;
-      line-height: 1.8;
-    }
-
-    .contact-info {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-    }
-
-    .contact-item {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .contact-label {
-      color: #00dd00;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 700;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    .contact-label::before {
-      content: '> ';
-    }
-
-    .contact-value {
-      color: #c9d1e0;
-      font-size: 15px;
-    }
-
-    .social-links {
-      display: flex;
-      gap: 12px;
-      list-style: none;
-      margin-top: 16px;
-    }
-
-    .social-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      background: transparent;
-      border: 1px solid rgba(0, 217, 255, 0.3);
-      color: #00dd00;
-      border-radius: 0px;
-      transition: all 0.2s;
-      font-weight: 600;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-      font-size: 11px;
-    }
-
-    .social-links a:hover {
-      border-color: #00dd00;
-      background: rgba(0, 217, 255, 0.1);
-      box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      .contact-content {
-        grid-template-columns: 1fr;
-      }
-
-      section {
-        padding: 80px 0;
-      }
-
-      .hero {
-        padding: 120px 0;
-      }
-
-      section h2 {
-        margin-bottom: 48px;
-      }
-    }
-
-    /* Footer */
-    footer {
-      border-top: 1px solid rgba(0, 217, 255, 0.1);
-      padding: 40px 0;
-      text-align: center;
-      color: #495670;
-      font-size: 12px;
-      font-family: "Monaco", "Menlo", "Courier New", monospace;
-    }
-
-    /* Scroll indicator */
-    .scroll-indicator {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      height: 2px;
-      background: #00dd00;
-      width: 0%;
-      transition: width 0.1s linear;
-      box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-    }
-
-    /* Grid background effect */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image:
-        linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-      z-index: -1;
-    }
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--amber); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+    .hero h1 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 20px; }
+    .hero h1 em { font-style: italic; color: var(--blue); }
+    .hero-desc { font-size: 16px; color: var(--text-mid); line-height: 1.8; margin-bottom: 28px; max-width: 520px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--blue); color: white; font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 7px; text-decoration: none; transition: background 0.15s; }
+    .btn-primary:hover { background: #2F4880; }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 7px; background: var(--bg-card); color: var(--text-mid); font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 7px; border: 1px solid var(--border); text-decoration: none; transition: border-color 0.15s, color 0.15s; }
+    .btn-secondary:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* hero right — stat card */
+    .hero-card { background: var(--bg-card); border: 1px solid var(--border); border-top: 3px solid var(--amber); border-radius: 12px; padding: 28px; box-shadow: var(--shadow-sm); }
+    .hero-card-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+    .stat-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { font-size: 13px; color: var(--text-mid); }
+    .stat-val { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+    .stat-val.blue { color: var(--blue); }
+    .stat-val.amber { color: var(--amber); }
+    .stat-val.green { color: var(--green); }
+
+    /* ── SECTION STRUCTURE ── */
+    .section { padding: 56px 48px; border-bottom: 1px solid var(--border); }
+    .section:last-of-type { border-bottom: none; }
+    .section-eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .section-title { font-family: var(--serif); font-size: clamp(22px, 3vw, 30px); font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.25; }
+    .section-title em { font-style: italic; color: var(--amber); }
+    .section-desc { font-size: 15px; color: var(--text-mid); max-width: 580px; line-height: 1.8; margin-bottom: 32px; }
+
+    /* ── TOOLS GRID (System Design + Market Dashboard) ── */
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--amber);
+      border-radius: 12px;
+      padding: 28px 32px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s, border-top-color 0.2s;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .tool-card:hover { box-shadow: var(--shadow); border-top-color: var(--blue); }
+    .tool-card-tag { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); }
+    .tool-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.25; }
+    .tool-card p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; flex: 1; }
+    .tool-card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .tool-card-meta { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+    .tool-card-arrow { font-size: 18px; color: var(--blue); transition: transform 0.15s; }
+    .tool-card:hover .tool-card-arrow { transform: translateX(4px); }
+
+    /* ── PROJECTS GRID ── */
+    .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .project-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s; }
+    .project-card:hover { box-shadow: var(--shadow); }
+    .project-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .project-badge { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+    .badge-work { background: var(--blue-light); color: var(--blue); border: 1px solid #D3DCF0; }
+    .badge-personal { background: var(--amber-light); color: var(--amber); border: 1px solid #EDCFA8; }
+    .project-card h3 { font-family: var(--serif); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+    .project-card p { font-size: 13px; color: var(--text-mid); line-height: 1.65; margin-bottom: 14px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { font-family: var(--mono); font-size: 10px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
+
+    /* ── SKILLS SECTION ── */
+    .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .skill-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+    .skill-group-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-tag { font-size: 12.5px; color: var(--text-mid); background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 10px; }
+
+    /* ── ABOUT / GOALS ── */
+    .two-col-text { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    .text-block h3 { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px; line-height: 1.3; }
+    .text-block p { font-size: 14px; color: var(--text-mid); line-height: 1.8; margin-bottom: 12px; }
+    .focus-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .focus-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+    .focus-list li::before { content: '▸'; color: var(--blue); font-size: 11px; margin-top: 4px; flex-shrink: 0; }
+    .focus-list li strong { color: var(--text); font-weight: 600; }
+
+    /* ── CONTACT ── */
+    .contact-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; margin-top: 24px; }
+    .contact-link { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 500; color: var(--blue); text-decoration: none; padding: 8px 16px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-card); transition: border-color 0.15s, box-shadow 0.15s; }
+    .contact-link:hover { border-color: var(--blue); box-shadow: var(--shadow-sm); }
+
+    /* ── FOOTER ── */
+    footer { padding: 28px 48px; border-top: 1px solid var(--border); }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-copy { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--blue); }
+
+    /* ── RESUME STRIP ── */
+    .resume-strip { background: var(--blue-light); border: 1px solid #D3DCF0; border-radius: 10px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 32px; }
+    .resume-strip p { font-size: 14px; color: var(--text-mid); max-width: 500px; line-height: 1.65; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 24px 40px; }
+      .hero-card { display: none; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .projects-grid { grid-template-columns: 1fr 1fr; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .two-col-text { grid-template-columns: 1fr; gap: 32px; }
+      .section { padding: 40px 24px; }
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      footer { padding: 24px; }
+    }
+    @media (max-width: 600px) {
+      .projects-grid { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
   </style>
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">Akshit Ahuja</div>
-      <ul>
-        <li><a href="#work" class="nav-link">work</a></li>
-        <li><a href="#current" class="nav-link">current</a></li>
-        <li><a href="#skills" class="nav-link">skills</a></li>
-        <li><a href="#goals" class="nav-link">goals</a></li>
-        <li><a href="#resume" class="nav-link">resume</a></li>
-        <li><a href="#contact" class="nav-link">contact</a></li>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/">akshit.ahuja.js.org</a>
+  <ul class="nav-links">
+    <li><a href="/system-design/">System Design</a></li>
+    <li><a href="/market-dashboard/">Market Dashboard</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="/Resume-Akshit_Ahuja.pdf" target="_blank">Resume ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Principal Member of Technical Staff · Oracle</div>
+    <h1>Building AI<br/><em>Infrastructure</em><br/>at Scale</h1>
+    <p class="hero-desc">I design agentic platforms, database observability systems, and distributed infrastructure across thousands of Oracle Cloud databases. When I'm not building at work, I'm studying systems and shipping personal tools.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="/system-design/">System Design Notes →</a>
+      <a class="btn-secondary" href="#work">See My Work</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-card">
+      <div class="hero-card-label">At a glance</div>
+      <div class="stat-row"><span class="stat-label">Role</span><span class="stat-val blue">PMTS @ Oracle</span></div>
+      <div class="stat-row"><span class="stat-label">Experience</span><span class="stat-val">10+ years</span></div>
+      <div class="stat-row"><span class="stat-label">Location</span><span class="stat-val">Austin, TX</span></div>
+      <div class="stat-row"><span class="stat-label">Focus</span><span class="stat-val amber">AI Infra · Systems</span></div>
+      <div class="stat-row"><span class="stat-label">Interview target</span><span class="stat-val green">Feb–Mar 2027</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section class="section" id="tools">
+  <div class="section-eyebrow">Live Tools</div>
+  <h2 class="section-title">Things I've <em>built & use</em></h2>
+  <p class="section-desc">Two tools I actually use day-to-day — one for interview prep, one for following the market. Both running live on this domain.</p>
+  <div class="tools-grid">
+    <a class="tool-card" href="/system-design/">
+      <div class="tool-card-tag">Study · Interview Prep</div>
+      <h3>System Design Notes</h3>
+      <p>A working study log for Staff-level system design interviews. Every design follows a 6-step framework with mandatory diagrams, tradeoff analysis, and honest reasoning. Built to double as a portfolio signal.</p>
+      <div class="tool-card-footer">
+        <span class="tool-card-meta">2 pages · growing weekly</span>
+        <span class="tool-card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card" href="/market-dashboard/">
+      <div class="tool-card-tag">Personal Tool · AI-Powered</div>
+      <h3>Market Dashboard</h3>
+      <p>AI-powered personal stock dashboard. A Claude Code cloud routine runs market analysis daily, writes JSON briefs to Google Drive, and serves them via a Cloudflare Worker to this live dashboard.</p>
+      <div class="tool-card-footer">
+        <span class="tool-card-meta">18 tickers · runs weekdays</span>
+        <span class="tool-card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- WORK -->
+<section class="section" id="work">
+  <div class="section-eyebrow">Projects</div>
+  <h2 class="section-title">What I'm <em>building</em></h2>
+  <p class="section-desc">A mix of production work at Oracle and personal tools — all real systems, no toy projects.</p>
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-work">Oracle · Current</span>
+      </div>
+      <h3>ADP Audit Agent</h3>
+      <p>Multi-surface observability platform combining OCI Audit, host logs, and database audit trails. Conversational interface with cited evidence and deterministic controls.</p>
+      <div class="tag-row">
+        <span class="tag">Java</span><span class="tag">LLM</span><span class="tag">OCI</span><span class="tag">Agentic AI</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-work">Oracle · Current</span>
+      </div>
+      <h3>FA Maintenance Agent</h3>
+      <p>Monitors 3,000–6,000 podDBs per wave across four OCI region groups. Deterministic checkpoint logic with phased LLM integration for anomaly detection.</p>
+      <div class="tag-row">
+        <span class="tag">Java</span><span class="tag">OCI</span><span class="tag">Distributed</span><span class="tag">LLM</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-work">Oracle · Current</span>
+      </div>
+      <h3>JIT Access Control</h3>
+      <p>Just-in-time access system with post-grant auditing coverage across SSH, API, and database access vectors. Zero standing privilege model.</p>
+      <div class="tag-row">
+        <span class="tag">Security</span><span class="tag">OCI</span><span class="tag">Java</span><span class="tag">Audit</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-personal">Personal</span>
+      </div>
+      <h3>HireLoop</h3>
+      <p>Autonomous career transition platform. Config-driven backend with pluggable LLM providers, human-in-the-loop confirmation, and a React dashboard. Live on Railway.</p>
+      <div class="tag-row">
+        <span class="tag">Java</span><span class="tag">React</span><span class="tag">Claude API</span><span class="tag">Railway</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-personal">Personal</span>
+      </div>
+      <h3>OrderAI</h3>
+      <p>Open-source AI food truck ordering system. MCP integration with Square POS, full web UI, real-time order processing with smart recommendations.</p>
+      <div class="tag-row">
+        <span class="tag">MCP</span><span class="tag">React</span><span class="tag">Square API</span><span class="tag">LLM</span>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-card-top">
+        <span class="project-badge badge-personal">Personal</span>
+      </div>
+      <h3>Market Dashboard</h3>
+      <p>AI-powered personal stock dashboard. Claude Code cloud routine runs daily, writes JSON briefs to Google Drive, served via Cloudflare Worker.</p>
+      <div class="tag-row">
+        <span class="tag">Claude Code</span><span class="tag">Cloudflare</span><span class="tag">Google Drive</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="section" id="skills">
+  <div class="section-eyebrow">Technical Skills</div>
+  <h2 class="section-title">The <em>stack</em></h2>
+  <div class="skills-grid">
+    <div class="skill-group">
+      <div class="skill-group-label">Platforms & Infrastructure</div>
+      <div class="skill-tags">
+        <span class="skill-tag">OCI</span><span class="skill-tag">ExaCS</span><span class="skill-tag">Kubernetes</span><span class="skill-tag">Docker</span><span class="skill-tag">AWS</span><span class="skill-tag">Autonomous DB</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-label">Backend & Databases</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Java</span><span class="skill-tag">Spring Boot</span><span class="skill-tag">MySQL</span><span class="skill-tag">PL/SQL</span><span class="skill-tag">Node.js</span><span class="skill-tag">Kafka</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-label">AI & Agentic</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Claude API</span><span class="skill-tag">Claude Code</span><span class="skill-tag">MCP</span><span class="skill-tag">LLM Integration</span><span class="skill-tag">Prompt Engineering</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-label">Frontend & Tooling</div>
+      <div class="skill-tags">
+        <span class="skill-tag">React</span><span class="skill-tag">Cloudflare Workers</span><span class="skill-tag">GitHub Pages</span><span class="skill-tag">Railway</span><span class="skill-tag">Vercel</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-label">Core Systems</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Distributed Systems</span><span class="skill-tag">System Design</span><span class="skill-tag">Database Design</span><span class="skill-tag">Access Control</span><span class="skill-tag">Reliability</span>
+      </div>
+    </div>
+    <div class="skill-group">
+      <div class="skill-group-label">Practices</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Production Support</span><span class="skill-tag">Mentorship</span><span class="skill-tag">Agile</span><span class="skill-tag">Technical Documentation</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT + GOALS -->
+<section class="section" id="goals">
+  <div class="two-col-text">
+    <div class="text-block">
+      <div class="section-eyebrow">Current Work</div>
+      <h3>Oracle Cloud Infrastructure</h3>
+      <p>I own and design mission-critical platforms for the ADP team. My work spans infrastructure for observability, access control, maintenance automation, and reliability across ExaCS and Autonomous Database ecosystems.</p>
+      <p>I also lead the AI-agent platform direction — moving conversational AI from POC to productizable workflows with safety-first design. 40% automation effort reduction, 15M+ operational touchpoints.</p>
+    </div>
+    <div class="text-block">
+      <div class="section-eyebrow">What I'm Focused On</div>
+      <h3>Where I'm headed</h3>
+      <ul class="focus-list">
+        <li><strong>Systems at Scale</strong> — multi-region, high-reliability, thousands of customers</li>
+        <li><strong>Agentic AI Architecture</strong> — LLM-powered workflows with deterministic control</li>
+        <li><strong>Distributed Data Platforms</strong> — database lifecycle, orchestration, operations</li>
+        <li><strong>Staff-level IC roles</strong> at FAANG-tier companies — target Feb–Mar 2027</li>
       </ul>
-    </div>
-  </nav>
-
-  <section class="hero">
-    <div class="container">
-      <h1>Building AI Infrastructure at Scale</h1>
-      <p class="subtitle">$ pmts @ oracle &gt; designing agentic platforms</p>
-      <p>
-        I work on the infrastructure that powers observability, access control, and maintenance automation across thousands of Oracle Cloud databases. When I'm not building at work, I'm exploring LLM-powered architectures and personal tools.
-      </p>
-      <div class="cta-buttons">
-        <a href="#work" class="btn btn-primary">explore work</a>
-        <a href="#contact" class="btn btn-secondary">get in touch</a>
+      <div class="resume-strip">
+        <p>10+ years of experience across Oracle, Dassault Systèmes, Bristlecone, Accenture, and First Republic.</p>
+        <a class="btn-primary" href="/Resume-Akshit_Ahuja.pdf" target="_blank">Download Resume ↗</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="work">
-    <div class="container">
-      <h2>featured projects</h2>
-      <div class="projects-grid">
-        <div class="project-card">
-          <span class="project-tag">Current</span>
-          <h3>ADP Audit Agent</h3>
-          <p>Multi-surface observability platform combining OCI Audit, host logs, and database audit trails. Conversational interface with cited evidence and deterministic controls.</p>
-          <div class="tech-stack">
-            <span class="tech-badge">Java</span>
-            <span class="tech-badge">LLM</span>
-            <span class="tech-badge">OCI</span>
-            <span class="tech-badge">Agentic AI</span>
-          </div>
-        </div>
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="section-eyebrow">Get In Touch</div>
+  <h2 class="section-title">Let's <em>talk</em></h2>
+  <p class="section-desc">Interested in collaborating, discussing system design, or exploring opportunities? I'm open to meaningful technical conversations.</p>
+  <div class="contact-row">
+    <a class="contact-link" href="mailto:ahuja101992@gmail.com">✉ ahuja101992@gmail.com</a>
+    <a class="contact-link" href="https://www.linkedin.com/in/akshitahuja92/" target="_blank">in LinkedIn</a>
+    <a class="contact-link" href="https://github.com/ahuja101992" target="_blank">gh GitHub</a>
+    <a class="contact-link" href="https://twitter.com/ahuja101992" target="_blank">𝕏 Twitter</a>
+  </div>
+</section>
 
-        <div class="project-card">
-          <span class="project-tag">Personal</span>
-          <h3>HireLoop</h3>
-          <p>Autonomous career tracking platform. Config-driven backend with pluggable LLM providers. Tracks job search, interview prep, and career milestones. Live on Railway.</p>
-          <div class="tech-stack">
-            <span class="tech-badge">Java/Spring Boot</span>
-            <span class="tech-badge">React</span>
-            <span class="tech-badge">Railway</span>
-            <span class="tech-badge">Claude API</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <span class="project-tag">Personal</span>
-          <h3>OrderAI</h3>
-          <p>Open-source AI food truck ordering system. MCP integration with Square POS, full web UI. Real-time order processing with smart recommendations.</p>
-          <div class="tech-stack">
-            <span class="tech-badge">MCP</span>
-            <span class="tech-badge">React</span>
-            <span class="tech-badge">Square API</span>
-            <span class="tech-badge">LLM</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <span class="project-tag">Personal</span>
-          <h3>Market Research Dashboard</h3>
-          <p>AI-powered personal stock dashboard. Claude Code cloud routine runs market analysis, writes JSON briefs to Google Drive, served via Cloudflare Worker.</p>
-          <div class="tech-stack">
-            <span class="tech-badge">Claude Code</span>
-            <span class="tech-badge">Cloudflare Workers</span>
-            <span class="tech-badge">Google Drive API</span>
-            <span class="tech-badge">AI Analysis</span>
-          </div>
-        </div>
-      </div>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copy">© 2026 akshit ahuja · Austin, TX</div>
+    <div class="footer-links">
+      <a href="/system-design/">System Design</a>
+      <a href="/market-dashboard/">Market Dashboard</a>
+      <a href="/Resume-Akshit_Ahuja.pdf" target="_blank">Resume ↗</a>
     </div>
-  </section>
+  </div>
+</footer>
 
-  <section id="current">
-    <div class="container">
-      <h2>current work</h2>
-      <div class="role-section">
-        <div class="role-header">
-          <span class="role-title">PMTS (Principal Member of Technical Staff)</span>
-          <div class="role-company">Oracle Cloud Infrastructure</div>
-        </div>
-        <p>
-          I own and design mission-critical platforms for the ADP (Application Data Platform) team. My work spans infrastructure for observability, access control, maintenance automation, and reliability across ExaCS and Autonomous Database ecosystems. I also lead the AI-agent platform direction, moving conversational AI from POC to productizable workflows with safety-first design.
-        </p>
-        <div class="role-details">
-          <div class="detail-item">
-            <h4>Core Ownership</h4>
-            <p>ADP Audit Agent, JIT Access Control, FA Maintenance workflows, KMS/BYOK platform, Data Guard orchestration</p>
-          </div>
-          <div class="detail-item">
-            <h4>Infrastructure</h4>
-            <p>OCI, ExaCS, Autonomous Databases, control plane APIs, workflow reliability, state management, periodic execution</p>
-          </div>
-          <div class="detail-item">
-            <h4>AI & Agentic</h4>
-            <p>Conversational UI, multi-agent orchestration, LLM-powered summarization, deterministic control enforcement</p>
-          </div>
-          <div class="detail-item">
-            <h4>Impact</h4>
-            <p>Production reliability, 40% automation effort reduction, 15M+ operational touchpoints, cross-team mentorship</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="skills">
-    <div class="container">
-      <h2>technical skills</h2>
-      <div class="skills-grid">
-        <div class="skill-category">
-          <h3>Platforms & Infrastructure</h3>
-          <div class="skill-list">
-            <span class="skill">OCI</span>
-            <span class="skill">ExaCS</span>
-            <span class="skill">Autonomous Databases</span>
-            <span class="skill">Kubernetes</span>
-            <span class="skill">Docker</span>
-            <span class="skill">AWS</span>
-          </div>
-        </div>
-
-        <div class="skill-category">
-          <h3>Backend & Databases</h3>
-          <div class="skill-list">
-            <span class="skill">Java</span>
-            <span class="skill">Spring Boot</span>
-            <span class="skill">MySQL</span>
-            <span class="skill">PL/SQL</span>
-            <span class="skill">Node.js</span>
-            <span class="skill">Kafka</span>
-          </div>
-        </div>
-
-        <div class="skill-category">
-          <h3>AI & Agentic</h3>
-          <div class="skill-list">
-            <span class="skill">Claude API</span>
-            <span class="skill">Claude Code</span>
-            <span class="skill">MCP</span>
-            <span class="skill">LLM Integration</span>
-            <span class="skill">Agentic Workflows</span>
-            <span class="skill">Prompt Engineering</span>
-          </div>
-        </div>
-
-        <div class="skill-category">
-          <h3>Frontend & Tooling</h3>
-          <div class="skill-list">
-            <span class="skill">React</span>
-            <span class="skill">Cloudflare Workers</span>
-            <span class="skill">Google Drive API</span>
-            <span class="skill">GitHub Pages</span>
-            <span class="skill">Railway</span>
-            <span class="skill">Vercel</span>
-          </div>
-        </div>
-
-        <div class="skill-category">
-          <h3>Core Systems</h3>
-          <div class="skill-list">
-            <span class="skill">Distributed Systems</span>
-            <span class="skill">Database Design</span>
-            <span class="skill">Workflow Orchestration</span>
-            <span class="skill">Access Control</span>
-            <span class="skill">Reliability Engineering</span>
-            <span class="skill">State Management</span>
-          </div>
-        </div>
-
-        <div class="skill-category">
-          <h3>Practices</h3>
-          <div class="skill-list">
-            <span class="skill">System Design</span>
-            <span class="skill">Production Support</span>
-            <span class="skill">Mentorship</span>
-            <span class="skill">Agile</span>
-            <span class="skill">Documentation</span>
-            <span class="skill">Cross-team Collaboration</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="goals">
-    <div class="container">
-      <h2>career direction</h2>
-      <div class="goals-content">
-        <div class="goals-text">
-          <p>
-            I'm focused on systems at scale, agentic AI infrastructure, and distributed data platforms. The work that excites me most: designing platforms that operate reliably across thousands of customers, building systems where LLMs improve UX without compromising safety, and mentoring engineers through complex production challenges.
-          </p>
-          <p>
-            I'm interested in senior IC roles where I can own critical infrastructure, drive architectural decisions, and shape how organizations interact with AI systems. The ideal fit combines technical depth with cross-team impact and mentorship opportunities.
-          </p>
-          <p>
-            I'm always open to conversations about interesting technical problems, whether that's optimizing existing systems, building new infrastructure, or exploring emerging paradigms in agentic AI and distributed systems.
-          </p>
-        </div>
-        <div class="goals-targets">
-          <h3>What I'm Focused On</h3>
-          <div class="goal-item">
-            <div class="goal-company">Systems at Scale</div>
-            <div class="goal-level">Multi-region, high-reliability, thousands of customers</div>
-          </div>
-          <div class="goal-item">
-            <div class="goal-company">Agentic AI Architecture</div>
-            <div class="goal-level">LLM-powered workflows with deterministic control</div>
-          </div>
-          <div class="goal-item">
-            <div class="goal-company">Distributed Data Platforms</div>
-            <div class="goal-level">Database lifecycle, orchestration, operations</div>
-          </div>
-          <div class="goal-item">
-            <div class="goal-company">Mentorship & Leadership</div>
-            <div class="goal-level">Growing engineers and shaping technical direction</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="resume">
-    <div class="container">
-      <h2>resume</h2>
-      <div class="resume-section">
-        <div class="resume-text">
-          <p>
-            Comprehensive overview of my professional experience, technical expertise, and key achievements across 11+ years. Detailed work history from Adeptia through Oracle, with emphasis on platform engineering, AI infrastructure, and production reliability.
-          </p>
-          <p>
-            Includes Oracle/OCI work, personal projects, technical skills, and past roles at Dassault Systèmes, Bristlecone, Accenture, and First Republic.
-          </p>
-        </div>
-        <div class="resume-download">
-          <a href="Resume-Akshit_Ahuja.pdf" download class="btn btn-primary" style="display: inline-block;">
-            ↓ Download Resume
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="contact">
-    <div class="container">
-      <h2>get in touch</h2>
-      <div class="contact-content">
-        <div class="contact-text">
-          <p>
-            Interested in collaborating, discussing systems design, or just having a conversation? I'm always open to meaningful technical discussions and opportunities where I can contribute to building great infrastructure.
-          </p>
-          <p>
-            Whether it's about agentic AI, distributed systems, or career growth—reach out.
-          </p>
-        </div>
-        <div class="contact-info">
-          <div class="contact-item">
-            <span class="contact-label">Email</span>
-            <span class="contact-value"><a href="mailto:ahuja101992@gmail.com">ahuja101992@gmail.com</a></span>
-          </div>
-          <div class="contact-item">
-            <span class="contact-label">Location</span>
-            <span class="contact-value">Austin, TX</span>
-          </div>
-          <div class="contact-item">
-            <span class="contact-label">Connect</span>
-            <ul class="social-links">
-              <li><a href="https://www.linkedin.com/in/akshitahuja92/">in</a></li>
-              <li><a href="https://github.com/ahuja101992">gh</a></li>
-              <li><a href="https://twitter.com/ahuja101992">𝕏</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 akshit ahuja | built for clarity &amp; impact</p>
-    </div>
-  </footer>
-
-  <div class="scroll-indicator"></div>
-
-  <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', e => {
-        const href = anchor.getAttribute('href');
-        if (href !== '#') {
-          e.preventDefault();
-          const target = document.querySelector(href);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
-        }
-      });
-    });
-
-    const updateNav = () => {
-      const sections = document.querySelectorAll('section');
-      const navLinks = document.querySelectorAll('nav a[href^="#"]');
-      let current = '';
-
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (window.pageYOffset >= sectionTop - 200) {
-          current = section.getAttribute('id');
-        }
-      });
-
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-          link.classList.add('active');
-        }
-      });
-    };
-
-    const updateScrollProgress = () => {
-      const scrollIndicator = document.querySelector('.scroll-indicator');
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = (scrollTop / docHeight) * 100;
-      scrollIndicator.style.width = scrollPercent + '%';
-    };
-
-    window.addEventListener('scroll', () => {
-      updateNav();
-      updateScrollProgress();
-    });
-
-    updateNav();
-  </script>
 </body>
 </html>
