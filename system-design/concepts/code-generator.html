@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Short Code Generator — System Design Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+      --shadow:0 4px 16px rgba(28,35,51,0.09);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:680px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:210px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4;transition:color 0.15s}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
+    .section{margin-bottom:52px;scroll-margin-top:80px}
+    .section-header{margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .section-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+    .section h2{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .prose{font-size:14px;color:var(--text-mid);line-height:1.85;margin-bottom:14px}
+    .prose strong{color:var(--text);font-weight:600}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .card.blue{border-left-color:var(--blue)}
+    .card.green{border-left-color:var(--green)}
+    .card.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
+    .decision{background:var(--amber-light);border:1px solid var(--amber-border);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start}
+    .decision-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+    .decision-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+    .decision p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .decision p strong{color:var(--text);font-weight:600}
+    .approach-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .approach-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+    .approach-card.chosen{border-color:var(--green-border);background:var(--green-light)}
+    .approach-card.rejected{border-color:var(--red-border);opacity:0.85}
+    .approach-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+    .approach-label.green{color:var(--green)}
+    .approach-label.red{color:var(--red)}
+    .approach-label.blue{color:var(--blue)}
+    .approach-card h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+    .pro-con-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+    .pro-con-list li{font-size:12.5px;color:var(--text-mid);padding-left:18px;position:relative;line-height:1.55}
+    .pro-con-list li::before{position:absolute;left:0;font-size:11px;top:1px}
+    .pro-con-list.pros li::before{content:'✓';color:var(--green)}
+    .pro-con-list.cons li::before{content:'✗';color:var(--red)}
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .checklist li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .checklist li strong{color:var(--text);font-weight:600}
+    code{font-family:var(--mono);font-size:12px;background:var(--blue-light);color:var(--blue);border:1px solid #D3DCF0;border-radius:3px;padding:1px 5px}
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:22px}
+    .diagram-wrap{margin-bottom:20px}
+    .diagram-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .diagram-box{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    td.green{color:var(--green)!important}
+    td.amber{color:var(--amber)!important}
+    td.red{color:var(--red)!important}
+    .open-q{background:var(--bg-alt);border:1px dashed var(--border-mid);border-radius:8px;padding:16px 20px;margin-bottom:16px}
+    .open-q-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .used-in{background:var(--blue-light);border:1px solid #D3DCF0;border-radius:8px;padding:16px 20px;margin-bottom:16px}
+    .used-in-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+    .used-in-list{display:flex;flex-wrap:wrap;gap:8px}
+    .used-in-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:var(--bg-card);border:1px solid #D3DCF0;border-radius:5px;padding:5px 12px;text-decoration:none;transition:all 0.15s}
+    .used-in-tag:hover{background:var(--blue);color:white}
+    .used-in-tag.soon{opacity:0.5;cursor:default;pointer-events:none}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){.spine{display:none}.main{padding:24px 20px 60px}.hero{padding:40px 20px 32px}.approach-grid{grid-template-columns:1fr}nav{padding:0 20px}.nav-links{display:none}footer{padding:20px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="../tinyurl.html">TinyURL</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb">
+    <a href="/system-design/">System Design Notes</a> / <a href="/system-design/#concepts">Concepts</a> / Short Code Generator
+  </div>
+  <h1>Short <em>Code Generator</em></h1>
+  <p class="hero-desc">How do you generate millions of globally unique short codes without creating a distributed coordination bottleneck? This is one of the most common "goes deeper than expected" problems in system design. It appears simple on the surface — generate a random string — but at scale, every naive approach breaks down in a different way. This page works through each approach from first principles, explains why the obvious solutions fail, and arrives at the design used in TinyURL.</p>
+  <div class="tag-row">
+    <span class="tag amber">Concept</span>
+    <span class="tag blue">Distributed Systems</span>
+    <span class="tag blue">Uniqueness at Scale</span>
+    <span class="tag blue">Concurrency</span>
+    <span class="tag">Ongoing — needs more research</span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="problem"><div class="spine-dot"></div><a class="spine-link" href="#problem">The Core Problem</a></div>
+      <div class="spine-item" data-target="comparison"><div class="spine-dot"></div><a class="spine-link" href="#comparison">Approaches at a Glance</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="approach1"><div class="spine-dot"></div><a class="spine-link" href="#approach1">1 · Hash-based</a></div>
+      <div class="spine-item" data-target="approach2"><div class="spine-dot"></div><a class="spine-link" href="#approach2">2 · Region Prefix</a></div>
+      <div class="spine-item" data-target="approach3"><div class="spine-dot"></div><a class="spine-link" href="#approach3">3 · Pre-gen Pool ✓</a></div>
+      <div class="spine-item" data-target="approach4"><div class="spine-dot"></div><a class="spine-link" href="#approach4">4 · Token Service</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="nanny"><div class="spine-dot"></div><a class="spine-link" href="#nanny">Nanny Service Design</a></div>
+      <div class="spine-item" data-target="reclaim"><div class="spine-dot"></div><a class="spine-link" href="#reclaim">Reclamation Lifecycle</a></div>
+      <div class="spine-item" data-target="openq"><div class="spine-dot"></div><a class="spine-link" href="#openq">Open Questions</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="usedin"><div class="spine-dot"></div><a class="spine-link" href="#usedin">Used In</a></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section id="problem" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">The Core Problem</div>
+        <h2>Uniqueness without coordination</h2>
+      </div>
+      <p class="prose">Any system that needs to generate unique identifiers at scale runs into the same fundamental tension: <strong>uniqueness requires knowing what already exists, but knowing what already exists requires coordination, and coordination is expensive.</strong></p>
+      <p class="prose">In a URL shortener at 1,000 writes per second, the naive approach is obvious — generate a random 7-character string, check the database to see if it exists, and retry if it does. This works fine at low volume. At 1,000 writes/sec across multiple web servers, it breaks in several ways simultaneously.</p>
+      <p class="prose">First, <strong>every write now requires a round-trip database read</strong> before it can complete. The write path goes from "generate → insert" to "generate → read → if collision: generate → read again → insert." Under load, this adds latency to every single URL creation.</p>
+      <p class="prose">Second, <strong>there is a race condition at the heart of it.</strong> Server A generates code "abc1234" and checks the database — it is not there. Server B generates the same code "abc1234" and checks the database — it is not there either. Both servers now try to insert. One wins; the other gets a constraint violation and has to retry. At 1,000 writes/sec across multiple servers, collision handling under concurrency is not a theoretical concern — it is a regular occurrence.</p>
+      <p class="prose">Third, <strong>retry loops under high collision probability compound the problem.</strong> As the database fills up, collision probability grows. Even a small retry rate multiplied across 1,000 writes/sec generates meaningfully higher database load than expected.</p>
+      <div class="callout">
+        <div class="callout-label">What we are actually optimizing for</div>
+        <p>The goal is not just uniqueness — it is <strong>uniqueness without synchronous coordination on the hot path.</strong> "Hot path" means the code that runs on every single write request, in the critical section between receiving the request and returning a response. Every millisecond of hot-path latency is multiplied by your write RPS. Moving code generation off the hot path entirely is the design insight that makes everything else work.</p>
+      </div>
+    </section>
+
+    <section id="comparison" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Overview</div>
+        <h2>Four approaches — tradeoffs at a glance</h2>
+      </div>
+      <p class="prose">Before going deep on each approach, it helps to see how they compare on the dimensions that matter most. Each approach makes a different tradeoff between simplicity, uniqueness guarantee, hot-path latency, and coordination overhead.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Approach</th><th>Uniqueness guarantee</th><th>Hot path cost</th><th>Coordination</th><th>Best at scale</th></tr></thead>
+          <tbody>
+            <tr><td>1 · Hash-based</td><td>Probabilistic + retry</td><td>1+ DB reads per write</td><td>DB check</td><td class="red">Low scale only</td></tr>
+            <tr><td>2 · Region prefix</td><td>Structural (by prefix)</td><td>Zero DB reads</td><td>None</td><td class="amber">Medium — burns code space</td></tr>
+            <tr><td>3 · Pre-gen pool</td><td>Guaranteed (pre-claimed)</td><td>One atomic DB claim</td><td>Minimal (nanny)</td><td class="green">Medium-high — chosen ✓</td></tr>
+            <tr><td>4 · Token service</td><td>Guaranteed (centralized)</td><td>One service call</td><td>Token service</td><td class="blue">Highest scale</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="approach1" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 1</div>
+        <h2>Hash-based generation</h2>
+      </div>
+      <p class="prose">The most intuitive approach: take the long URL, run it through a hash function (MD5, SHA-256), take the first 7 characters of the base62 output, and use that as the short code. If it collides with an existing code, append a salt — the user ID, a counter, a timestamp — and try again.</p>
+      <p class="prose">The appeal of hashing is that <strong>the same long URL always produces the same prefix.</strong> This means you get natural deduplication — two requests to shorten the same URL will produce the same hash prefix, and you can return the existing code without creating a new one. At low volume, this works elegantly.</p>
+      <div class="diagram-wrap">
+        <div class="diagram-label">Hash + retry flow</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 700 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs><marker id="ha" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker></defs>
+            <rect x="10" y="25" width="110" height="50" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="65" y="47" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Long URL</text>
+            <text x="65" y="63" text-anchor="middle" font-size="10" fill="#8896AA">input</text>
+            <line x1="120" y1="50" x2="140" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="142" y="25" width="120" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="202" y="47" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">MD5 / SHA-256</text>
+            <text x="202" y="63" text-anchor="middle" font-size="10" fill="#8896AA">first 7 base62 chars</text>
+            <line x1="262" y1="50" x2="282" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="284" y="25" width="130" height="50" rx="6" fill="#FDECEA" stroke="#F0B8B3" stroke-width="1.5"/>
+            <text x="349" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#C0392B">DB uniqueness check</text>
+            <text x="349" y="59" text-anchor="middle" font-size="10" fill="#C0392B">EXISTS? retry with salt</text>
+            <text x="349" y="73" text-anchor="middle" font-size="10" fill="#C0392B">hot path DB read</text>
+            <line x1="414" y1="50" x2="434" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#ha)"/>
+            <rect x="436" y="25" width="110" height="50" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="491" y="47" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Assign code</text>
+            <text x="491" y="63" text-anchor="middle" font-size="10" fill="#2E7D52">if no collision</text>
+            <path d="M 349 75 Q 349 98 202 98 Q 150 98 150 75" fill="none" stroke="#C0392B" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#ha)"/>
+            <text x="250" y="96" font-size="9" fill="#C0392B">retry with appended salt on collision</text>
+          </svg>
+        </div>
+      </div>
+      <div class="approach-grid">
+        <div class="approach-card">
+          <div class="approach-label green">What works</div>
+          <ul class="pro-con-list pros">
+            <li>Simple to implement and reason about</li>
+            <li>Same URL always hashes to same prefix — natural deduplication</li>
+            <li>No new infrastructure needed</li>
+            <li>Works well at low write volume</li>
+          </ul>
+        </div>
+        <div class="approach-card rejected">
+          <div class="approach-label red">Why it breaks at scale</div>
+          <ul class="pro-con-list cons">
+            <li>Every write requires a DB read on the hot path</li>
+            <li>Race condition: two servers check simultaneously, both see "not exists", both try to insert</li>
+            <li>Retry storms compound under concurrent load</li>
+            <li>Salt-based retries produce inconsistent codes for the same URL</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout red">
+        <div class="callout-label">The race condition in detail</div>
+        <p>Server A generates "abc1234" and checks the DB — not found. Server B generates "abc1234" and checks the DB — not found. Server A inserts "abc1234" — succeeds. Server B inserts "abc1234" — constraint violation. Server B must now generate a new code, do another DB read, and retry. <strong>At 1,000 writes/sec across multiple servers, this happens regularly.</strong> Each retry adds latency and additional DB load, which cascades under sustained write pressure.</p>
+      </div>
+    </section>
+
+    <section id="approach2" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 2</div>
+        <h2>Region prefix per server</h2>
+      </div>
+      <p class="prose">The insight behind region prefix is elegant: if you can guarantee that no two servers ever produce the same prefix, you do not need to coordinate at all. Server US-1 generates codes starting with "u1", Server EU-1 generates codes starting with "e1". Two servers cannot collide if their codes are structurally distinct.</p>
+      <p class="prose">This completely eliminates the hot-path database read. A server generates a code locally in microseconds, inserts it, done. No coordination, no retry, no race condition. At pure write throughput, this is the fastest possible approach. The problem is what it costs.</p>
+      <div class="approach-grid">
+        <div class="approach-card">
+          <div class="approach-label green">What works</div>
+          <ul class="pro-con-list pros">
+            <li>Zero coordination between servers</li>
+            <li>No DB read on hot write path</li>
+            <li>Scales horizontally without limit</li>
+            <li>Simple per-server implementation</li>
+          </ul>
+        </div>
+        <div class="approach-card rejected">
+          <div class="approach-label red">Why it was abandoned</div>
+          <ul class="pro-con-list cons">
+            <li>Burns code space: 2-char prefix leaves only 62^5 = 916M codes per server vs 62^7 = 3.5T</li>
+            <li>Codes leak infrastructure details — region and server identity visible in URL</li>
+            <li>Custom aliases have no prefix — breaks the model</li>
+            <li>Adding new servers requires new prefix registry</li>
+            <li>Easy to accidentally mix with pool approach — exactly what happened</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout red">
+        <div class="callout-label">Why this was abandoned in the TinyURL design</div>
+        <p>This approach was initially proposed and then accidentally mixed with the pre-generated pool approach — some logic was region-prefixing codes while other logic was pulling from a shared pool. The two approaches are fundamentally incompatible: region prefix assumes codes are generated on-demand with server identity encoded; the pool assumes codes are pre-generated centrally with no server-specific information. <strong>The lesson: pick one code generation strategy and commit to it end-to-end. Mixing approaches produces an inconsistent design that is harder to reason about than either pure approach.</strong></p>
+      </div>
+    </section>
+
+    <section id="approach3" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 3 — Chosen for TinyURL</div>
+        <h2>Pre-generated code pool</h2>
+      </div>
+      <p class="prose">The core insight of the pool approach is: <strong>move code generation entirely off the hot path.</strong> Instead of generating a code when a write request arrives, generate codes in advance and store them in a pool. When a write arrives, the web server claims the next available code from the pool. The pool stays full because a background service — the nanny — continuously refills it.</p>
+      <p class="prose">This separates two concerns that the hash approach conflated: generating unique codes (now done offline by the nanny, never blocking a user request) and assigning codes to URLs (now done on the hot path via an atomic database claim). The web server never generates a code — it only claims one that has already been guaranteed unique.</p>
+      <div class="diagram-wrap">
+        <div class="diagram-label">Pre-generated pool — separation of concerns</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="pa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+              <marker id="paa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#C87533"/></marker>
+              <marker id="pab" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3D5A99"/></marker>
+            </defs>
+            <rect x="10" y="10" width="290" height="80" rx="8" fill="#FDF9F5" stroke="#EDCFA8" stroke-width="1" stroke-dasharray="5,3"/>
+            <text x="155" y="26" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" font-weight="600" fill="#C87533">OFFLINE — happens in background</text>
+            <rect x="20" y="35" width="120" height="48" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="80" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Nanny Service</text>
+            <text x="80" y="69" text-anchor="middle" font-size="10" fill="#8896AA">generates random Base62</text>
+            <text x="80" y="80" text-anchor="middle" font-size="9" fill="#C87533">pool &lt; 5K → generate batch</text>
+            <line x1="140" y1="59" x2="160" y2="59" stroke="#C87533" stroke-width="1.5" marker-end="url(#paa)"/>
+            <rect x="162" y="35" width="120" height="48" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
+            <text x="222" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Code Pool</text>
+            <text x="222" y="69" text-anchor="middle" font-size="10" fill="#8896AA">10,000 codes ready</text>
+            <text x="222" y="80" text-anchor="middle" font-size="9" fill="#C87533">UNIQUE constraint</text>
+            <rect x="330" y="10" width="370" height="80" rx="8" fill="#F5F8FF" stroke="#C4D0EC" stroke-width="1" stroke-dasharray="5,3"/>
+            <text x="515" y="26" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" font-weight="600" fill="#3D5A99">HOT PATH — per write request</text>
+            <rect x="340" y="35" width="100" height="48" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="390" y="59" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Write Request</text>
+            <text x="390" y="73" text-anchor="middle" font-size="10" fill="#8896AA">POST /shorten</text>
+            <line x1="440" y1="59" x2="460" y2="59" stroke="#3D5A99" stroke-width="1.5" marker-end="url(#pab)"/>
+            <rect x="462" y="35" width="110" height="48" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="1.5"/>
+            <text x="517" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Atomic Claim</text>
+            <text x="517" y="69" text-anchor="middle" font-size="10" fill="#6B85BD">DELETE + RETURN code</text>
+            <text x="517" y="80" text-anchor="middle" font-size="9" fill="#3D5A99">guaranteed unique</text>
+            <line x1="572" y1="59" x2="592" y2="59" stroke="#3D5A99" stroke-width="1.5" marker-end="url(#pab)"/>
+            <rect x="594" y="35" width="96" height="48" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="642" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">URLs Table</text>
+            <text x="642" y="69" text-anchor="middle" font-size="10" fill="#2E7D52">insert + return</text>
+            <line x1="282" y1="59" x2="340" y2="59" stroke="#8896AA" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#pa)"/>
+            <text x="311" y="51" text-anchor="middle" font-size="9" fill="#8896AA">web server</text>
+            <text x="311" y="62" text-anchor="middle" font-size="9" fill="#8896AA">reads next code</text>
+            <text x="155" y="115" text-anchor="middle" font-size="11" fill="#C87533" font-weight="500">Code generation happens here</text>
+            <text x="155" y="130" text-anchor="middle" font-size="10" fill="#8896AA">async, no user waiting</text>
+            <text x="515" y="115" text-anchor="middle" font-size="11" fill="#3D5A99" font-weight="500">Code assignment happens here</text>
+            <text x="515" y="130" text-anchor="middle" font-size="10" fill="#8896AA">fast, deterministic, no race condition</text>
+          </svg>
+        </div>
+      </div>
+      <div class="approach-grid">
+        <div class="approach-card chosen">
+          <div class="approach-label green">Why this works</div>
+          <ul class="pro-con-list pros">
+            <li>No generation logic on the hot write path</li>
+            <li>No DB uniqueness check per request</li>
+            <li>Codes guaranteed unique at pool-creation time</li>
+            <li>Nanny runs async — never blocks user requests</li>
+            <li>Atomic claim prevents race conditions between servers</li>
+            <li>UNIQUE constraint catches theoretical pool duplicates</li>
+            <li>Reclamation service keeps pool sustainable indefinitely</li>
+          </ul>
+        </div>
+        <div class="approach-card">
+          <div class="approach-label red">Known limitations</div>
+          <ul class="pro-con-list cons">
+            <li>Nanny downtime drains the pool (~10s before writes fail)</li>
+            <li>Multiple nanny instances need coordination</li>
+            <li>Pool table becomes contention point at very high scale</li>
+            <li>Atomic claim semantics vary across database engines</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout green">
+        <div class="callout-label">The atomic claim operation — why it eliminates the race condition</div>
+        <p>The web server claims a code with a single atomic operation: <code>DELETE FROM code_pool WHERE code = (SELECT code FROM code_pool LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING code</code>. The <code>FOR UPDATE SKIP LOCKED</code> clause means two servers can never claim the same code — one acquires the row lock and proceeds; the other skips that row and claims the next one. This is a single database operation, not a read-then-write pair. <strong>The atomicity is exactly what eliminates the race condition that breaks the hash approach.</strong></p>
+      </div>
+    </section>
+
+    <section id="approach4" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 4 — Future Direction</div>
+        <h2>Distributed token service</h2>
+      </div>
+      <p class="prose">At higher scale — 100,000+ writes per second, or a globally distributed deployment — the pool table itself becomes a bottleneck. Every write does an atomic DELETE on a shared table. A dedicated token service solves this by decentralizing code generation entirely.</p>
+      <p class="prose">Instead of all web servers competing for rows in a shared pool table, each server gets a pre-allocated range of IDs from the token service. Within its range, the server generates codes locally with zero coordination. When the range is exhausted, the server requests a new range — one network call per 1,000 codes instead of one per write.</p>
+      <p class="prose">Twitter's Snowflake is the canonical implementation: a 64-bit integer encoding a timestamp, datacenter ID, machine ID, and sequence number. Each server generates IDs entirely locally. Global uniqueness is guaranteed by the combination of time and machine identity — no central counter, no coordination at all.</p>
+      <div class="callout">
+        <div class="callout-label">Why not used in TinyURL at our stated scale</div>
+        <p>At 1,000 writes/sec, the pre-generated pool is comfortably sufficient — the pool table is not under meaningful contention. A token service adds a new piece of infrastructure to deploy, monitor, and maintain. That complexity is not justified unless the pool approach is demonstrably failing under load. <strong>Reach for a token service when the pool table is the measured bottleneck in production, not as a speculative upfront design choice.</strong></p>
+      </div>
+    </section>
+
+    <section id="nanny" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Component Detail</div>
+        <h2>Nanny service — the full design</h2>
+      </div>
+      <p class="prose">The nanny service is deceptively simple. Its entire job is to keep the code pool full. It runs as a singleton background job, wakes up on a schedule, checks the pool size, and generates new codes if the pool is below threshold. The simplicity is intentional — a service with one clear responsibility is easy to reason about, monitor, and debug.</p>
+      <div class="sub-heading">Why these specific numbers</div>
+      <p class="prose"><strong>Pool target: 10,000 codes.</strong> At 1,000 writes/sec, this is 10 seconds of write capacity. If the nanny runs every few seconds and takes a moment to generate codes, there is still plenty of buffer before the pool drains. If the pool target were only 1,000 codes (one second), a single nanny hiccup could drain the pool before it responds. 10,000 is conservative but the cost is negligible — the pool table at 10,000 entries of 10 bytes each is 100KB.</p>
+      <p class="prose"><strong>Refill threshold: 5,000 codes (50% capacity).</strong> The nanny does not wait until the pool is empty before refilling — that would leave no margin for error. Refilling at 50% means the remaining 5,000 codes provide approximately 5 seconds of additional runway even if the nanny takes longer than usual. This "buffer within a buffer" is what makes the system robust to nanny delays without requiring a high-frequency polling loop.</p>
+      <div class="card blue">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:10px">Nanny service pseudocode</div>
+        <pre style="font-family:var(--mono);font-size:12.5px;color:var(--text-mid);line-height:1.9;overflow-x:auto"><span style="color:var(--text-muted)">// runs every N seconds</span>
+pool_size = <span style="color:var(--amber)">SELECT COUNT(*) FROM code_pool</span>
+
+<span style="color:var(--blue)">if</span> pool_size &lt; REFILL_THRESHOLD (5,000) {
+  to_generate = TARGET_SIZE (10,000) - pool_size
+
+  <span style="color:var(--blue)">for</span> i in range(to_generate) {
+    code = <span style="color:var(--green)">random_base62(length=7)</span>
+    <span style="color:var(--amber)">INSERT INTO code_pool (code)
+    ON CONFLICT DO NOTHING</span>  <span style="color:var(--text-muted)">// safety net for duplicates</span>
+  }
+}</pre>
+      </div>
+      <div class="sub-heading">The unique constraint — safety net, not crutch</div>
+      <p class="prose">The pool table has a UNIQUE constraint on the code column. At a pool size of 10,000 against a space of 3.5 trillion possible Base62 strings, the probability of a duplicate is approximately 0.0000003% — effectively zero. But production systems should never rely on probability when a deterministic check is cheap. The constraint catches the one-in-a-billion case, silently drops the duplicate (ON CONFLICT DO NOTHING), and the loop continues. No crash, no alert, no retry storm.</p>
+      <div class="callout red">
+        <div class="callout-label">The nanny single point of failure — and what to do about it</div>
+        <p>If the nanny crashes and stays down, the pool drains at 1,000 codes/sec. With a 10,000-code buffer, writes start failing in roughly 10 seconds. Mitigations: (1) Monitor pool size as a critical metric — alert loudly at 2,000 codes (~2 seconds of runway). (2) Restart the nanny automatically on crash (systemd, Kubernetes restart policy). (3) Consider two nanny instances with a distributed lock — one is primary, one is standby. For a first production deployment, option 1 plus 2 is the right tradeoff: simple, fast to implement, catches the failure before it becomes a user-visible outage.</p>
+      </div>
+    </section>
+
+    <section id="reclaim" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Component Detail</div>
+        <h2>Code reclamation — the full lifecycle</h2>
+      </div>
+      <p class="prose">Without reclamation, the code pool has a slow leak. Codes claimed for URLs that nobody ever clicks again are permanently consumed. At 1,000 writes/sec, approximately 86 million codes are claimed every day. Over time, even a 3.5 trillion code space shrinks. The reclamation service prevents this while solving a practical problem: codes from abandoned or deleted URLs should eventually be reusable.</p>
+      <div class="diagram-wrap">
+        <div class="diagram-label">URL state lifecycle — from active to reclaimed</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 700 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs><marker id="la" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker></defs>
+            <rect x="10" y="20" width="130" height="60" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="75" y="43" text-anchor="middle" font-size="12" font-weight="600" fill="#2E7D52">ACTIVE</text>
+            <text x="75" y="58" text-anchor="middle" font-size="10" fill="#8896AA">receiving clicks</text>
+            <text x="75" y="72" text-anchor="middle" font-size="10" fill="#8896AA">state = ACTIVE</text>
+            <line x1="140" y1="50" x2="168" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#la)"/>
+            <text x="154" y="42" text-anchor="middle" font-size="9" fill="#8896AA">no clicks</text>
+            <text x="154" y="54" text-anchor="middle" font-size="9" fill="#C87533">3 months</text>
+            <rect x="170" y="20" width="130" height="60" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="235" y="43" text-anchor="middle" font-size="12" font-weight="600" fill="#C87533">INACTIVE</text>
+            <text x="235" y="58" text-anchor="middle" font-size="10" fill="#8896AA">DW batch job flags</text>
+            <text x="235" y="72" text-anchor="middle" font-size="10" fill="#C87533">state = INACTIVE</text>
+            <line x1="300" y1="50" x2="328" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#la)"/>
+            <text x="314" y="42" text-anchor="middle" font-size="9" fill="#8896AA">1 more</text>
+            <text x="314" y="54" text-anchor="middle" font-size="9" fill="#C87533">month</text>
+            <rect x="330" y="20" width="130" height="60" rx="6" fill="#FDECEA" stroke="#F0B8B3" stroke-width="1.5"/>
+            <text x="395" y="40" text-anchor="middle" font-size="11" font-weight="600" fill="#C0392B">SOFT DELETED</text>
+            <text x="395" y="56" text-anchor="middle" font-size="10" fill="#8896AA">state = DELETED</text>
+            <text x="395" y="70" text-anchor="middle" font-size="10" fill="#8896AA">record kept for audit</text>
+            <line x1="460" y1="50" x2="488" y2="50" stroke="#8896AA" stroke-width="1.5" marker-end="url(#la)"/>
+            <text x="474" y="42" text-anchor="middle" font-size="9" fill="#8896AA">reclaim</text>
+            <text x="474" y="54" text-anchor="middle" font-size="9" fill="#8896AA">service</text>
+            <rect x="490" y="20" width="130" height="60" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
+            <text x="555" y="40" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">CODE POOL</text>
+            <text x="555" y="56" text-anchor="middle" font-size="10" fill="#8896AA">code re-inserted</text>
+            <text x="555" y="70" text-anchor="middle" font-size="10" fill="#C87533">available for reuse</text>
+          </svg>
+        </div>
+      </div>
+      <div class="sub-heading">Why soft delete — not hard delete</div>
+      <p class="prose">The instinct when reclaiming a code is to delete the record entirely. But hard deletion has a dangerous consequence: if the short code is immediately reassigned to a new long URL, anyone who had cached or bookmarked the old short link would silently land on completely different content. This is a terrible user experience and a potential security issue.</p>
+      <p class="prose">Soft deletion — setting <code>state = DELETED</code> while keeping the record — means an expired link shows a clear "this URL has expired" page rather than silently redirecting to something unrelated. The record is also preserved for audit: if someone reports a link behaved unexpectedly, you have the full history of what the code pointed to and when it changed.</p>
+      <div class="sub-heading">Why the grace period exists</div>
+      <p class="prose">The reclamation service waits one additional month after the INACTIVE state is set before moving to SOFT DELETED. This handles a real pattern: content that has a traffic lull but is not actually dead. A seasonal campaign that goes quiet in January might spike again in March. A blog post with irregular traffic should not lose its code during a quiet period. The 3-month inactivity window plus 1-month grace period gives 4 total months — long enough to correctly identify genuinely inactive URLs while preserving those with irregular but real traffic.</p>
+    </section>
+
+    <section id="openq" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Needs More Research</div>
+        <h2>Open questions — to be explored</h2>
+      </div>
+      <p class="prose">The pre-generated pool approach as described is solid for TinyURL at its stated scale. But it has known gaps that become important at higher scale or in more complex deployments. These are left open intentionally — they require research and benchmarking rather than speculation.</p>
+      <div class="card">
+        <ul class="checklist" style="margin-bottom:0">
+          <li><strong>Nanny high availability:</strong> Running two nanny instances without them generating overlapping codes requires either leader election (ZooKeeper, etcd) or range-based allocation per nanny instance. What is the right coordination primitive, and what is the operational overhead?</li>
+          <li><strong>Atomic claim on non-relational databases:</strong> The <code>DELETE ... FOR UPDATE SKIP LOCKED ... RETURNING</code> pattern works on PostgreSQL. On Cassandra or DynamoDB, what is the equivalent? Conditional writes provide atomicity but with different performance characteristics.</li>
+          <li><strong>Pool table as write bottleneck:</strong> At 10K+ writes/sec, is the pool table a contention point even with row-level locking? Could we batch-allocate codes to each web server — giving each a local in-memory buffer of 100 codes — to reduce pool table contention by 100x?</li>
+          <li><strong>Custom alias conflicts with pool:</strong> If a user requests a custom alias that happens to exist in the pre-generated pool, the pool code must be invalidated. Does this need an explicit check, or does the UNIQUE constraint on the URLs table handle it cleanly?</li>
+          <li><strong>Global multi-region deployment:</strong> Should each region have its own independent code pool, or a shared global pool? Independent pools eliminate cross-region coordination but risk producing the same code in two regions simultaneously.</li>
+          <li><strong>Pool exhaustion recovery:</strong> If the pool drains to zero before the nanny refills it, what should the web server do? Fall back to inline generation? Queue the request? Return a 503? Each option has different user-experience implications.</li>
+        </ul>
+      </div>
+      <div class="callout amber">
+        <div class="callout-label">This page will be updated as more research is done</div>
+        <p>Code generation uniqueness is a pattern that appears across URL shorteners, order ID systems, user ID systems, and event tracking. The open questions above apply across all these contexts. As more systems are designed and the answers become clearer, this page will be updated with concrete approaches and benchmarks.</p>
+      </div>
+    </section>
+
+    <section id="usedin" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Cross-reference</div>
+        <h2>Systems that use this concept</h2>
+      </div>
+      <p class="prose">The code generation problem — unique short identifiers at scale without coordination overhead — appears in many system designs. Each system has slightly different constraints but the core tradeoffs are the same.</p>
+      <div class="used-in">
+        <div class="used-in-label">Referenced from these designs</div>
+        <div class="used-in-list">
+          <a class="used-in-tag" href="../tinyurl.html">TinyURL — short codes</a>
+          <span class="used-in-tag soon">Order ID System — coming soon</span>
+          <span class="used-in-tag soon">Distributed Tracing IDs — coming soon</span>
+          <span class="used-in-tag soon">User ID Generation — coming soon</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · concepts · 2026</span>
+    <div class="footer-links">
+      <a href="/system-design/">All Designs</a>
+      <a href="../tinyurl.html">TinyURL</a>
+      <a href="/system-design/#concepts">All Concepts</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const spineItems = document.querySelectorAll('.spine-item');
+  const targets = {};
+  spineItems.forEach(item => {
+    const id = item.dataset.target;
+    if (id) { const el = document.getElementById(id); if (el) targets[id] = el; }
+  });
+  function updateSpine() {
+    const y = window.scrollY + 100;
+    let active = null;
+    for (const [id, el] of Object.entries(targets)) { if (el.offsetTop <= y) active = id; }
+    spineItems.forEach(item => item.classList.toggle('active', item.dataset.target === active));
+  }
+  window.addEventListener('scroll', updateSpine, { passive: true });
+  updateSpine();
+</script>
+</body>
+</html>
