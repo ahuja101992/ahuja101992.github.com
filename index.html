@@ -57,7 +57,7 @@
     .hero-eyebrow { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--amber); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
     .hero h1 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 20px; }
     .hero h1 em { font-style: italic; color: var(--blue); }
-    .hero-desc { font-size: 16px; color: var(--text-mid); line-height: 1.8; margin-bottom: 28px; max-width: 520px; }
+    .hero-desc { font-size: 16px; color: var(--text-mid); line-height: 1.8; margin-bottom: 28px; }
     .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--blue); color: white; font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 7px; text-decoration: none; transition: background 0.15s; }
     .btn-primary:hover { background: #2F4880; }
@@ -190,8 +190,8 @@
 <section class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">Principal Member of Technical Staff · Oracle</div>
-    <h1>Building AI<br/><em>Infrastructure</em><br/>at Scale</h1>
-    <p class="hero-desc">I design agentic platforms, database observability systems, and distributed infrastructure across thousands of Oracle Cloud databases. When I'm not building at work, I'm studying systems and shipping personal tools.</p>
+    <h1>Building <em>Systems,</em><br/>Platforms &amp; Agents<br/>at Scale</h1>
+    <p class="hero-desc">I build the platform that lets Oracle Cloud teams provision and run ExaCS and Autonomous databases without managing any of the lifecycle — patching, replication, Data Guard, resizing. One API call and it just works. On top of that I design agentic platforms, access control systems, and AI-powered tooling. When I'm not building at work, I'm studying systems and shipping personal tools.</p>
     <div class="hero-actions">
       <a class="btn-primary" href="/system-design/">System Design Notes →</a>
       <a class="btn-secondary" href="#work">See My Work</a>
@@ -203,8 +203,7 @@
       <div class="stat-row"><span class="stat-label">Role</span><span class="stat-val blue">PMTS @ Oracle</span></div>
       <div class="stat-row"><span class="stat-label">Experience</span><span class="stat-val">10+ years</span></div>
       <div class="stat-row"><span class="stat-label">Location</span><span class="stat-val">Austin, TX</span></div>
-      <div class="stat-row"><span class="stat-label">Focus</span><span class="stat-val amber">AI Infra · Systems</span></div>
-      <div class="stat-row"><span class="stat-label">Interview target</span><span class="stat-val green">Feb–Mar 2027</span></div>
+      <div class="stat-row"><span class="stat-label">Focus</span><span class="stat-val amber">AI Agents · DB Platform</span></div>
     </div>
   </div>
 </section>
@@ -213,12 +212,12 @@
 <section class="section" id="tools">
   <div class="section-eyebrow">Live Tools</div>
   <h2 class="section-title">Things I've <em>built & use</em></h2>
-  <p class="section-desc">Two tools I actually use day-to-day — one for interview prep, one for following the market. Both running live on this domain.</p>
+  <p class="section-desc">Two tools I actually use day-to-day — one for studying systems, one for following the market. Both running live on this domain.</p>
   <div class="tools-grid">
     <a class="tool-card" href="/system-design/">
-      <div class="tool-card-tag">Study · Interview Prep</div>
+      <div class="tool-card-tag">Study · System Design</div>
       <h3>System Design Notes</h3>
-      <p>A working study log for Staff-level system design interviews. Every design follows a 6-step framework with mandatory diagrams, tradeoff analysis, and honest reasoning. Built to double as a portfolio signal.</p>
+      <p>A working study log covering system design at Staff level. Every design follows a 6-step framework with mandatory diagrams, tradeoff analysis, and honest reasoning throughout.</p>
       <div class="tool-card-footer">
         <span class="tool-card-meta">2 pages · growing weekly</span>
         <span class="tool-card-arrow">→</span>
@@ -239,15 +238,15 @@
 <!-- WORK -->
 <section class="section" id="work">
   <div class="section-eyebrow">Projects</div>
-  <h2 class="section-title">What I'm <em>building</em></h2>
-  <p class="section-desc">A mix of production work at Oracle and personal tools — all real systems, no toy projects.</p>
+  <h2 class="section-title">Things I've <em>built</em></h2>
+  <p class="section-desc">A mix of production work at Oracle and personal projects — professional and personal, all real systems.</p>
   <div class="projects-grid">
     <div class="project-card">
       <div class="project-card-top">
         <span class="project-badge badge-work">Oracle · Current</span>
       </div>
       <h3>ADP Audit Agent</h3>
-      <p>Multi-surface observability platform combining OCI Audit, host logs, and database audit trails. Conversational interface with cited evidence and deterministic controls.</p>
+      <p>Multi-surface audit platform combining OCI Audit, host logs, and database audit trails into a conversational interface with cited evidence and deterministic controls.</p>
       <div class="tag-row">
         <span class="tag">Java</span><span class="tag">LLM</span><span class="tag">OCI</span><span class="tag">Agentic AI</span>
       </div>
@@ -275,19 +274,21 @@
     <div class="project-card">
       <div class="project-card-top">
         <span class="project-badge badge-personal">Personal</span>
+        <a href="/hireloop/" style="font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;">View →</a>
       </div>
       <h3>HireLoop</h3>
-      <p>Autonomous career transition platform. Config-driven backend with pluggable LLM providers, human-in-the-loop confirmation, and a React dashboard. Live on Railway.</p>
+      <p>Autonomous career transition platform. Config-driven backend with pluggable LLM providers, human-in-the-loop confirmation before applications, and a React dashboard. Live on Railway.</p>
       <div class="tag-row">
         <span class="tag">Java</span><span class="tag">React</span><span class="tag">Claude API</span><span class="tag">Railway</span>
       </div>
     </div>
     <div class="project-card">
       <div class="project-card-top">
-        <span class="project-badge badge-personal">Personal</span>
+        <span class="project-badge badge-personal">Personal · Open Source</span>
+        <a href="/orderai/" style="font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;">View →</a>
       </div>
       <h3>OrderAI</h3>
-      <p>Open-source AI food truck ordering system. MCP integration with Square POS, full web UI, real-time order processing with smart recommendations.</p>
+      <p>Open-source AI food truck ordering system. MCP integration with Square POS, full web UI with merchant onboarding, real-time order processing, and AES-256-GCM token storage.</p>
       <div class="tag-row">
         <span class="tag">MCP</span><span class="tag">React</span><span class="tag">Square API</span><span class="tag">LLM</span>
       </div>
@@ -355,8 +356,8 @@
     <div class="text-block">
       <div class="section-eyebrow">Current Work</div>
       <h3>Oracle Cloud Infrastructure</h3>
-      <p>I own and design mission-critical platforms for the ADP team. My work spans infrastructure for observability, access control, maintenance automation, and reliability across ExaCS and Autonomous Database ecosystems.</p>
-      <p>I also lead the AI-agent platform direction — moving conversational AI from POC to productizable workflows with safety-first design. 40% automation effort reduction, 15M+ operational touchpoints.</p>
+      <p>I own and design mission-critical platforms for the ADP team. My work spans autonomous database lifecycle management, agentic AI platforms, access control, and reliability infrastructure across ExaCS and Autonomous Database ecosystems.</p>
+      <p>I also lead the AI-agent platform direction — moving conversational AI from POC to productizable workflows with safety-first design. Significant automation effort reduction across operational touchpoints.</p>
     </div>
     <div class="text-block">
       <div class="section-eyebrow">What I'm Focused On</div>
@@ -365,7 +366,7 @@
         <li><strong>Systems at Scale</strong> — multi-region, high-reliability, thousands of customers</li>
         <li><strong>Agentic AI Architecture</strong> — LLM-powered workflows with deterministic control</li>
         <li><strong>Distributed Data Platforms</strong> — database lifecycle, orchestration, operations</li>
-        <li><strong>Staff-level IC roles</strong> at FAANG-tier companies — target Feb–Mar 2027</li>
+        <li><strong>Staff-level IC roles</strong> at top-tier tech companies</li>
       </ul>
       <div class="resume-strip">
         <p>10+ years of experience across Oracle, Dassault Systèmes, Bristlecone, Accenture, and First Republic.</p>
