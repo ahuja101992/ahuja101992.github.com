@@ -153,7 +153,7 @@
   <div class="hero-eyebrow">System Design Notes</div>
   <h1>Learning systems<br/><em>by building them.</em></h1>
   <p class="hero-desc">
-    A working study log for Staff-level system design interviews. Each entry documents the full design process — requirements through deep dives — with diagrams, tradeoffs, and honest reasoning throughout.
+    A working study log for Staff-level system design. Each entry documents the full design process — requirements through deep dives — with diagrams, tradeoffs, and honest reasoning throughout.
   </p>
   <div class="hero-rule"></div>
 </header>
@@ -168,8 +168,8 @@
   <a class="card-featured" href="framework.html">
     <div>
       <div class="card-featured-badge">Framework · Read First</div>
-      <h2>The 6-Step Interview Framework</h2>
-      <p>The structured approach behind every design on this site. Requirements, estimation, interface, data model, high-level design, and deep dives — with timing guidance and interview signals for each step.</p>
+      <h2>The 6-Step Design Framework</h2>
+      <p>The structured approach behind every design on this site. Requirements, estimation, interface, data model, high-level design, and deep dives — with timing guidance and key signals for each step.</p>
     </div>
     <div class="card-featured-meta">
       <div class="card-arrow">→</div>
@@ -196,12 +196,63 @@
   <a class="card" href="tinyurl.html">
     <div class="card-num">01</div>
     <div class="card-body">
-      <div class="card-tag">URL Shortener · Read-Heavy · Caching · Hashing</div>
+      <div class="card-tag">URL Shortener · Read-Heavy · Caching · Streaming · Lambda Architecture</div>
       <h3>Design TinyURL</h3>
-      <p>A URL shortening service handling 100M creates/day and 1B redirects/day. Covers short code generation, cache strategy, redirect semantics, and abuse prevention.</p>
-      <span class="card-status status-wip">In Progress</span>
+      <p>100M DAU, 1K writes/sec, 10K reads/sec. Full session — requirements through data model. Two-level caching, Kafka analytics pipeline, pre-generated code pool, duplicate URL logic, and reclamation service.</p>
+      <span class="card-status status-done">Complete</span>
     </div>
   </a>
+
+  <a class="card" href="concepts/code-generator.html">
+    <div class="card-num" style="color:var(--blue)">↳</div>
+    <div class="card-body">
+      <div class="card-tag">Component Deep Dive · Uniqueness at Scale · Distributed Systems</div>
+      <h3>Short Code Generator Design</h3>
+      <p>Component-level deep dive on code generation uniqueness. Four approaches compared — hash, region prefix, pre-generated pool, token service — with nanny service design, reclamation lifecycle, and open questions.</p>
+      <span class="card-status status-wip">Ongoing — needs more research</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- CONCEPTS -->
+<div class="section-label" id="concepts">
+  <span class="section-label-text">Concepts</span>
+  <div class="section-label-line"></div>
+</div>
+
+<div class="cards">
+
+  <a class="card" href="concepts/code-generator.html">
+    <div class="card-num" style="color:var(--blue)">C1</div>
+    <div class="card-body">
+      <div class="card-tag">Uniqueness · Distributed Coordination · Hot Path Design</div>
+      <h3>Short Code Generator</h3>
+      <p>How to generate millions of unique short identifiers without hot-path coordination. Covers hash-based, region prefix, pre-generated pool, and token service approaches. Referenced from TinyURL and any system needing unique IDs at scale.</p>
+      <span class="card-status status-wip">Ongoing</span>
+    </div>
+  </a>
+
+  <div class="card-placeholder">
+    <div class="card-num">C2</div>
+    <div class="card-body">
+      <h3>Sharding — coming soon</h3>
+    </div>
+  </div>
+
+  <div class="card-placeholder">
+    <div class="card-num">C3</div>
+    <div class="card-body">
+      <h3>Consistent Hashing — coming soon</h3>
+    </div>
+  </div>
+
+  <div class="card-placeholder">
+    <div class="card-num">C4</div>
+    <div class="card-body">
+      <h3>Caching Patterns — coming soon</h3>
+    </div>
+  </div>
 
   <div class="card-placeholder">
     <div class="card-num">02</div>
