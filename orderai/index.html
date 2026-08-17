@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrderAI — Akshit Ahuja</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+      --shadow:0 4px 16px rgba(28,35,51,0.09);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:64px 48px 48px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero-grid{display:grid;grid-template-columns:1fr 320px;gap:48px;align-items:start}
+    .hero h1{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:700;line-height:1.2;margin-bottom:14px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:580px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .tag.green{color:var(--green);background:var(--green-light);border-color:var(--green-border)}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;transition:all 0.15s}
+    .btn-primary{background:var(--blue);color:white}
+    .btn-primary:hover{background:#2F4880}
+    .btn-secondary{background:var(--bg-card);color:var(--text-mid);border:1px solid var(--border)}
+    .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--amber);border-radius:10px;padding:22px 24px;box-shadow:var(--shadow-sm)}
+    .stat-card-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .stat-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border)}
+    .stat-row:last-child{border-bottom:none}
+    .stat-label{font-size:13px;color:var(--text-mid)}
+    .stat-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+    .stat-val.blue{color:var(--blue)}
+    .stat-val.amber{color:var(--amber)}
+    .stat-val.green{color:var(--green)}
+    .body{padding:48px 48px 80px;display:grid;grid-template-columns:1fr 280px;gap:48px;align-items:start}
+    .side-col{position:sticky;top:72px}
+    .section{margin-bottom:40px}
+    .section-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .section h2{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.3}
+    .section p{font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px}
+    .section p:last-child{margin-bottom:0}
+    .flow-steps{display:flex;flex-direction:column;gap:0;margin-bottom:0}
+    .flow-step{display:flex;gap:16px;position:relative;padding-bottom:20px}
+    .flow-step:last-child{padding-bottom:0}
+    .flow-step-line{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+    .flow-dot{width:28px;height:28px;border-radius:50%;background:var(--amber-light);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber);flex-shrink:0}
+    .flow-connector{width:2px;flex:1;background:var(--border);margin-top:4px}
+    .flow-step:last-child .flow-connector{display:none}
+    .flow-content{padding-top:3px;padding-bottom:4px}
+    .flow-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .flow-desc{font-size:13px;color:var(--text-mid);line-height:1.65}
+    .feature-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+    .feature-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .feature-list li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .feature-list li strong{color:var(--text);font-weight:600}
+    code{font-family:var(--mono);font-size:12px;background:var(--blue-light);color:var(--blue);border:1px solid #D3DCF0;border-radius:3px;padding:1px 5px}
+    .tech-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm)}
+    .tech-table{width:100%;border-collapse:collapse;font-size:13px}
+    .tech-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+    .tech-table tr:last-child td{border-bottom:none}
+    .tech-table td:first-child{font-family:var(--mono);font-size:11px;color:var(--text-muted);white-space:nowrap;width:130px}
+    .tech-table td:last-child{color:var(--text-mid)}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.7}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .side-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .side-card-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .side-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .side-list li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative;line-height:1.5}
+    .side-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){
+      .hero-grid{grid-template-columns:1fr}.stat-card{display:none}
+      .body{grid-template-columns:1fr;padding:32px 24px 60px}
+      .side-col{position:static}
+      nav{padding:0 20px}.nav-links{display:none}
+      .hero{padding:40px 24px 32px}
+      footer{padding:20px 24px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">akshit.ahuja.js.org</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">System Design</a></li>
+    <li><a href="/market-dashboard/">Market Dashboard</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/">akshit.ahuja.js.org</a> / Projects / OrderAI</div>
+  <div class="hero-grid">
+    <div>
+      <h1><em>OrderAI</em></h1>
+      <p class="hero-desc">An open-source AI assistant for food trucks. Customers scan a QR code, chat with an AI that knows the menu, and place orders that land directly in Square POS — with payment handled through a Square-hosted checkout link. No app download, no cashier queue.</p>
+      <div class="tag-row">
+        <span class="tag blue">MCP</span>
+        <span class="tag blue">Java · Jetty</span>
+        <span class="tag blue">Claude API</span>
+        <span class="tag blue">Square POS</span>
+        <span class="tag blue">React</span>
+        <span class="tag green">Open Source</span>
+        <span class="tag amber">Personal Project</span>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a>
+        <a class="btn btn-secondary" href="/">← Home</a>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">At a glance</div>
+      <div class="stat-row"><span class="stat-label">Protocol</span><span class="stat-val blue">MCP over HTTP</span></div>
+      <div class="stat-row"><span class="stat-label">POS</span><span class="stat-val">Square (OAuth)</span></div>
+      <div class="stat-row"><span class="stat-label">Payment</span><span class="stat-val">Square Checkout</span></div>
+      <div class="stat-row"><span class="stat-label">Token storage</span><span class="stat-val amber">AES-256-GCM</span></div>
+      <div class="stat-row"><span class="stat-label">Multi-POS</span><span class="stat-val green">PosProvider API</span></div>
+      <div class="stat-row"><span class="stat-label">Entry point</span><span class="stat-val">QR code → chat</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="body">
+  <div class="main-col">
+
+    <!-- HOW IT WORKS -->
+    <div class="section">
+      <div class="section-eyebrow">How it works</div>
+      <h2>QR code to paid order in one conversation</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-line"><div class="flow-dot">1</div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <div class="flow-title">Customer scans QR code</div>
+            <p class="flow-desc">Each truck has a unique QR code that opens the customer chat page in their browser. No app download, no account required.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-line"><div class="flow-dot">2</div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <div class="flow-title">Chat with the AI</div>
+            <p class="flow-desc">Claude knows the truck's full menu (pulled live from Square catalog), can answer questions about ingredients and allergens, and takes the order conversationally.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-line"><div class="flow-dot">3</div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <div class="flow-title">MCP tools execute the order</div>
+            <p class="flow-desc">Claude calls <code>place_order</code> via the MCP server, which hits Square Orders API. One MCP server instance per truck, registered dynamically — no server restart needed for new trucks.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-line"><div class="flow-dot">4</div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <div class="flow-title">Payment via Square checkout link</div>
+            <p class="flow-desc">Claude calls <code>create_checkout_link</code> — Square generates a hosted payment page. No card data touches the server. Customer pays, Square notifies the truck.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-line"><div class="flow-dot">5</div><div class="flow-connector"></div></div>
+          <div class="flow-content">
+            <div class="flow-title">Order appears in Square POS</div>
+            <p class="flow-desc">The truck sees the order in their existing Square terminal. Nothing changes on their end — they get a new order notification the same way as always.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MCP DESIGN -->
+    <div class="section">
+      <div class="section-eyebrow">Technical Architecture</div>
+      <h2>MCP as the integration layer</h2>
+      <p>The key design decision was using the Model Context Protocol to keep Claude's reasoning separate from the POS integration. Claude doesn't know or care about Square's API — it calls high-level tools and the MCP server handles the translation.</p>
+      <ul class="feature-list">
+        <li><strong><code>list_menu</code></strong> — fetches catalog from Square for the specific truck location. Location filter was a critical bug fix — without explicit <code>.locationIds()</code>, both demo trucks returned the same menu.</li>
+        <li><strong><code>place_order</code></strong> — creates an order in Square Orders API with line items, quantities, and modifiers.</li>
+        <li><strong><code>get_order_status</code></strong> — lets customers check their order after submission.</li>
+        <li><strong><code>create_checkout_link</code></strong> — generates a Square-hosted payment URL. No PCI scope on the server.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">Key architecture decision</div>
+        <p>One <code>McpSyncServer</code> instance per truck, not per request. The truckId lives in the constructor closure — each instance is scoped to one truck's credentials. New trucks register via <code>trucks.json</code> with a <code>ConcurrentHashMap</code>, live without restart.</p>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="section">
+      <div class="section-eyebrow">Security</div>
+      <h2>Token storage and OAuth</h2>
+      <ul class="feature-list">
+        <li><strong>AES-256-GCM encryption:</strong> Square OAuth tokens encrypted at rest. No plaintext credentials anywhere in the codebase or config files.</li>
+        <li><strong>Automatic token refresh:</strong> Access tokens are refreshed before expiry transparently — merchants stay connected without re-authorizing.</li>
+        <li><strong>Square-hosted payments:</strong> Payment page is entirely on Square's domain. No card data, no PCI scope on the OrderAI server.</li>
+        <li><strong>OAuth onboarding flow:</strong> Merchants connect their Square account through a standard OAuth flow on the merchant onboarding page. Token exchange and storage happens server-side.</li>
+      </ul>
+    </div>
+
+    <!-- MULTI-POS -->
+    <div class="section">
+      <div class="section-eyebrow">Extensibility</div>
+      <h2>Built for multiple POS systems</h2>
+      <p>A <code>PosProvider</code> interface abstracts all POS operations — menu fetch, order placement, checkout link creation. Square is the first implementation. Adding Toast, Clover, or any other system is a new class implementing the interface, not a rewrite of the core.</p>
+      <p>Toast integration was the next target but hit a wall — Toast's developer portal routes to a sales demo request with up to a 30-day approval timeline. The interface is ready when access opens up.</p>
+    </div>
+
+    <!-- STACK -->
+    <div class="section">
+      <div class="section-eyebrow">Tech Stack</div>
+      <h2>What it's built on</h2>
+      <div class="tech-wrap">
+        <table class="tech-table">
+          <tr><td>MCP server</td><td>Java · Jetty HTTP server exposing MCP tools over HTTP</td></tr>
+          <tr><td>LLM</td><td>Claude API with <code>mcp_servers</code> parameter pointing to local MCP server</td></tr>
+          <tr><td>POS integration</td><td>Square Orders API, Catalog API, Checkout API — via Square Java SDK</td></tr>
+          <tr><td>OAuth</td><td>Square OAuth 2.0 — merchant onboarding, token exchange, AES-256-GCM storage</td></tr>
+          <tr><td>Web UI</td><td>Three pages: landing, merchant onboarding, customer chat — served by Jetty</td></tr>
+          <tr><td>Truck config</td><td>trucks.json — credential store, ConcurrentHashMap for live registration</td></tr>
+          <tr><td>Multi-POS</td><td>PosProvider interface — Square is implementation #1</td></tr>
+          <tr><td>Dev tooling</td><td>ngrok for local HTTPS (MCP requires public URL), Claude Code in IntelliJ + VS Code</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <div class="callout-label">Open source</div>
+      <p>OrderAI is open source. The MCP pattern, Square integration, and PosProvider abstraction are all reusable for anyone building AI-powered POS integrations. Check the GitHub repo for the full source.</p>
+    </div>
+
+  </div>
+
+  <div class="side-col">
+    <div class="side-card">
+      <div class="side-card-label">MCP Tools</div>
+      <ul class="side-list">
+        <li><code style="font-family:var(--mono);font-size:11px;color:var(--blue)">list_menu</code></li>
+        <li><code style="font-family:var(--mono);font-size:11px;color:var(--blue)">place_order</code></li>
+        <li><code style="font-family:var(--mono);font-size:11px;color:var(--blue)">get_order_status</code></li>
+        <li><code style="font-family:var(--mono);font-size:11px;color:var(--blue)">create_checkout_link</code></li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Phases built</div>
+      <ul class="side-list">
+        <li>Phase 1 — Read-only MCP + Claude Desktop</li>
+        <li>Phase 2 — Square OAuth onboarding</li>
+        <li>Phase 3 — Order placement + checkout</li>
+        <li>Next — Toast POS integration</li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Demo trucks</div>
+      <ul class="side-list">
+        <li>Joe's Tacos (Square sandbox)</li>
+        <li>Burger Bus (Square sandbox)</li>
+        <li>Realistic menus with allergen variety</li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Related projects</div>
+      <ul class="side-list">
+        <li><a href="/hireloop/" style="color:var(--blue);text-decoration:none">HireLoop →</a></li>
+        <li><a href="/system-design/" style="color:var(--blue);text-decoration:none">System Design Notes →</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · orderai · 2026</span>
+    <div class="footer-links">
+      <a href="/">← Home</a>
+      <a href="/hireloop/">HireLoop</a>
+      <a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
