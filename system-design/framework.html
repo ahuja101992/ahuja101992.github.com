@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The 6-Step Interview Framework — System Design Notes</title>
+  <title>The 6-Step Design Framework — System Design Notes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Analytics: replace YOUR-DOMAIN with your Plausible site domain when ready -->
@@ -167,7 +167,8 @@
 <nav>
   <a class="nav-brand" href="index.html">System Design Notes</a>
   <ul class="nav-links">
-    <li><a href="index.html">← All Designs</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="index.html">System Design</a></li>
     <li><a href="/market-dashboard/">Market Dashboard</a></li>
     <li><a href="https://github.com/akshit101" target="_blank">GitHub ↗</a></li>
   </ul>
@@ -175,12 +176,12 @@
 
 <header class="hero">
   <div class="breadcrumb"><a href="index.html">System Design Notes</a> / Framework</div>
-  <h1>The <em>6-Step</em> Interview Framework</h1>
-  <p class="hero-desc">A structured approach for Staff-level system design interviews. Every design on this site follows these six steps — in order, with time discipline. Read this first.</p>
+  <h1>The <em>6-Step</em> Design Framework</h1>
+  <p class="hero-desc">A structured approach to designing systems at scale. Every design on this site follows these six steps — in order, with time discipline. Read this first.</p>
   <div class="hero-meta">
-    <span class="meta-tag">~45 min interview</span>
-    <span class="meta-tag">Adapted from RESHADED</span>
-    <span class="meta-tag">Staff / FAANG level</span>
+    <span class="meta-tag">~45 min session</span>
+    <span class="meta-tag">6-step framework</span>
+    <span class="meta-tag">Staff-level depth</span>
   </div>
 </header>
 
@@ -209,7 +210,7 @@
 
       <!-- FLOW DIAGRAM -->
       <div class="diagram-wrap">
-        <div class="diagram-label">Interview flow — 45 minutes</div>
+        <div class="diagram-label">Design session flow — 45 minutes</div>
         <div class="diagram-box">
           <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
             <defs>
@@ -268,7 +269,7 @@
             <rect x="400" y="172" width="348" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
             <text x="574" y="194" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">06</text>
             <text x="574" y="210" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Deep Dive &amp; Tradeoffs</text>
-            <text x="574" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~15 min · interviewer-guided</text>
+            <text x="574" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~15 min · discussion-driven</text>
 
             <!-- feedback arrow: deep dive back to high-level -->
             <path d="M 400 207 Q 360 207 360 155 Q 360 95 400 95" fill="none" stroke="#C8D0E0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
@@ -314,7 +315,8 @@
 
       <div class="callout">
         <div class="callout-label">The core principle</div>
-        <p>The first four steps are <strong>foundation work</strong> — they exist so that your High-Level Design is grounded in real constraints, not wishful thinking. Most candidates rush to step 5. The ones who spend the first 20 minutes well draw better diagrams and defend them better in step 6.</p>
+        <p>The first four steps are <strong>foundation work</strong> — they exist so that your High-Level Design is grounded in real constraints, not wishful thinking. Most people rush to step 5. They start drawing boxes before they know what the system does, how many users it serves, or what the API looks like. The result is a diagram that looks impressive but collapses under the first pointed question. The ones who spend the first 20 minutes well draw better diagrams, defend them better, and spot their own weaknesses before anyone else does.</p>
+        <p style="margin-top:10px">The 45 minutes are also a negotiation — you control the pacing. Going deep on requirements for 10 minutes is fine if it produces a cleaner scope. Rushing through estimation to "get to the interesting part" is a mistake that costs you later. Every step earns the next one.</p>
       </div>
     </section>
 
@@ -332,7 +334,11 @@
         <div class="step-time">⏱ ~5 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">The most common mistake in design interviews is jumping to solutions. Interviewers deliberately leave the problem ambiguous — your first job is to compress that ambiguity into an agreed-upon scope, without asking so many questions you appear lost.</p>
+        <p class="step-desc">The most common mistake when designing systems is jumping to solutions. Problem statements are deliberately left ambiguous — the ambiguity is the test. Your job is to compress that ambiguity into a concrete, agreed-upon scope without asking so many questions that you appear lost or unprepared.</p>
+
+        <p class="step-desc">The hardest part of this step for most people is knowing <em>what</em> to ask. The instinct is to ask about features — "can users edit their URLs?" — but the more important questions are about constraints: <em>how many users? how fast must it respond? what happens if a component fails?</em> Features tell you what the system does. Constraints tell you how hard building it actually is.</p>
+
+        <p class="step-desc">A reliable structure is to split requirements into two explicit buckets: <strong>functional</strong> (what the system does for users) and <strong>non-functional</strong> (how well it does it). Fill each deliberately, then confirm the scope back before moving on. Saying "so to confirm — users can create and redirect short URLs, analytics is in scope, and link editing is out of scope — does that sound right?" signals that you're working collaboratively, not just talking at a whiteboard.</p>
 
         <!-- DIAGRAM: FR vs NFR split -->
         <div class="diagram-wrap">
@@ -366,26 +372,28 @@
           </div>
         </div>
 
-        <div class="sub-heading">Functional Requirements</div>
+        <div class="sub-heading">Functional Requirements — what the system does</div>
+        <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">Walk through the user journey. A user arrives, does something, gets something back. What are those actions? Which are core and which are edge cases? Name what is explicitly out of scope — this is as important as naming what is in scope, because it sets the boundary that prevents scope creep later.</p>
         <ul class="checklist">
-          <li><strong>Core user actions:</strong> What does the user actually do? Create, read, search, stream, delete?</li>
-          <li><strong>Carve out scope explicitly:</strong> "For this interview I'll focus on X and Y, not Z." Name what's out of scope — don't let it haunt later steps.</li>
-          <li><strong>Clarify the happy path:</strong> What does success look like for the primary use case?</li>
-          <li><strong>Edge cases up front:</strong> Real-time vs. eventual? Read-heavy or write-heavy? Hard consistency requirements?</li>
+          <li><strong>Core user actions:</strong> What does the user actually do? Create, read, search, stream, delete? Be specific — "manage content" is not a user action.</li>
+          <li><strong>Scope explicitly:</strong> "For this design I'll focus on X and Y, not Z." Naming what's out of scope prevents the design from expanding mid-session into territory you haven't thought through.</li>
+          <li><strong>Clarify the happy path:</strong> What does success look like for the primary use case? Walk through it step by step before worrying about edge cases.</li>
+          <li><strong>Ask the hidden dependencies:</strong> Does this feature require real-time updates? Strong consistency? Does it touch user data that has compliance implications? These surface non-functional requirements early.</li>
         </ul>
 
-        <div class="sub-heading">Non-Functional Requirements</div>
+        <div class="sub-heading">Non-Functional Requirements — how well the system does it</div>
+        <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">These are the constraints that make the problem hard. A URL shortener serving 100 users is trivially simple. One serving 100 million users requires real design thinking. You cannot have a meaningful architectural conversation without agreeing on these numbers first.</p>
         <ul class="checklist">
-          <li><strong>Scale targets:</strong> Users, RPS, data volume — get an order of magnitude, not exactness.</li>
-          <li><strong>Latency SLAs:</strong> Is <code>p99 &lt; 100ms</code> a hard requirement or a nice-to-have?</li>
-          <li><strong>Availability target:</strong> 99.9% vs 99.99% changes the design significantly — single-region vs multi-region.</li>
-          <li><strong>Consistency model:</strong> Strong vs. eventual — especially critical for distributed state.</li>
-          <li><strong>Durability:</strong> What's the cost of data loss? Financial records vs. social media drafts are very different.</li>
+          <li><strong>Scale targets:</strong> Users, RPS, data volume — get an order of magnitude, not exactness. Is this 1K writes/sec or 100K writes/sec? That changes everything.</li>
+          <li><strong>Latency SLAs:</strong> Is <code>p99 &lt; 100ms</code> a hard requirement or a nice-to-have? Hard latency SLAs rule out certain storage choices and force caching strategies.</li>
+          <li><strong>Availability target:</strong> 99.9% (8.7 hours downtime/year) vs 99.99% (52 minutes/year) are fundamentally different architectures — single-region vs multi-region, one DB vs replicated clusters.</li>
+          <li><strong>Consistency model:</strong> Strong vs. eventual — especially critical for distributed state. Can two users see different data temporarily? For how long? What's the user-visible impact?</li>
+          <li><strong>Durability:</strong> What's the cost of data loss? Financial records and social media drafts have completely different durability requirements. Know which one you're building.</li>
         </ul>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Explicitly labeling the FR/NFR split shows Staff-level systems thinking — most candidates conflate them. End step 1 with a verbal confirm: <strong>"So to confirm scope: users can do X, the system must handle Y scale, and strong consistency isn't required. Sound right?"</strong> This demonstrates structured thinking and gives the interviewer a checkpoint.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>Explicitly labeling the FR/NFR split shows senior systems thinking — most people conflate them, leading to requirements lists that mix "users can upload photos" with "99.9% availability" in a single undifferentiated list. The split forces clarity: one type defines scope, the other defines difficulty. End this step with a verbal confirm: <strong>"So to confirm scope: users can do X, the system must handle Y scale, and strong consistency isn't required. Sound right?"</strong> This closes the loop, creates shared understanding, and gives you a record to refer back to when deep-dive questions arise.</p>
         </div>
       </div>
     </section>
@@ -404,7 +412,11 @@
         <div class="step-time">⏱ ~5 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">Estimation isn't a math test — it's a reasoning signal. The interviewer wants to see that you can derive architecture constraints from numbers. A system at 1K RPS and one at 1M RPS need fundamentally different designs. Get the numbers on the board early so every decision that follows is grounded.</p>
+        <p class="step-desc">Estimation is not a math test — it is a reasoning signal. The goal is to show that you can derive architecture constraints from numbers. A system at 1K RPS and one at 1M RPS need fundamentally different designs — different numbers of servers, different caching strategies, different database choices. You cannot know which one you're building without the numbers.</p>
+
+        <p class="step-desc">The most important thing to understand about this step is <strong>what the numbers are for.</strong> They are not for precision. They are for order-of-magnitude reasoning that constrains your architecture. "About 1,000 writes per second" is exactly as useful as "1,157 writes per second" — the architecture is identical. But "about 1,000" versus "about 100,000" produces completely different designs. Round aggressively. Get the order of magnitude right and move on.</p>
+
+        <p class="step-desc">Work in a chain: start from what you know (users, usage patterns) and derive what you need (RPS, storage, bandwidth, cache size). Each number unlocks the next. Each final number should map to an architectural decision — otherwise, why compute it?</p>
 
         <!-- ESTIMATION FLOW DIAGRAM -->
         <div class="diagram-wrap">
@@ -498,8 +510,8 @@
         </div>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Don't just produce numbers — narrate your reasoning: <strong>"I'm assuming 10% of users are active daily, that gives us…"</strong> The interviewer is scoring your reasoning process, not your arithmetic accuracy. Sanity-check final numbers out loud before moving on.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>Don't just produce numbers — narrate your reasoning out loud: <strong>"I'm assuming 10% of users are active daily, so 100M DAU × 10% = 10M active users. Each creates about 1 URL per day on average, so that's 10M / 86,400 seconds ≈ 115 writes/sec."</strong> The reasoning process matters more than the arithmetic accuracy. If you're wrong by a factor of 2, that's fine — the architecture is the same. If you're wrong by a factor of 1,000 because you skipped the reasoning, that's a real problem. Sanity-check your final numbers before moving on: 10,000 writes/sec sounds plausible for a popular service; 10 million writes/sec probably does not.</p>
         </div>
       </div>
     </section>
@@ -518,7 +530,11 @@
         <div class="step-time">⏱ ~5 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">Define the API before drawing boxes. This forces you to think from the consumer's perspective, surfaces ambiguities missed in step 1, and creates a stable contract that anchors the rest of the design. You're not writing production code — sketch the signature, key parameters, and response shape.</p>
+        <p class="step-desc">Define the API before drawing boxes. This step is often skipped entirely, which is a mistake. The API is the contract between the system and the outside world. Defining it first forces you to think from the consumer's perspective, surfaces ambiguities you missed in step 1, and creates a stable reference that anchors everything you design after it.</p>
+
+        <p class="step-desc">You are not writing production code here. You are sketching. Write the endpoint name, the method, the key parameters, and the response shape. That is enough. The goal is to have something concrete to point to when you say "this component handles the URL creation" — you mean the component that serves <code>POST /shorten</code> and returns <code>{ shortUrl }</code>. The API gives every component a clear job description.</p>
+
+        <p class="step-desc">A secondary benefit: defining the API often reveals scope gaps. When you try to write the endpoint for "give users their analytics" and you realize you never decided whether analytics is in scope, you have found a requirement that slipped through step 1. Better to find it now than when you're mid-diagram.</p>
 
         <!-- API ANATOMY DIAGRAM -->
         <div class="diagram-wrap">
@@ -571,16 +587,16 @@
         </div>
 
         <ul class="checklist">
-          <li><strong>API style:</strong> REST, gRPC, GraphQL, WebSocket — pick the right tool and justify it briefly.</li>
-          <li><strong>Core endpoints:</strong> One per major functional requirement. Name, method, key params, response shape.</li>
-          <li><strong>Auth/Identity:</strong> Where does user identity come from? API key, JWT, session token?</li>
-          <li><strong>Error contract:</strong> What does failure look like? Rate limits, not-found, auth failure.</li>
-          <li><strong>Pagination / streaming:</strong> How does the client consume large result sets?</li>
+          <li><strong>API style:</strong> REST, gRPC, GraphQL, WebSocket — pick the right tool and justify it in one sentence. REST for most CRUD systems. gRPC for internal service-to-service with strict contracts. WebSocket for real-time bidirectional. GraphQL when the client needs flexible querying over a rich data graph.</li>
+          <li><strong>Core endpoints:</strong> One per major functional requirement from step 1. Name, method, key params, response shape. Keep it to the core paths — you do not need to design every error code or query parameter here.</li>
+          <li><strong>Auth/Identity:</strong> Where does user identity come from? API key for developer APIs. JWT for stateless user sessions. Session cookie for traditional web apps. This matters because it affects what every other component needs to validate.</li>
+          <li><strong>Error contract:</strong> What does failure look like from the client's perspective? Rate limit exceeded (429), resource not found (404), auth failure (401 vs 403). Define this now so the internal design knows what it needs to produce.</li>
+          <li><strong>Pagination / streaming:</strong> If a response can return many items — search results, a feed, a list of URLs — how does the client consume them? Offset-based pagination is simple but breaks at scale. Cursor-based is robust. Streaming is for real-time data. Pick one and name it.</li>
         </ul>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>This step reveals whether you think product-first or infrastructure-first. Strong candidates define the interface the way a platform engineer would — they think about <strong>what changes independently</strong>: client contract vs. internal routing vs. storage layer. Weak candidates skip this and start drawing load balancers without knowing what the system actually does.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>This step reveals whether you think product-first or infrastructure-first. People who skip it and go straight to drawing servers are thinking infrastructure-first — they are designing a machine without knowing what it produces. People who define the API first are thinking product-first — they know exactly what the system delivers to the outside world before they decide how to build it. <strong>What changes independently?</strong> The client contract (API) changes independently of the internal routing, which changes independently of the storage layer. Designing them as one monolith is the most common source of brittle systems.</p>
         </div>
       </div>
     </section>
@@ -599,7 +615,11 @@
         <div class="step-time">⏱ ~5 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">Most design flaws trace back to a mismatched data model. Define your entities, their relationships, and — critically — your read/write access patterns <em>before</em> choosing a storage technology. Storage choice should follow access pattern, not the other way around.</p>
+        <p class="step-desc">Most design flaws trace back to a mismatched data model. The most common version of this mistake is choosing a storage technology before defining the access patterns — "we'll use Cassandra" before you know whether the primary query is a key lookup, a range scan, or a full-text search. The storage choice should be the last decision in this step, not the first.</p>
+
+        <p class="step-desc">Start with your entities and their relationships. Then ask: how will this data actually be read and written? What are the hot query patterns? Who reads what, how often, and in what shape? A query that needs to join five tables on every read is not a Redis problem. A query that always fetches a record by a single key and never joins anything is not a Postgres problem either — but Postgres handles it fine, so you might still use it for simplicity.</p>
+
+        <p class="step-desc">The access pattern drives everything: which fields to index, whether to normalize or denormalize, which storage engine fits, and where the bottlenecks will appear at scale. Get this right and step 5 becomes much easier. Get it wrong and your High-Level Design will have a data layer that quietly cannot serve the traffic pattern you committed to in step 2.</p>
 
         <!-- STORAGE DECISION DIAGRAM -->
         <div class="diagram-wrap">
@@ -662,15 +682,15 @@
         <ul class="checklist">
           <li><strong>Core entities:</strong> What are the 3–5 primary data objects? Sketch their key fields.</li>
           <li><strong>Relationships:</strong> One-to-many, many-to-many — does this need foreign keys or denormalization?</li>
-          <li><strong>Access patterns:</strong> Read by ID? Range scans? Full-text search? This drives the storage choice.</li>
-          <li><strong>SQL vs NoSQL:</strong> Don't default — justify. ACID needs? SQL. Flexible schema + scale? NoSQL.</li>
-          <li><strong>Indexes:</strong> What are your hot query patterns? Which fields need indexing?</li>
-          <li><strong>Partitioning key:</strong> For distributed storage — what's your shard key and why?</li>
+          <li><strong>Access patterns:</strong> Read by ID? Range scans? Full-text search? Time-series queries? This is the most important question in this step. Every other decision flows from it.</li>
+          <li><strong>SQL vs NoSQL — justify the choice:</strong> SQL when you need ACID transactions, complex joins, or relational integrity. NoSQL when you need horizontal scale, a flexible schema, or your access pattern is purely key-value or document-based. The mistake is defaulting to one without reasoning from the access pattern.</li>
+          <li><strong>Indexes:</strong> What are your hot query patterns? Which fields will you search or filter on? An unindexed column in a 35TB table is effectively unusable for queries. Name your indexes explicitly.</li>
+          <li><strong>Partitioning key:</strong> For distributed storage — what's your shard key and why? A bad shard key creates hot spots (one partition gets all the traffic). A good shard key distributes load evenly. This is the hardest data model decision at scale.</li>
         </ul>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>Picking a storage type without mentioning access patterns is a yellow flag. The best candidates say: <strong>"My primary read pattern is lookup by short code, O(1) — this maps naturally to a key-value store."</strong> The choice follows the reasoning, not the other way around.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>Picking a storage type without mentioning access patterns is the most common data model mistake. It suggests the storage choice is based on familiarity or preference, not the requirements of the system. The right pattern is: describe the access pattern first, then say "this maps naturally to X because…" As a concrete example: <strong>"My primary read pattern is lookup by short code — always a point lookup by a single key, never a join, never a range scan. This maps to a key-value store. I'll use Cassandra because I also need horizontal write scale and built-in TTL support."</strong> The choice follows the reasoning.</p>
         </div>
       </div>
     </section>
@@ -689,7 +709,13 @@
         <div class="step-time">⏱ ~10 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">This is where you put boxes on the board — but only after the four steps above have grounded you. Your goal is a working end-to-end sketch that satisfies the core functional requirements at the estimated scale. Resist the urge to go deep on any single component here.</p>
+        <p class="step-desc">This is where you put boxes on the board — but only after the four steps above have grounded you. Your goal is a working end-to-end sketch that satisfies the core functional requirements at the estimated scale. Resist the urge to go deep on any single component here. Deep dives come in step 6. Step 5 is about getting the full picture on the board first.</p>
+
+        <p class="step-desc">Think of this step as proving your system can work — not that it works perfectly. Can a write request get from client to database? Can a read request get served without hitting the database every time? Can background operations (analytics, cleanup jobs) happen without blocking user-facing requests? If you can trace those flows end-to-end on your diagram, you have a working High-Level Design.</p>
+
+        <p class="step-desc">Label everything. Every box should have a name and a one-line description of its role. Every arrow should show what protocol or data is being passed. Show both the write path and the read path explicitly — they are often different, and showing both demonstrates you understand the system's traffic patterns. If your diagram has unlabeled boxes or arrows, you have an incomplete design.</p>
+
+        <p class="step-desc">The single most important discipline in this step: <strong>name your own bottleneck before anyone else does.</strong> Look at your diagram and ask "where does this break under 10× load?" Point to it. Say "the database write path is the bottleneck here — I'll address this in the deep dive." This is the difference between someone who designed a system and someone who just drew a picture.</p>
 
         <!-- GENERIC HLD DIAGRAM -->
         <div class="diagram-wrap">
@@ -791,22 +817,22 @@
 
         <ul class="checklist">
           <li><strong>Client layer:</strong> Web, mobile, SDK — what initiates requests?</li>
-          <li><strong>DNS + CDN:</strong> Where does traffic enter? Static assets vs. dynamic routing?</li>
-          <li><strong>Load balancer:</strong> L4 vs L7, routing strategy, sticky sessions needed?</li>
-          <li><strong>Application servers:</strong> Stateless + auto-scaling. How many at peak RPS?</li>
-          <li><strong>Cache layer:</strong> Read-through, write-through, or aside? Redis vs Memcached?</li>
-          <li><strong>Primary datastore:</strong> Your choice from step 4, with replicas called out.</li>
-          <li><strong>Message queue:</strong> Do any operations need to be async? Kafka, SQS, Pub/Sub?</li>
+          <li><strong>DNS + CDN:</strong> Where does traffic enter the system? Static assets (JS, CSS, images) should be served from a CDN — they never need to reach your application servers. Dynamic requests go through DNS to your load balancer. Calling this out explicitly shows you understand the traffic hierarchy.</li>
+          <li><strong>Load balancer:</strong> L4 (TCP-level, fast, dumb) vs L7 (HTTP-level, can route by path or header). Most application load balancers are L7. Mention the routing strategy: round robin, least connections, or consistent hashing if you need sticky sessions.</li>
+          <li><strong>Application servers:</strong> Stateless by default — session state lives in Redis or the DB, not on the server. Stateless servers can be replaced or scaled without coordination. Call out how many you need at peak RPS: at 10K RPS and ~1K RPS per server, that's ~10 servers plus buffer.</li>
+          <li><strong>Cache layer:</strong> Redis for most cases. Explain the caching strategy: read-through (check cache first, fetch DB on miss), write-through (write to cache and DB simultaneously), or cache-aside (application manages both explicitly). Each has different consistency tradeoffs.</li>
+          <li><strong>Primary datastore:</strong> Your choice from step 4, now with replicas called out. Read replicas handle read traffic. The primary handles writes. Mention replication — synchronous (strong consistency) or asynchronous (eventual consistency).</li>
+          <li><strong>Message queue:</strong> Any operation that does not need to be synchronous should be async. Analytics events, email notifications, cleanup jobs — these do not need to block the user's request. Kafka for high-throughput ordered streams. SQS for simpler task queues.</li>
         </ul>
 
         <div class="callout amber">
-          <div class="callout-label">Drawing Discipline</div>
-          <p>Label every arrow with the protocol or data being passed. Show data flow for <strong>both the write path and the read path</strong> — they're often different. If you have a cache, explicitly show cache hit vs. cache miss flow. An unlabeled diagram is an unclear design.</p>
+          <div class="callout-label">Drawing discipline</div>
+          <p>Label every arrow with the protocol or data being passed. Show data flow for <strong>both the write path and the read path</strong> — they are often completely different components in different sequences. If you have a cache, show the cache hit flow separately from the cache miss flow. If you have an async queue, show what feeds it and what consumes it. An unlabeled diagram is an incomplete design.</p>
         </div>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>At Staff level, proactively call out the <strong>bottleneck in your own design</strong> before they ask: <em>"The datastore is the bottleneck at this write rate — I'll address that in the deep dive."</em> This shows architectural ownership, not just pattern recognition.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>Proactively calling out the bottleneck in your own design is one of the strongest signals of architectural ownership. Anyone can draw boxes and arrows. The person who built the system knows where it breaks. Before finishing this step, look at your diagram and say out loud: <em>"The write path has a bottleneck here at the database — at 10× current load this would be the first thing to fail. I'll address this in the deep dive."</em> This shows you are not just presenting a design — you are owning it.</p>
         </div>
       </div>
     </section>
@@ -825,7 +851,13 @@
         <div class="step-time">⏱ ~15 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">This is where Staff-level candidates separate themselves. You've drawn a working system — now you and the interviewer go deep on the hardest parts. The best candidates proactively steer this conversation toward the most interesting tradeoffs, rather than waiting to be asked.</p>
+        <p class="step-desc">This is where the design gets interesting. You have drawn a working system — now you go deep on the hardest parts. The best designs proactively address the most interesting tradeoffs rather than leaving gaps unexplored. This step is also where you transition from "presenting a design" to "owning a system."</p>
+
+        <p class="step-desc">The key discipline is prioritization. You have 15 minutes. You cannot go deep on everything. The right approach: start with the bottleneck you already called out in step 5, pick 2–3 additional areas that matter most for this specific system, go genuinely deep on each one (not a surface-level mention), and leave time for questions. Covering 6 areas in 2 minutes each is far weaker than covering 3 areas in 5 minutes each. Depth signals mastery. Breadth signals survey reading.</p>
+
+        <p class="step-desc">Name tradeoffs explicitly. Every deep dive area has at least two reasonable approaches, and every approach gives something up to gain something else. <strong>"I could use synchronous replication for strong consistency, but at the cost of write latency — so I'll use asynchronous replication and accept eventual consistency on reads, because the user-visible impact is acceptable."</strong> That is how you talk about a tradeoff. Not "I chose async replication" — that's a decision without reasoning. Not "there are tradeoffs with replication" — that's a placeholder without content.</p>
+
+        <p class="step-desc">The most powerful thing you can do in this step is demonstrate <strong>intellectual honesty about your own design's weaknesses.</strong> Pointing out a flaw before someone else asks about it, then explaining how you'd address it, signals that you understand the system at a level beyond what's drawn on the board. Pretending the design has no weaknesses signals the opposite.</p>
 
         <!-- DEEP DIVE DECISION MAP -->
         <div class="diagram-wrap">
@@ -857,7 +889,7 @@
               <!-- Reserve time -->
               <rect x="376" y="70" width="140" height="60" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
               <text x="446" y="92" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#2E7D52">Reserve ~10 min</text>
-              <text x="446" y="107" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">for interviewer questions</text>
+              <text x="446" y="107" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">for open discussion</text>
               <text x="446" y="120" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">best signal is here</text>
 
               <!-- Common areas strip -->
@@ -881,18 +913,18 @@
         </div>
 
         <ul class="checklist">
-          <li><strong>Scalability bottlenecks:</strong> Where does the system break under 10× load? What's the mitigation?</li>
-          <li><strong>Failure modes:</strong> What happens when a DB replica lags? A cache is cold? A service goes down?</li>
-          <li><strong>Consistency tradeoffs:</strong> Where did you accept eventual consistency? What's the user-visible impact?</li>
-          <li><strong>Hot spots / thundering herd:</strong> What if one resource gets 100× normal traffic?</li>
-          <li><strong>ID generation:</strong> UUID vs auto-increment vs Snowflake — why does it matter here?</li>
-          <li><strong>Security:</strong> Auth, rate limiting, input validation — where are the attack surfaces?</li>
-          <li><strong>Monitoring &amp; observability:</strong> What metrics matter? How do you know the system is healthy?</li>
+          <li><strong>Scalability bottlenecks:</strong> Where does the system break under 10× load? Is it the database write throughput? The cache memory? The message queue consumer lag? Name the specific bottleneck, explain why it breaks there, and describe the mitigation — read replicas, sharding, horizontal scaling, tiered caching.</li>
+          <li><strong>Failure modes:</strong> What happens when a DB replica lags? When the cache is cold after a restart? When a downstream service is down? The best designs fail gracefully — they degrade rather than crash. Explain which failures are acceptable (a momentarily stale cache) and which are not (lost writes).</li>
+          <li><strong>Consistency tradeoffs:</strong> Where did you accept eventual consistency, and what is the user-visible impact? "User A creates a URL and User B tries to follow it 50ms later — in the worst case, User B gets a 404 before the replica catches up." Naming the concrete user experience of an eventual consistency window is much stronger than abstractly saying "I used eventual consistency."</li>
+          <li><strong>Hot spots / thundering herd:</strong> What if a single URL receives 1,000× normal traffic because a celebrity tweeted it? What if your cache restarts and 10,000 requests simultaneously try to populate it from the DB? These are real failure patterns with specific mitigations — L1 local cache for hot URLs, probabilistic early expiry for thundering herd.</li>
+          <li><strong>ID generation:</strong> UUID vs auto-increment vs Snowflake-style IDs — the choice matters for indexing performance, distribution across shards, and debugging. Auto-increment IDs are predictable (security risk), UUID inserts fragment B-tree indexes, Snowflake IDs are time-ordered and shard-friendly.</li>
+          <li><strong>Security:</strong> Rate limiting (token bucket per IP at the load balancer), input validation (reject malformed URLs, known malicious domains), auth scope (what can an anonymous user do vs. an authenticated user). Name the attack surface, not just the mitigation.</li>
+          <li><strong>Monitoring &amp; observability:</strong> What metrics would tell you the system is unhealthy before users notice? Cache hit rate dropping means either the cache is too small or traffic patterns changed. Write latency p99 spiking means the DB is under pressure. Define your SLIs and what their violation looks like in practice.</li>
         </ul>
 
         <div class="callout">
-          <div class="callout-label">Interview Signal</div>
-          <p>The mark of a Staff-level engineer in this step is <strong>intellectual honesty about the tradeoffs in their own design</strong>. Saying <em>"this design has a write bottleneck at the DB layer — here are three ways to address it and why I'd start with read replicas"</em> is far stronger than pretending the design is perfect. Interviewers probe for exactly this.</p>
+          <div class="callout-label">Key Signal</div>
+          <p>Intellectual honesty about your own design's weaknesses is the clearest signal of deep system understanding. Saying <em>"this design has a write bottleneck at the DB layer — here are three ways to address it: read replicas for read-heavy load, connection pooling to reduce connection overhead, and sharding if we need to scale writes — I'd start with read replicas because it's lowest complexity for the biggest gain"</em> is not an admission of a flawed design. It is evidence that you understand the system at a level beyond what's drawn on the board. That is what separates a good design from a great one.</p>
         </div>
       </div>
     </section>
