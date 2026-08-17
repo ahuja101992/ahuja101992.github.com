@@ -1,357 +1,1005 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Design TinyURL — System Design Notes</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- Analytics: replace YOUR-DOMAIN with your Plausible site domain when ready -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --white: #FFFFFF; --bg: #F7F8FA; --bg-card: #FFFFFF;
-      --border: #E2E6EF; --border-mid: #C8D0E0;
-      --text: #1C2333; --text-mid: #4A5568; --text-muted: #8896AA;
-      --blue: #3D5A99; --blue-light: #EBF0FA; --blue-mid: #6B85BD;
-      --amber: #C87533; --amber-light: #FDF3E9;
-      --green: #2E7D52; --green-light: #E8F5EE;
-      --sans: 'Inter', system-ui, sans-serif;
-      --serif: 'Playfair Display', Georgia, serif;
-      --mono: 'JetBrains Mono', monospace;
-      --shadow-sm: 0 1px 3px rgba(28,35,51,0.06);
-      --shadow: 0 4px 12px rgba(28,35,51,0.08);
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+      --shadow:0 4px 16px rgba(28,35,51,0.09);
     }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
 
-    nav { border-top: 3px solid var(--amber); position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.93); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); height: 57px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; }
-    .nav-brand { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a { font-size: 13px; font-weight: 500; color: var(--text-mid); text-decoration: none; transition: color 0.15s; }
-    .nav-links a:hover { color: var(--blue); }
+    /* NAV */
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
 
-    .hero { max-width: 100%; padding: 60px 48px 40px; border-bottom: 1px solid var(--border); }
-    .breadcrumb { font-family: var(--mono); font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-    .breadcrumb a { color: var(--blue); text-decoration: none; }
-    .hero h1 { font-family: var(--serif); font-size: clamp(26px, 4vw, 40px); font-weight: 700; line-height: 1.2; color: var(--text); margin-bottom: 14px; }
-    .hero h1 em { font-style: italic; color: var(--amber); }
-    .hero-desc { font-size: 16px; color: var(--text-mid); max-width: 600px; line-height: 1.8; margin-bottom: 24px; }
-    .hero-meta { display: flex; gap: 12px; flex-wrap: wrap; }
-    .meta-tag { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
-    .meta-tag.wip { color: var(--amber); background: var(--amber-light); border-color: #EDCFA8; }
+    /* HERO */
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:700px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .tag.green{color:var(--green);background:var(--green-light);border-color:var(--green-border)}
 
-    .layout { max-width: 100%; padding: 40px 48px 80px; }
+    /* SECTION NAV PILLS */
+    .snav{display:flex;gap:7px;flex-wrap:wrap;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--bg-card)}
+    .snav a{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);text-decoration:none;transition:all 0.15s}
+    .snav a:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-light)}
+    .snav a.done{color:var(--green);border-color:var(--green-border);background:var(--green-light)}
+    .snav a.deep{color:var(--blue);border-color:#D3DCF0;background:var(--blue-light)}
 
-    /* section nav */
-    .section-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
-    .snav-item { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--white); color: var(--text-muted); text-decoration: none; transition: all 0.15s; }
-    .snav-item:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-light); }
-    .snav-item.done { color: var(--green); border-color: #B8DCCA; background: var(--green-light); }
-    .snav-item.wip { color: var(--amber); border-color: #EDCFA8; background: var(--amber-light); }
+    /* LAYOUT */
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:200px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4;transition:color 0.15s}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
 
-    /* section blocks */
-    .design-section { margin-bottom: 48px; }
-    .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--amber); }
-    .section-num { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--amber); }
-    .section-title { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--text); }
-    .section-time { font-family: var(--mono); font-size: 11px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; margin-left: auto; }
+    /* STEP SECTIONS */
+    .step{margin-bottom:52px;scroll-margin-top:80px}
+    .step-header{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .step-num{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)}
+    .step-title{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .step-time{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;margin-left:auto}
 
-    /* placeholder state */
-    .placeholder-block { background: var(--bg); border: 2px dashed var(--border-mid); border-radius: 10px; padding: 40px 32px; text-align: center; }
-    .placeholder-icon { font-size: 32px; margin-bottom: 12px; }
-    .placeholder-block h3 { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
-    .placeholder-block p { font-size: 13.5px; color: var(--text-muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
+    /* CARDS */
+    .card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .card.blue{border-left-color:var(--blue)}
+    .card.green{border-left-color:var(--green)}
+    .card.red{border-left-color:var(--red);background:var(--red-light)}
 
-    /* content cards */
-    .content-card { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--amber); border-radius: 10px; padding: 24px 28px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
-    .content-card p { font-size: 14.5px; color: var(--text-mid); line-height: 1.8; margin-bottom: 14px; }
-    .content-card p:last-child { margin-bottom: 0; }
+    /* CALLOUTS */
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.7}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
 
-    /* table */
-    .req-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 4px; }
-    .req-table th { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: left; padding: 8px 14px; background: var(--bg); border-bottom: 1px solid var(--border); }
-    .req-table td { padding: 10px 14px; color: var(--text-mid); border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
-    .req-table tr:last-child td { border-bottom: none; }
-    .req-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--blue); white-space: nowrap; font-weight: 500; }
-    .req-table tr.nfr td:first-child { color: var(--amber); }
-    .req-table tr.out td { opacity: 0.5; }
-    .req-table tr.out td:first-child { text-decoration: line-through; color: var(--text-muted); }
+    /* DECISION BOX */
+    .decision{background:var(--amber-light);border:1px solid var(--amber-border);border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start}
+    .decision-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+    .decision-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+    .decision p{font-size:13.5px;color:var(--text-mid);line-height:1.7}
+    .decision p strong{color:var(--text);font-weight:600}
 
-    /* scale grid */
-    .scale-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-    .scale-cell { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-    .scale-cell-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-    .scale-cell-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--text); }
-    .scale-cell-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+    /* TABLES */
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    tr.nfr td:first-child{color:var(--amber)}
+    tr.out td{opacity:0.5}
+    tr.out td:first-child{text-decoration:line-through;color:var(--text-muted)}
 
-    /* diagram */
-    .diagram-wrap { margin-bottom: 20px; }
-    .diagram-label { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
-    .diagram-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; }
+    /* SCALE GRID */
+    .scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .scale-cell{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+    .scale-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+    .scale-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text)}
+    .scale-sub{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.4}
 
-    code { font-family: var(--mono); font-size: 12.5px; background: var(--blue-light); color: var(--blue); border: 1px solid #D3DCF0; border-radius: 4px; padding: 1px 6px; }
+    /* TWO COL */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    .mini-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+    .mini-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .mini-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .mini-list li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative}
+    .mini-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px}
 
-    .callout { border-left: 3px solid var(--blue); background: var(--blue-light); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 20px; }
-    .callout-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
-    .callout p { font-size: 13.5px; color: var(--text-mid); line-height: 1.7; }
-    .callout p strong { color: var(--text); font-weight: 600; }
-    .callout.amber { border-left-color: var(--amber); background: var(--amber-light); }
-    .callout.amber .callout-label { color: var(--amber); }
+    /* CHECKLIST */
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .checklist li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .checklist li strong{color:var(--text);font-weight:600}
 
-    .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-mid); line-height: 1.65; }
-    .checklist li::before { content: '▸'; color: var(--blue); font-size: 11px; margin-top: 4px; flex-shrink: 0; }
-    .checklist li strong { color: var(--text); font-weight: 600; }
+    /* INLINE CODE */
+    code{font-family:var(--mono);font-size:12px;background:var(--blue-light);color:var(--blue);border:1px solid #D3DCF0;border-radius:3px;padding:1px 5px}
 
-    footer { border-top: 1px solid var(--border); padding: 28px 40px; margin-top: 40px; }
-    .footer-inner { max-width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .footer-copy { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
-    .footer-links { display: flex; gap: 20px; }
-    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
-    .footer-links a:hover { color: var(--blue); }
+    /* SECTION DIVIDER */
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;margin-top:20px}
 
-    @media (max-width: 680px) {
-      nav { padding: 0 20px; } .nav-links { display: none; }
-      .hero, .layout { padding-left: 20px; padding-right: 20px; }
-      .scale-grid { grid-template-columns: repeat(2, 1fr); }
-      footer { padding: 24px 20px; }
+    /* DIAGRAM */
+    .diagram-wrap{margin-bottom:20px}
+    .diagram-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .diagram-box{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+
+    /* OPEN QUESTION */
+    .open-q{background:var(--bg-alt);border:1px dashed var(--border-mid);border-radius:8px;padding:14px 18px;margin-bottom:16px}
+    .open-q-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+    .open-q p{font-size:13.5px;color:var(--text-mid);line-height:1.7}
+
+    /* DEEP DIVE LINK */
+    .deep-link{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:1px solid #D3DCF0;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--blue);text-decoration:none;transition:all 0.15s;margin-top:4px}
+    .deep-link:hover{background:var(--blue);color:white}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+
+    @media(max-width:900px){
+      .spine{display:none}
+      .main{padding:24px 20px 60px}
+      .hero,.snav{padding-left:20px;padding-right:20px}
+      .scale-grid{grid-template-columns:repeat(2,1fr)}
+      .two-col{grid-template-columns:1fr}
+      nav{padding:0 20px}.nav-links{display:none}
+      footer{padding:20px}
     }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
   </style>
 </head>
 <body>
 
 <nav>
-  <a class="nav-brand" href="index.html">System Design Notes</a>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
   <ul class="nav-links">
-    <li><a href="index.html">← All Designs</a></li>
-    <li><a href="framework.html">Framework</a></li>
-    <li><a href="https://github.com/akshit101" target="_blank">GitHub ↗</a></li>
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="/system-design/framework.html">Framework</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
   </ul>
 </nav>
 
 <header class="hero">
-  <div class="breadcrumb"><a href="index.html">System Design Notes</a> / <a href="index.html">Worked Examples</a> / 01</div>
+  <div class="breadcrumb"><a href="/system-design/">System Design Notes</a> / Worked Examples / 01</div>
   <h1>Design <em>TinyURL</em></h1>
-  <p class="hero-desc">A URL shortening service handling 100M URL creates per day and 1B redirects per day. Covers short code generation, caching strategy, redirect semantics, consistency tradeoffs, and abuse prevention.</p>
-  <div class="hero-meta">
-    <span class="meta-tag wip">In Progress</span>
-    <span class="meta-tag">URL Shortener</span>
-    <span class="meta-tag">Read-Heavy 10:1</span>
-    <span class="meta-tag">Caching · Hashing</span>
-    <span class="meta-tag">~45 min interview</span>
+  <p class="hero-desc">A URL shortening service at scale. 100M DAU, 1,000 writes/sec, 10,000 reads/sec. This page documents the full design session — every decision, every tradeoff, every deep dive — exactly as it was reasoned through.</p>
+  <div class="tag-row">
+    <span class="tag amber">Read-Heavy 10:1</span>
+    <span class="tag blue">Caching</span>
+    <span class="tag blue">Streaming</span>
+    <span class="tag blue">Code Generation</span>
+    <span class="tag blue">Lambda Architecture</span>
+    <span class="tag">~45 min session</span>
   </div>
 </header>
 
+<!-- SECTION NAV -->
+<div class="snav">
+  <a class="done" href="#s1a">1A Requirements</a>
+  <a class="done" href="#s1b">1B Personas</a>
+  <a class="done" href="#s2">2 Estimations</a>
+  <a class="done" href="#s3">3 API Design</a>
+  <a class="done" href="#s4">4 High-Level Design</a>
+  <a class="deep" href="#s5a">5A Code Generation</a>
+  <a class="deep" href="#s5b">5B Analytics Pipeline</a>
+  <a class="deep" href="#s5c">5C Cache Design</a>
+  <a class="deep" href="#s5d">5D Duplicate URLs</a>
+  <a href="#s6">6 Data Model</a>
+</div>
+
 <div class="layout">
 
-  <!-- SECTION NAV -->
-  <div class="section-nav">
-    <a class="snav-item done" href="#s1">01 Requirements</a>
-    <a class="snav-item done" href="#s2">02 Estimation</a>
-    <a class="snav-item done" href="#s3">03 API Design</a>
-    <a class="snav-item done" href="#s4">04 Data Model</a>
-    <a class="snav-item wip"  href="#s5">05 High-Level Design</a>
-    <a class="snav-item"      href="#s6">06 Deep Dive</a>
-    <a class="snav-item"      href="#s7">Component Deep Dives</a>
-  </div>
-
-  <!-- ── STEP 1 ── -->
-  <section id="s1" class="design-section">
-    <div class="section-header">
-      <span class="section-num">01</span>
-      <span class="section-title">Requirements Clarification</span>
-      <span class="section-time">⏱ ~5 min</span>
+  <!-- SPINE -->
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="s1a"><div class="spine-dot"></div><a class="spine-link" href="#s1a">1A · Requirements</a></div>
+      <div class="spine-item" data-target="s1b"><div class="spine-dot"></div><a class="spine-link" href="#s1b">1B · Personas</a></div>
+      <div class="spine-item" data-target="s2"><div class="spine-dot"></div><a class="spine-link" href="#s2">2 · Estimations</a></div>
+      <div class="spine-item" data-target="s3"><div class="spine-dot"></div><a class="spine-link" href="#s3">3 · API Design</a></div>
+      <div class="spine-item" data-target="s4"><div class="spine-dot"></div><a class="spine-link" href="#s4">4 · High-Level Design</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s5a"><div class="spine-dot"></div><a class="spine-link" href="#s5a">5A · Code Generation</a></div>
+      <div class="spine-item" data-target="s5b"><div class="spine-dot"></div><a class="spine-link" href="#s5b">5B · Analytics Pipeline</a></div>
+      <div class="spine-item" data-target="s5c"><div class="spine-dot"></div><a class="spine-link" href="#s5c">5C · Cache Design</a></div>
+      <div class="spine-item" data-target="s5d"><div class="spine-dot"></div><a class="spine-link" href="#s5d">5D · Duplicate URLs</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s6"><div class="spine-dot"></div><a class="spine-link" href="#s6">6 · Data Model</a></div>
     </div>
-    <div class="content-card">
-      <table class="req-table">
-        <thead><tr><th>Requirement</th><th>Decision</th></tr></thead>
-        <tbody>
-          <tr><td>Create short URL</td><td>Given a long URL, return a unique short alias — e.g. <code>tinyurl.com/abc1234</code></td></tr>
-          <tr><td>Redirect short URL</td><td>HTTP 301 or 302 redirect to the original long URL</td></tr>
-          <tr><td>Custom alias</td><td>In scope — user can optionally specify their own short code</td></tr>
-          <tr><td>URL expiry / TTL</td><td>In scope — URLs can have an optional time-to-live</td></tr>
-          <tr class="out"><td>Analytics</td><td>Out of scope — click counts, geo, referrers deferred</td></tr>
-          <tr class="out"><td>User accounts</td><td>Out of scope — no auth required to create or use URLs</td></tr>
-          <tr class="nfr"><td>Scale</td><td>100M URLs created/day · 10:1 read:write → 1B redirects/day</td></tr>
-          <tr class="nfr"><td>Latency</td><td>Redirect p99 &lt; 50ms — speed is the product</td></tr>
-          <tr class="nfr"><td>Availability</td><td>99.99% — a down TinyURL is very visible</td></tr>
-          <tr class="nfr"><td>Consistency</td><td>Eventual OK for reads; write uniqueness must be guaranteed</td></tr>
-          <tr class="nfr"><td>Durability</td><td>Short codes must not be lost — permanent links expected</td></tr>
-        </tbody>
-      </table>
-      <div class="callout amber" style="margin-top:16px;margin-bottom:0">
-        <div class="callout-label">Key scope call</div>
-        <p><strong>301 vs 302 is a product decision, not just a technical one.</strong> 301 (permanent) is cached by browsers — reduces server load but kills analytics. 302 (temporary) hits the server every time — enables tracking. Since analytics is out of scope here, 302 + aggressive server-side cache gives the best balance.</p>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══ 1A ══════════════════════════════════════════════════ -->
+    <section id="s1a" class="step">
+      <div class="step-header">
+        <span class="step-num">1A</span>
+        <span class="step-title">Requirements Clarification</span>
+        <span class="step-time">⏱ ~5 min</span>
       </div>
-    </div>
-  </section>
 
-  <!-- ── STEP 2 ── -->
-  <section id="s2" class="design-section">
-    <div class="section-header">
-      <span class="section-num">02</span>
-      <span class="section-title">Capacity Estimation</span>
-      <span class="section-time">⏱ ~5 min</span>
-    </div>
-    <div class="content-card">
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">Before drawing a single box, you need to agree on what the system actually does. This step is about compression — taking an ambiguous problem statement and narrowing it to a concrete, agreed-upon scope. The problem statement is deliberately left ambiguous. Your job is to ask the right questions and confirm the answers back.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The hardest part of requirements gathering for most people is knowing <em>what</em> to ask. The instinct is to ask about features — "can users edit their URLs?" — but the more important questions are about constraints: <em>how many users? how fast must it be? what happens if it's down?</em> Features define what the system does; constraints define how hard building it actually is.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">A practical approach is to split requirements into two buckets and fill each one deliberately:</p>
+
+      <div style="background:var(--bg-alt);border-radius:8px;padding:18px 22px;margin-bottom:16px">
+        <p style="font-size:13.5px;color:var(--text-mid);line-height:1.75;margin-bottom:10px"><strong style="color:var(--amber)">Functional requirements (what the system does):</strong> Walk through the user journey. A user arrives, does something, gets something back. What are those actions? Which ones are in scope? Name what is explicitly out of scope — this is as important as naming what is in scope, because it sets the boundary that prevents scope creep mid-design.</p>
+        <p style="font-size:13.5px;color:var(--text-mid);line-height:1.75"><strong style="color:var(--blue)">Non-functional requirements (how well it does it):</strong> Scale, latency, availability, consistency. These are the constraints that make the problem hard. A URL shortener serving 100 users is trivially simple. One serving 100M users requires real design thinking. You cannot have a meaningful architectural discussion without agreeing on these numbers first.</p>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The most important call in this step is <strong>analytics</strong>. It sounds like a minor feature — but it determines the redirect type (302 vs 301), which determines whether you need a streaming pipeline at all, which is one of the most complex parts of the system. Getting this scope decision wrong early cascades through every subsequent step. This is why you surface it explicitly rather than assuming.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Requirement</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr><td>Create short URL</td><td>Given a long URL, return a unique 7-character short code</td></tr>
+            <tr><td>Redirect short URL</td><td>HTTP 302 redirect to original long URL (not 301 — see API design)</td></tr>
+            <tr><td>Custom alias</td><td>In scope — user can optionally specify their own short code</td></tr>
+            <tr><td>Analytics</td><td><strong>In scope — click tracking required.</strong> This single decision drives the entire analytics pipeline design and the 302 redirect choice.</td></tr>
+            <tr><td>User login</td><td>In scope — assume users have accounts. This enables per-user analytics and deduplication logic.</td></tr>
+            <tr class="out"><td>URL editing</td><td>Out of scope — once a short code is created, the long URL it points to is immutable.</td></tr>
+            <tr class="out"><td>Link expiry</td><td>Out of scope for this session — the reclamation service handles code reuse separately.</td></tr>
+            <tr class="nfr"><td>DAU</td><td>100M daily active users — this is the anchor for all traffic estimates.</td></tr>
+            <tr class="nfr"><td>Write RPS</td><td>~1,000 URL creations/sec — moderate write load, manageable without exotic solutions.</td></tr>
+            <tr class="nfr"><td>Read RPS</td><td>~10,000 redirects/sec (10:1 read:write ratio) — the system is read-heavy. Cache design is critical.</td></tr>
+            <tr class="nfr"><td>Availability</td><td>High — a broken URL shortener is immediately visible. Every broken link is a user-facing failure.</td></tr>
+            <tr class="nfr"><td>Consistency</td><td>Eventual OK for reads — a redirect serving a slightly stale cache entry is acceptable. But write uniqueness must be guaranteed — two different long URLs cannot share the same short code.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Why the 10:1 read:write ratio matters</div>
+        <p>This ratio tells you where to spend your design energy. Writes (URL creation) happen 1,000 times per second — manageable. Reads (redirects) happen 10,000 times per second — that's where the system will strain. Every architectural decision that follows should be evaluated through the lens of <strong>"does this make the read path faster?"</strong> The two-level cache, the pre-generated code pool (which keeps write latency low so it doesn't interfere with reads), and the fire-and-forget analytics approach all serve this goal.</p>
+      </div>
+    </section>
+
+    <!-- ══ 1B ══════════════════════════════════════════════════ -->
+    <section id="s1b" class="step">
+      <div class="step-header">
+        <span class="step-num">1B</span>
+        <span class="step-title">Personas &amp; Use Cases</span>
+        <span class="step-time">⏱ ~2 min</span>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">Personas help you define the use cases concretely — who uses the system, what they do, and what they care about. For some systems this step is critical (a social network has dozens of meaningful user types with very different access patterns). For a URL shortener, it's simpler.</p>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-label">Persona 1 — Creator</div>
+          <ul class="mini-list">
+            <li>Has a long URL to share</li>
+            <li>Calls POST /shorten</li>
+            <li>Gets back a short code</li>
+            <li>Optionally specifies custom alias</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Persona 2 — Consumer</div>
+          <ul class="mini-list">
+            <li>Has a short URL (from link, QR, etc.)</li>
+            <li>Calls GET /{shortCode}</li>
+            <li>Gets 302 redirected to long URL</li>
+            <li>Click is tracked for analytics</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">Why two personas is enough for this system</div>
+        <p>For a URL shortener, the creator/consumer split cleanly covers the full functional surface. In production there are other personas — advertisers tracking campaign performance, developers using the API, admins managing abuse — but none of them change the core architectural decisions for this session's scope. Adding more personas here would just generate requirements we've already put out of scope. The right call is to name the two that drive the design and move on. Don't over-engineer the personas step for a simple system.</p>
+      </div>
+    </section>
+
+    <!-- ══ 2 ══════════════════════════════════════════════════ -->
+    <section id="s2" class="step">
+      <div class="step-header">
+        <span class="step-num">02</span>
+        <span class="step-title">Capacity Estimation</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
       <div class="scale-grid">
         <div class="scale-cell">
-          <div class="scale-cell-label">Write RPS</div>
-          <div class="scale-cell-val">~1,160</div>
-          <div class="scale-cell-sub">100M URLs ÷ 86,400s</div>
+          <div class="scale-label">Write RPS</div>
+          <div class="scale-val">~1,000</div>
+          <div class="scale-sub">100M DAU ÷ 86,400s (assumed ~10% daily active)</div>
         </div>
         <div class="scale-cell">
-          <div class="scale-cell-label">Read RPS</div>
-          <div class="scale-cell-val">~11,600</div>
-          <div class="scale-cell-sub">10:1 read:write ratio</div>
+          <div class="scale-label">Read RPS</div>
+          <div class="scale-val">~10,000</div>
+          <div class="scale-sub">10:1 read:write ratio</div>
         </div>
         <div class="scale-cell">
-          <div class="scale-cell-label">Storage / year</div>
-          <div class="scale-cell-val">~1.8 TB</div>
-          <div class="scale-cell-sub">500 bytes × 100M × 365</div>
+          <div class="scale-label">Code space</div>
+          <div class="scale-val">3.5T</div>
+          <div class="scale-sub">62⁷ = 3,521B combinations — 10 years of headroom</div>
         </div>
         <div class="scale-cell">
-          <div class="scale-cell-label">Storage / 5 yr</div>
-          <div class="scale-cell-val">~9 TB</div>
-          <div class="scale-cell-sub">Manageable single cluster</div>
+          <div class="scale-label">Storage / 10 yr</div>
+          <div class="scale-val">~35 TB</div>
+          <div class="scale-sub">3.15T codes × ~100 bytes/record</div>
         </div>
         <div class="scale-cell">
-          <div class="scale-cell-label">Code space (7 chars)</div>
-          <div class="scale-cell-val">3.5T</div>
-          <div class="scale-cell-sub">62⁷ with [a-zA-Z0-9]</div>
+          <div class="scale-label">Redis cache</div>
+          <div class="scale-val">1–2 GB</div>
+          <div class="scale-sub">~20% active URLs cached; 20M × ~100B = ~2GB max</div>
         </div>
         <div class="scale-cell">
-          <div class="scale-cell-label">Cache memory</div>
-          <div class="scale-cell-val">~170 GB</div>
-          <div class="scale-cell-sub">20% daily reads × 500B</div>
+          <div class="scale-label">Code pool</div>
+          <div class="scale-val">10,000</div>
+          <div class="scale-sub">Pre-generated codes always in DB; refill below 5K</div>
         </div>
       </div>
-      <div class="callout" style="margin-bottom:0">
-        <div class="callout-label">What the numbers tell us</div>
-        <p>Write load is moderate (~1K RPS) — manageable without exotic solutions. Read load is heavy (~12K RPS) — the design must be read-optimized with <strong>aggressive caching on the redirect path</strong>. The 3.5T code space gives us ~97 years of runway at current scale before exhaustion.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">Estimation isn't a math test — it's a reasoning signal. The numbers you produce here constrain every architectural decision that follows. Get this wrong and your design is built on fiction. The key is to work from what you know (DAU) to what you need (RPS, storage, cache size) in a chain of logical steps.</p>
+
+      <div class="callout amber">
+        <div class="callout-label">Walking through the key calculations</div>
+        <p><strong>Writes RPS:</strong> 100M DAU — assume ~10% of users create a URL on any given day, spread across 86,400 seconds. That gives roughly 1,000 writes/sec. Not a precise number, but the right order of magnitude.<br/><br/>
+        <strong>Reads RPS:</strong> The 10:1 read:write ratio gives us 10,000 redirects/sec. This is the number that shapes the cache design — 10K requests per second is not something you can serve from a single database.<br/><br/>
+        <strong>Why 7 characters:</strong> Base62 uses [a-zA-Z0-9] — no special characters, URL-safe. 62⁶ = 56 billion combinations. At 1,000 writes/sec that's only ~1.8 years of unique codes before you run out. 62⁷ = 3.5 trillion combinations — at the same write rate, that's over 100 years of headroom. 7 is the minimum safe length for this scale.<br/><br/>
+        <strong>Storage:</strong> Each URL record is ~100 bytes (shortCode + longURL + userId + timestamps). Over 10 years at 1,000 writes/sec = ~3.15 trillion records × 100 bytes = ~35TB. Manageable on a distributed database cluster — no exotic storage solutions needed.<br/><br/>
+        <strong>Cache sizing:</strong> Not all URLs are accessed equally — a small fraction gets the vast majority of traffic (the 80/20 rule applies hard here). If 20% of URLs receive 80% of traffic, you only need to cache ~20M active URLs × 100 bytes = ~2GB in Redis. That's cheap and fits on a single Redis instance.</p>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ── STEP 3 ── -->
-  <section id="s3" class="design-section">
-    <div class="section-header">
-      <span class="section-num">03</span>
-      <span class="section-title">API Design</span>
-      <span class="section-time">⏱ ~5 min</span>
-    </div>
-    <div class="content-card">
-      <p>REST API. Three endpoints covering the full functional scope.</p>
-      <table class="req-table">
-        <thead><tr><th>Method + Path</th><th>Request</th><th>Response</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>POST /urls</td>
-            <td>Body: <code>long_url</code>, optional <code>alias</code>, optional <code>ttl_days</code></td>
-            <td><code>{ short_url, expires_at }</code> — 201</td>
-          </tr>
-          <tr>
-            <td>GET /{short_code}</td>
-            <td>—</td>
-            <td>HTTP 302 → <code>Location: long_url</code></td>
-          </tr>
-          <tr>
-            <td>DELETE /urls/{short_code}</td>
-            <td>—</td>
-            <td>204 No Content</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="callout amber" style="margin-top:16px; margin-bottom:0">
-        <div class="callout-label">Design decisions</div>
-        <p><strong>No auth for MVP.</strong> Rate limiting at the load balancer (token bucket per IP) substitutes. <strong>Custom alias:</strong> if alias is taken, return 409 Conflict — don't silently override. <strong>DELETE:</strong> soft-delete in DB + cache invalidation, not hard purge, so we can detect reuse attempts.</p>
+    <!-- ══ 3 ══════════════════════════════════════════════════ -->
+    <section id="s3" class="step">
+      <div class="step-header">
+        <span class="step-num">03</span>
+        <span class="step-title">API Design</span>
+        <span class="step-time">⏱ ~5 min</span>
       </div>
-    </div>
-  </section>
 
-  <!-- ── STEP 4 ── -->
-  <section id="s4" class="design-section">
-    <div class="section-header">
-      <span class="section-num">04</span>
-      <span class="section-title">Data Model</span>
-      <span class="section-time">⏱ ~5 min</span>
-    </div>
-    <div class="content-card">
-      <p>Single primary entity. Primary access pattern: given a <code>short_code</code>, return <code>long_url</code>. This is a pure key-value lookup — O(1), no joins, no range scans on the hot path.</p>
-      <table class="req-table" style="margin-top:14px">
-        <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td>short_code</td><td>VARCHAR(7)</td><td>Primary key / partition key. Base62 [a-zA-Z0-9].</td></tr>
-          <tr><td>long_url</td><td>TEXT (≤2048 chars)</td><td>Target URL. Validated on write.</td></tr>
-          <tr><td>created_at</td><td>TIMESTAMP</td><td>UTC. Immutable after creation.</td></tr>
-          <tr><td>expires_at</td><td>TIMESTAMP NULL</td><td>Null = no expiry. Used by cleanup worker + TTL index.</td></tr>
-          <tr><td>is_deleted</td><td>BOOLEAN</td><td>Soft delete flag. Prevents code reuse on deleted URLs.</td></tr>
-          <tr><td>user_id</td><td>VARCHAR NULL</td><td>Reserved for future auth. Null for now.</td></tr>
-        </tbody>
-      </table>
-      <div class="callout" style="margin-top:16px; margin-bottom:0">
-        <div class="callout-label">Storage choice</div>
-        <p><strong>Cassandra or DynamoDB.</strong> Access is by <code>short_code</code> (point lookup), write throughput is ~1K RPS, schema is simple, and no joins are needed. NoSQL wide-column handles this cleanly with built-in TTL support and horizontal scaling. Could use Postgres at this scale — the write volume is comfortable — but NoSQL removes connection pool pressure at 12K read RPS and gives us clean sharding when we need it.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method + Path</th><th>Request</th><th>Response</th></tr></thead>
+          <tbody>
+            <tr><td>POST /api/v1/shorten</td><td>Body: <code>longUrl</code>, optional <code>customAlias</code></td><td><code>{ shortUrl }</code> — 201</td></tr>
+            <tr><td>GET /api/v1/{shortCode}</td><td>—</td><td>HTTP 302 → <code>Location: longUrl</code></td></tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </section>
 
-  <!-- ── STEP 5 (placeholder) ── -->
-  <section id="s5" class="design-section">
-    <div class="section-header">
-      <span class="section-num">05</span>
-      <span class="section-title">High-Level Design</span>
-      <span class="section-time">⏱ ~10 min</span>
-    </div>
-    <div class="placeholder-block">
-      <div class="placeholder-icon">🏗️</div>
-      <h3>Architecture diagram — coming from our discussion session</h3>
-      <p>This section will include the full write path + read path architecture diagram, component table with decisions, and the short code generation approach (hash vs. token service).</p>
-    </div>
-  </section>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The API definition forces you to think from the consumer's perspective before drawing any internal boxes. Two endpoints cover the full functional scope from step 1A — one for creating a short URL, one for using it.</p>
 
-  <!-- ── STEP 6 (placeholder) ── -->
-  <section id="s6" class="design-section">
-    <div class="section-header">
-      <span class="section-num">06</span>
-      <span class="section-title">Deep Dive &amp; Tradeoffs</span>
-      <span class="section-time">⏱ ~15 min</span>
-    </div>
-    <div class="placeholder-block">
-      <div class="placeholder-icon">🔬</div>
-      <h3>Deep dives — built from our session</h3>
-      <p>Will cover: short code uniqueness at scale, cache warming + thundering herd, 301 vs 302 tradeoff analysis, DB bottleneck at 10× scale, and abuse prevention strategy.</p>
-    </div>
-  </section>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The GET endpoint is deliberately minimal. The client sends a short code and gets a redirect back. There's no response body to parse, no JSON to decode — just a status code and a Location header. This is intentional: the consumer of a short URL should get to their destination as fast as possible.</p>
 
-  <!-- ── COMPONENT DEEP DIVES (placeholder) ── -->
-  <section id="s7" class="design-section">
-    <div class="section-header">
-      <span class="section-num">↳</span>
-      <span class="section-title">Component Deep Dives</span>
-    </div>
-    <div class="placeholder-block">
-      <div class="placeholder-icon">⚙️</div>
-      <h3>Component-level design — added after the session</h3>
-      <p>Planned components: Short Code Generation Service (hash + retry vs. token pre-generation), Cache Layer design (write-through, eviction, warming), Cleanup Worker (TTL scanning + soft delete), and Rate Limiter (token bucket per IP at LB layer).</p>
-    </div>
-  </section>
+      <div class="card red">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--red);margin-bottom:8px">⚠ Very Common Mistake — 301 vs 302</div>
+        <p style="font-size:13.5px;color:var(--text-mid);line-height:1.7;margin-bottom:10px">This is one of the most common traps in URL shortener design. The two redirect codes feel similar but have completely opposite implications for analytics:</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="font-size:13.5px;color:var(--text-mid);padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--red);font-weight:700">✗</span> <strong style="color:var(--text)">301 Permanent Redirect</strong> — the browser interprets this as "this URL has moved permanently." It caches the redirect locally and never hits your server again for subsequent visits. From an analytics perspective, this is catastrophic — every click after the first is invisible to you. The only data you have is the first click per browser. If analytics is in scope, <strong style="color:var(--red)">301 kills it entirely.</strong></li>
+          <li style="font-size:13.5px;color:var(--text-mid);padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--green);font-weight:700">✓</span> <strong style="color:var(--text)">302 Temporary Redirect</strong> — the browser interprets this as "this URL has moved temporarily." It does not cache the redirect, so every click goes through your server. Every request gives you the opportunity to emit a click event to your analytics pipeline. <strong style="color:var(--green)">This is the right choice when analytics is in scope.</strong></li>
+        </ul>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:10px;font-style:italic">Memory trick: 301 = Permanent = browser caches = you lose data. 302 = Temporary = browser always asks = you see everything.</p>
+      </div>
 
+      <div class="decision">
+        <div class="decision-icon">🎯</div>
+        <div>
+          <div class="decision-label">Decision — 302</div>
+          <p><strong>Use 302.</strong> Analytics is in scope — we confirmed this in step 1A. Every redirect must hit our servers so we can emit a click event to the Kafka streaming pipeline. Yes, this means ~10,000 requests per second touch our servers instead of being absorbed by browser caches. But that's exactly why we designed the two-level cache — L1 local cache on each web server handles viral URLs without even hitting Redis. The additional server load is acceptable and manageable at this scale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 4 ══════════════════════════════════════════════════ -->
+    <section id="s4" class="step">
+      <div class="step-header">
+        <span class="step-num">04</span>
+        <span class="step-title">High-Level Design</span>
+        <span class="step-time">⏱ ~10 min</span>
+      </div>
+
+      <!-- ARCHITECTURE DIAGRAM -->
+      <div class="diagram-wrap">
+        <div class="diagram-label">System architecture — write path + read path</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 780 440" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;font-family:Inter,sans-serif">
+            <defs>
+              <marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+              <marker id="arrb" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3D5A99"/></marker>
+              <marker id="arra" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#C87533"/></marker>
+            </defs>
+
+            <!-- CLIENT -->
+            <rect x="10" y="180" width="80" height="50" rx="7" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="50" y="201" text-anchor="middle" font-size="12" font-weight="600" fill="#1C2333">Client</text>
+            <text x="50" y="216" text-anchor="middle" font-size="10" fill="#8896AA">Web / Mobile</text>
+
+            <!-- LB -->
+            <rect x="120" y="180" width="90" height="50" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="165" y="201" text-anchor="middle" font-size="12" font-weight="600" fill="#C87533">Load</text>
+            <text x="165" y="216" text-anchor="middle" font-size="12" font-weight="600" fill="#C87533">Balancer</text>
+
+            <!-- WEB SERVER -->
+            <rect x="240" y="155" width="120" height="100" rx="7" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="300" y="178" text-anchor="middle" font-size="12" font-weight="600" fill="#3D5A99">Web Server</text>
+            <rect x="252" y="185" width="96" height="28" rx="4" fill="#FFFFFF" stroke="#C8D0E0" stroke-width="1"/>
+            <text x="300" y="202" text-anchor="middle" font-size="10" font-weight="600" fill="#C87533">L1 Local Cache</text>
+            <text x="300" y="230" text-anchor="middle" font-size="10" fill="#6B85BD">stateless · auto-scale</text>
+
+            <!-- REDIS -->
+            <rect x="400" y="100" width="100" height="50" rx="7" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="450" y="121" text-anchor="middle" font-size="12" font-weight="600" fill="#2E7D52">Redis Cache</text>
+            <text x="450" y="136" text-anchor="middle" font-size="10" fill="#2E7D52">L2 shared</text>
+
+            <!-- PRIMARY DB -->
+            <rect x="400" y="180" width="100" height="50" rx="7" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="450" y="201" text-anchor="middle" font-size="12" font-weight="600" fill="#3D5A99">Primary DB</text>
+            <text x="450" y="216" text-anchor="middle" font-size="10" fill="#6B85BD">URLs table</text>
+
+            <!-- CODE POOL TABLE -->
+            <rect x="400" y="260" width="100" height="50" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="450" y="281" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Code Pool</text>
+            <text x="450" y="296" text-anchor="middle" font-size="10" fill="#8896AA">pre-generated</text>
+
+            <!-- NANNY SERVICE -->
+            <rect x="530" y="260" width="100" height="50" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="580" y="281" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Nanny Service</text>
+            <text x="580" y="296" text-anchor="middle" font-size="10" fill="#8896AA">refills pool</text>
+
+            <!-- KAFKA -->
+            <rect x="530" y="155" width="100" height="50" rx="7" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="580" y="176" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Kafka Stream</text>
+            <text x="580" y="191" text-anchor="middle" font-size="10" fill="#8896AA">click events</text>
+
+            <!-- DATA WAREHOUSE -->
+            <rect x="530" y="80" width="100" height="50" rx="7" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="580" y="101" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Data Warehouse</text>
+            <text x="580" y="116" text-anchor="middle" font-size="10" fill="#8896AA">analytics + reclaim</text>
+
+            <!-- RECLAIM SERVICE -->
+            <rect x="660" y="260" width="100" height="50" rx="7" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="710" y="281" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Reclaim Service</text>
+            <text x="710" y="296" text-anchor="middle" font-size="10" fill="#8896AA">soft-delete → pool</text>
+
+            <!-- ARROWS -->
+            <line x1="90" y1="205" x2="120" y2="205" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
+            <line x1="210" y1="205" x2="240" y2="205" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- web → redis (read) -->
+            <line x1="360" y1="180" x2="400" y2="145" stroke="#2E7D52" stroke-width="1.3" marker-end="url(#arr)"/>
+            <!-- web → DB (write) -->
+            <line x1="360" y1="205" x2="400" y2="205" stroke="#3D5A99" stroke-width="1.8" marker-end="url(#arrb)"/>
+            <!-- web → code pool (claim code) -->
+            <line x1="360" y1="220" x2="400" y2="275" stroke="#C87533" stroke-width="1.3" marker-end="url(#arra)"/>
+            <!-- web → kafka (fire-and-forget) -->
+            <line x1="360" y1="190" x2="530" y2="175" stroke="#8896AA" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#arr)"/>
+            <!-- kafka → DW -->
+            <line x1="580" y1="155" x2="580" y2="130" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr)"/>
+            <!-- nanny → code pool -->
+            <line x1="530" y1="285" x2="500" y2="285" stroke="#C87533" stroke-width="1.3" marker-end="url(#arra)"/>
+            <!-- DW → reclaim -->
+            <line x1="630" y1="105" x2="710" y2="105" stroke="#8896AA" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="710" y1="105" x2="710" y2="260" stroke="#8896AA" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+            <!-- reclaim → code pool -->
+            <line x1="660" y1="285" x2="500" y2="285" stroke="#8896AA" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+
+            <!-- LABELS -->
+            <text x="372" y="168" font-size="9" fill="#2E7D52">read</text>
+            <text x="372" y="198" font-size="9" fill="#3D5A99">write</text>
+            <text x="372" y="245" font-size="9" fill="#C87533">claim</text>
+            <text x="430" y="175" font-size="9" fill="#8896AA">fire &amp; forget</text>
+
+            <!-- LEGEND -->
+            <rect x="10" y="380" width="750" height="50" rx="6" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
+            <line x1="24" y1="400" x2="50" y2="400" stroke="#2E7D52" stroke-width="2"/>
+            <text x="56" y="404" font-size="10" fill="#4A5568">Read path</text>
+            <line x1="120" y1="400" x2="146" y2="400" stroke="#3D5A99" stroke-width="2"/>
+            <text x="152" y="404" font-size="10" fill="#4A5568">Write path</text>
+            <line x1="220" y1="400" x2="246" y2="400" stroke="#C87533" stroke-width="2"/>
+            <text x="252" y="404" font-size="10" fill="#4A5568">Code claim</text>
+            <line x1="330" y1="400" x2="356" y2="400" stroke="#8896AA" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="362" y="404" font-size="10" fill="#4A5568">Async / background</text>
+            <text x="24" y="422" font-size="10" fill="#8896AA">L1 = local web server cache (viral URL fast path) · L2 = shared Redis · DB = primary URL store</text>
+          </svg>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The system has two fundamentally different traffic patterns that need to be designed separately. Reads (redirects) are high-volume, latency-sensitive, and should almost never touch the database. Writes (URL creation) are lower-volume, slightly higher latency is acceptable, but must guarantee uniqueness. Mixing these concerns would produce a worse design for both.</p>
+
+      <div class="sub-heading">Read Path — GET /{shortCode}</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">The goal of the read path is to return the long URL as fast as possible. At 10,000 requests per second, every unnecessary database hit is a problem. The two-level cache exists specifically to absorb this load.</p>
+      <ul class="checklist">
+        <li><strong>L1 Local Cache check first</strong> — each web server has an in-process cache holding the hottest URLs. If a URL is going viral — say, a link tweeted by a celebrity getting 50,000 clicks per minute — that URL gets promoted to L1 on every web server. Requests are served entirely in-process, zero network hops. This is the fast path for the case that matters most.</li>
+        <li><strong>Redis Cache check</strong> — the shared L2 cache holds the broader set of recently active URLs. Most reads (~80-90%) hit here. The key is the shortCode, the value is the longUrl. A Redis lookup is a single network round-trip, typically sub-millisecond.</li>
+        <li><strong>DB lookup on miss</strong> — only cold URLs, rarely accessed URLs that have aged out of cache, reach the database. The shortCode column is indexed, so the lookup is fast. On the way back, the URL is populated into Redis and L1 so the next request doesn't hit the DB.</li>
+        <li><strong>Invalid code check</strong> — before any cache or DB lookup, validate that the shortCode looks like a valid 7-character Base62 string. This protects against bots probing random codes and generating useless DB load.</li>
+        <li><strong>Fire-and-forget analytics emit to Kafka</strong> — after the redirect is determined, emit a click event to Kafka. This is asynchronous — the 302 response goes back to the client immediately, without waiting for the Kafka write to complete. A lost event is acceptable; a slow redirect is not.</li>
+      </ul>
+
+      <div class="sub-heading">Write Path — POST /shorten</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">The write path has a harder problem: generating a unique code at 1,000 requests per second across multiple web servers without coordination overhead. The pre-generated pool solves this cleanly — the web server's job on a write is just to claim a code that's already been created, not to generate one on the fly.</p>
+      <ul class="checklist">
+        <li><strong>Duplicate URL check</strong> — first, check if this user has already shortened this exact URL. If yes, return the existing short code. This keeps the system idempotent: submitting the same URL twice gives the same result, which is what users expect. (Note: different users submitting the same URL get different codes — more on this in 5D.)</li>
+        <li><strong>Claim a code from the Code Pool table</strong> — the pre-generated pool always has 5,000–10,000 codes ready. The web server does an atomic delete-and-return: grab the next available code, remove it from the pool. No generation logic happens here. No uniqueness check against the URLs table. The code is guaranteed unique because the nanny service guaranteed it when creating the pool.</li>
+        <li><strong>Insert into URLs table</strong> — write the shortCode, longUrl, userId, and timestamps. The UNIQUE constraint on shortCode is a safety net, not the primary uniqueness mechanism.</li>
+        <li><strong>Return shortUrl to client</strong> — combine the base domain with the short code and return. The client can start using the link immediately.</li>
+      </ul>
+    </section>
+
+    <!-- ══ 5A ══════════════════════════════════════════════════ -->
+    <section id="s5a" class="step">
+      <div class="step-header">
+        <span class="step-num">5A</span>
+        <span class="step-title">Deep Dive — Code Generation</span>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">Why this deserves a deep dive</div>
+        <p>Code generation is the write path bottleneck. At 1,000 writes/sec, any synchronous generation + uniqueness-check against the DB adds latency and creates a distributed coordination problem across multiple web servers. The design below eliminates both issues.</p>
+      </div>
+
+      <!-- DIAGRAM: two approaches -->
+      <div class="diagram-wrap">
+        <div class="diagram-label">Two approaches considered — and why approach 2 was chosen</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="arr2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+            </defs>
+            <!-- Option A -->
+            <rect x="10" y="20" width="300" height="160" rx="8" fill="#FDECEA" stroke="#F0B8B3" stroke-width="1.5"/>
+            <text x="160" y="42" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C0392B">Approach A — Region Prefix</text>
+            <text x="20" y="62" font-size="11" fill="#4A5568">• Each web server generates codes independently</text>
+            <text x="20" y="80" font-size="11" fill="#4A5568">• Region prefix encodes the server identity</text>
+            <text x="20" y="98" font-size="11" fill="#4A5568">• e.g. US-1: "us1xxxx", US-2: "us2xxxx"</text>
+            <text x="20" y="116" font-size="11" fill="#C0392B">✗ Reduces 7-char code space with prefix</text>
+            <text x="20" y="134" font-size="11" fill="#C0392B">✗ Still needs coordination for custom aliases</text>
+            <text x="20" y="152" font-size="11" fill="#C0392B">✗ Mixed approach causes confusion</text>
+            <text x="20" y="170" font-size="11" fill="#C0392B">✗ Abandoned — mixed with pool approach</text>
+
+            <!-- Option B -->
+            <rect x="380" y="20" width="300" height="160" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="530" y="42" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#2E7D52">Approach B — Pre-generated Pool ✓</text>
+            <text x="390" y="62" font-size="11" fill="#4A5568">• Nanny service pre-generates codes offline</text>
+            <text x="390" y="80" font-size="11" fill="#4A5568">• Codes stored in pool table (10K buffer)</text>
+            <text x="390" y="98" font-size="11" fill="#4A5568">• Web servers claim next available code</text>
+            <text x="390" y="116" font-size="11" fill="#2E7D52">✓ No generation on the hot write path</text>
+            <text x="390" y="134" font-size="11" fill="#2E7D52">✓ No distributed coordination needed</text>
+            <text x="390" y="152" font-size="11" fill="#2E7D52">✓ Unique constraint as concurrency safety net</text>
+            <text x="390" y="170" font-size="11" fill="#2E7D52">✓ Nanny refills async, never blocks requests</text>
+          </svg>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The region prefix idea was tempting at first — if each web server generates codes with a region-specific prefix (US servers generate "us_xxxxx", EU servers generate "eu_xxxxx"), then codes are structurally unique with no coordination needed. But this approach was abandoned for two reasons: it consumes part of the 7-character code space on a prefix, reducing the combinatorial headroom from 62⁷ to 62⁵; and it doesn't handle custom aliases cleanly, since a user-specified alias has no region prefix by definition. Mixing the two approaches made the design inconsistent.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The pre-generated pool approach is cleaner. A background service generates codes ahead of time and stores them in a pool table. Web servers simply claim the next available code when a write comes in — no generation, no uniqueness check, no coordination. The entire code generation problem moves off the hot path.</p>
+
+      <div class="sub-heading">Nanny Service Design</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">The nanny service is a singleton background job. Its only responsibility is to keep the pool full. It does this by checking the pool size periodically and generating new codes whenever the pool drops below a threshold.</p>
+      <ul class="checklist">
+        <li><strong>Pool target: 10,000 codes</strong> — at 1,000 writes/sec, this is a 10-second buffer. Enough time for the nanny to detect a low pool and refill it even if it runs every few seconds.</li>
+        <li><strong>Refill threshold: 5,000 codes</strong> — when the pool drops below 5,000 (half capacity), the nanny starts generating. At 1,000 writes/sec, this gives ~5 seconds of runway even if the nanny takes a moment to respond. This buffer-within-a-buffer is deliberate — it means the system never comes close to running out of codes under normal conditions.</li>
+        <li><strong>Generation algorithm:</strong> generate a random 7-character string from the Base62 alphabet [a-zA-Z0-9]. At a pool size of 10,000 codes against a space of 3.5 trillion, the probability of a collision is so low it's effectively zero. But the unique constraint on the pool table catches it anyway.</li>
+        <li><strong>Unique constraint as safety net</strong> — the <code>short_code</code> column in the pool table has a DB-level unique constraint. If the nanny somehow generates a duplicate, the INSERT fails silently (ON CONFLICT DO NOTHING) and the nanny moves on. No crash, no retry storm. The safety net costs nothing and prevents a theoretical edge case from becoming a production incident.</li>
+      </ul>
+
+      <div class="sub-heading">Code Reclamation Service</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">Without reclamation, the system has a slow leak. At 1,000 writes/sec, codes are consumed permanently — shortened URLs that nobody ever clicks again still hold their codes. Over time, the usable code space shrinks. The reclamation service prevents this by returning dormant codes to the pool.</p>
+      <ul class="checklist">
+        <li><strong>The Data Warehouse detects inactivity</strong> — a batch job runs nightly, scanning <code>last_accessed_at</code> across all URLs. Any URL with zero clicks in the past 3 months is a candidate for reclamation. The Data Warehouse already has all this click data from the analytics pipeline — no additional data collection is needed.</li>
+        <li><strong>Soft delete first, not hard delete</strong> — when a URL is flagged inactive, it gets <code>state = INACTIVE</code>. The record is not deleted. This matters: if someone follows an old link, they get a clear "URL expired" page rather than a random redirect to someone else's content (which would happen if the code was immediately reassigned). It also preserves history for abuse investigations.</li>
+        <li><strong>One more month of grace period</strong> — after going INACTIVE, the URL waits one additional month before reclamation. This handles the case of a URL that had a traffic lull — a campaign that paused, a blog post that went quiet — without permanently losing the code. Only URLs that have been inactive for 4 months total get their codes reclaimed.</li>
+        <li><strong>Code re-enters the pool</strong> — the reclamation service sets <code>state = DELETED</code> and re-inserts the short code back into the <code>code_pool</code> table. From that point, the code is available for new URL assignments. The system is self-sustaining indefinitely.</li>
+      </ul>
+
+      <div class="callout amber">
+        <div class="callout-label">Open question — needs further research</div>
+        <p>The current nanny service approach is a good starting point but has open questions: <strong>What if the nanny goes down?</strong> The pool drains and writes start failing. <strong>What if two nanny instances run?</strong> Race conditions on code insertion. A more robust design might use a distributed token service (like Twitter's Snowflake or a dedicated ID generation service) or range-based pre-allocation per server. <a href="concepts/code-generator.html" style="color:var(--amber);font-weight:600">See the dedicated Code Generator deep dive →</a></p>
+      </div>
+
+      <a class="deep-link" href="concepts/code-generator.html">📖 Full Code Generator Deep Dive →</a>
+    </section>
+
+    <!-- ══ 5B ══════════════════════════════════════════════════ -->
+    <section id="s5b" class="step">
+      <div class="step-header">
+        <span class="step-num">5B</span>
+        <span class="step-title">Deep Dive — Analytics Pipeline</span>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">Every time someone follows a short link, we chose 302 over 301 specifically so that request hits our servers. That request is a click event — it tells us who clicked, when, from where, and on what device. The analytics pipeline is how we capture that event without slowing down the redirect.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The core design constraint is simple: <strong>the redirect must be fast regardless of what happens to the analytics write.</strong> If the analytics system is slow or temporarily down, the redirect still completes in milliseconds. This is why the analytics write is fire-and-forget — we emit an event to Kafka and return the 302 response immediately. We don't wait to confirm the event was received or stored.</p>
+
+      <div class="diagram-wrap">
+        <div class="diagram-label">Analytics pipeline — from click event to dashboard query</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="arr3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+            </defs>
+            <!-- boxes -->
+            <rect x="10" y="40" width="100" height="50" rx="7" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="60" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">302 Response</text>
+            <text x="60" y="77" text-anchor="middle" font-size="10" fill="#8896AA">click detected</text>
+
+            <line x1="110" y1="65" x2="130" y2="65" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+            <rect x="132" y="40" width="110" height="50" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="187" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Kafka Topic</text>
+            <text x="187" y="77" text-anchor="middle" font-size="10" fill="#8896AA">fire-and-forget</text>
+
+            <line x1="242" y1="65" x2="262" y2="65" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+            <rect x="264" y="40" width="110" height="50" rx="7" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="319" y="60" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Stream</text>
+            <text x="319" y="75" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Processor</text>
+            <text x="319" y="88" text-anchor="middle" font-size="10" fill="#8896AA">Flink / Spark</text>
+
+            <!-- fork -->
+            <line x1="374" y1="65" x2="394" y2="65" stroke="#8896AA" stroke-width="1.5"/>
+            <line x1="394" y1="65" x2="394" y2="35" stroke="#8896AA" stroke-width="1.3"/>
+            <line x1="394" y1="65" x2="394" y2="95" stroke="#8896AA" stroke-width="1.3"/>
+            <line x1="394" y1="35" x2="414" y2="35" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr3)"/>
+            <line x1="394" y1="95" x2="414" y2="95" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr3)"/>
+
+            <rect x="416" y="14" width="120" height="40" rx="7" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="476" y="30" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Real-time Store</text>
+            <text x="476" y="44" text-anchor="middle" font-size="10" fill="#2E7D52">raw events · last 24h</text>
+
+            <rect x="416" y="74" width="120" height="40" rx="7" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="476" y="90" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Data Warehouse</text>
+            <text x="476" y="104" text-anchor="middle" font-size="10" fill="#3D5A99">aggregated · historical</text>
+
+            <line x1="536" y1="34" x2="556" y2="34" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr3)"/>
+            <line x1="536" y1="94" x2="556" y2="94" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr3)"/>
+
+            <rect x="558" y="14" width="120" height="120" rx="7" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="618" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Analytics API</text>
+            <text x="618" y="54" text-anchor="middle" font-size="10" fill="#8896AA">serves dashboard</text>
+            <text x="618" y="74" text-anchor="middle" font-size="10" fill="#2E7D52">↑ recent queries</text>
+            <text x="618" y="90" text-anchor="middle" font-size="10" fill="#8896AA">→ from real-time</text>
+            <text x="618" y="110" text-anchor="middle" font-size="10" fill="#3D5A99">↑ historical queries</text>
+            <text x="618" y="126" text-anchor="middle" font-size="10" fill="#8896AA">→ from DW</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">Kafka Event Payload</div>
+      <div class="card blue">
+        <pre style="font-family:var(--mono);font-size:12px;color:var(--text-mid);line-height:1.8;overflow-x:auto">{
+  "event_type": "url_click",
+  "short_code": "abc1234",
+  "long_url": "https://example.com/...",
+  "user_id": "usr_xyz",           <span style="color:var(--text-muted)">// null for anonymous</span>
+  "timestamp": "2026-08-16T14:23:11Z",
+  "ip_address": "203.0.113.42",   <span style="color:var(--text-muted)">// for geo analytics</span>
+  "user_agent": "Mozilla/5.0...", <span style="color:var(--text-muted)">// device type</span>
+  "referrer": "https://twitter.com"
+}</pre>
+      </div>
+
+      <div class="sub-heading">Lambda Architecture — why you need two serving layers</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">Analytics queries have two very different shapes, and no single storage system serves both well. Someone looking at a dashboard wants to know "how many clicks in the last hour?" — they need low-latency access to recent raw events. Someone running a monthly report wants "total clicks by country over the past 30 days" — they need pre-aggregated historical data, because scanning 30 days of raw events at 10K clicks/sec is billions of records. Lambda architecture handles both by using two separate layers.</p>
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-label">Speed Layer (Real-time)</div>
+          <ul class="mini-list">
+            <li>Raw Kafka events stored as-is</li>
+            <li>Last 24–48 hours of data</li>
+            <li>Query: "clicks in last hour"</li>
+            <li>Store: Redis or time-series DB</li>
+            <li>High write throughput, short TTL</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Batch Layer (Historical)</div>
+          <ul class="mini-list">
+            <li>Pre-aggregated daily records</li>
+            <li>clicks_per_day, clicks_per_country</li>
+            <li>Query: "clicks last 30 days"</li>
+            <li>Store: Data Warehouse (BigQuery etc.)</li>
+            <li>Batch jobs run nightly</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The analytics API serves as the query router — it knows which layer to hit based on the time range of the query. Recent queries go to the speed layer, historical queries go to the batch layer. The user sees a single analytics dashboard; the two-layer complexity is hidden behind the API.</p>
+
+      <div class="decision">
+        <div class="decision-icon">🎯</div>
+        <div>
+          <div class="decision-label">Why this matters — the math</div>
+          <p>At 10,000 redirects/sec, a single day generates ~864 million click events. A "last 30 days" query that scans raw events would touch <strong>26 billion records</strong> — even with good indexing, that's not a user-friendly query. The batch layer pre-aggregates these into daily summaries (clicks_per_url_per_day, clicks_per_country_per_day) so the 30-day query reads 30 rows per URL, not 26 billion events. Two layers, two order-of-magnitude differences in query complexity.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Why fire-and-forget is the right pattern here</div>
+        <p>The redirect response must be fast. If the Kafka write fails — Kafka is momentarily overloaded, there's a network hiccup, whatever — <strong>that's acceptable.</strong> A lost click event is not a data integrity issue. Nobody's money is lost. The URL still works. In contrast, if we waited for the Kafka write to complete before returning the 302, a slow analytics system would cause a slow redirect — which is the opposite of what TinyURL exists to provide. Kafka handles durability and retry internally; the web server's job ends at emit.</p>
+      </div>
+    </section>
+
+    <!-- ══ 5C ══════════════════════════════════════════════════ -->
+    <section id="s5c" class="step">
+      <div class="step-header">
+        <span class="step-num">5C</span>
+        <span class="step-title">Deep Dive — Cache Design</span>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The database can handle reads — it's indexed on shortCode, lookups are fast. But at 10,000 reads per second, hitting the database for every redirect would saturate it quickly. A URL shortener's read pattern is also highly skewed: a small number of URLs get the vast majority of traffic. This makes caching extremely effective — you only need to cache the hot URLs to absorb most of the load.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The reason for two cache levels comes from a specific problem: viral URLs. When a link goes viral — a post shared by someone with millions of followers, a product launch announcement, a news story — that single URL might receive thousands of requests per second for a short window. Even Redis, shared across all web servers, becomes a bottleneck at that scale. The L1 local cache on each web server handles this by absorbing the viral URL's traffic entirely in-process.</p>
+
+      <div class="diagram-wrap">
+        <div class="diagram-label">Two-level cache hierarchy</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="arr4" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+            </defs>
+            <!-- Request -->
+            <rect x="10" y="55" width="80" height="40" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="50" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Request</text>
+            <text x="50" y="86" text-anchor="middle" font-size="10" fill="#8896AA">GET /abc1234</text>
+
+            <line x1="90" y1="75" x2="110" y2="75" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr4)"/>
+
+            <!-- L1 -->
+            <rect x="112" y="40" width="120" height="70" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
+            <text x="172" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">L1 — Local Cache</text>
+            <text x="172" y="77" text-anchor="middle" font-size="10" fill="#8896AA">in-process · per server</text>
+            <text x="172" y="90" text-anchor="middle" font-size="10" fill="#8896AA">viral URLs only</text>
+            <text x="172" y="103" text-anchor="middle" font-size="10" fill="#C87533">threshold-based promotion</text>
+
+            <!-- L1 hit -->
+            <text x="172" y="128" text-anchor="middle" font-size="10" fill="#2E7D52">HIT → return immediately ✓</text>
+
+            <!-- L1 miss arrow -->
+            <line x1="232" y1="75" x2="262" y2="75" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr4)"/>
+            <text x="247" y="68" text-anchor="middle" font-size="9" fill="#8896AA">miss</text>
+
+            <!-- L2 Redis -->
+            <rect x="264" y="40" width="120" height="70" rx="7" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="2"/>
+            <text x="324" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">L2 — Redis</text>
+            <text x="324" y="77" text-anchor="middle" font-size="10" fill="#8896AA">shared · all servers</text>
+            <text x="324" y="90" text-anchor="middle" font-size="10" fill="#8896AA">~1–2 GB · LRU eviction</text>
+            <text x="324" y="103" text-anchor="middle" font-size="10" fill="#2E7D52">20% of active URLs</text>
+            <text x="324" y="128" text-anchor="middle" font-size="10" fill="#2E7D52">HIT → return + update L1 ✓</text>
+
+            <!-- L2 miss arrow -->
+            <line x1="384" y1="75" x2="414" y2="75" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr4)"/>
+            <text x="399" y="68" text-anchor="middle" font-size="9" fill="#8896AA">miss</text>
+
+            <!-- DB -->
+            <rect x="416" y="40" width="120" height="70" rx="7" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="2"/>
+            <text x="476" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Primary DB</text>
+            <text x="476" y="77" text-anchor="middle" font-size="10" fill="#8896AA">indexed on short_code</text>
+            <text x="476" y="90" text-anchor="middle" font-size="10" fill="#8896AA">~35 TB total</text>
+            <text x="476" y="103" text-anchor="middle" font-size="10" fill="#3D5A99">always has the answer</text>
+            <text x="476" y="128" text-anchor="middle" font-size="10" fill="#2E7D52">HIT → populate L2 + L1 ✓</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">L1 — Local In-Process Cache</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">L1 is small, fast, and selective. It doesn't hold all URLs — just the ultra-hot ones that would otherwise flood Redis with repeated requests for the same key.</p>
+      <ul class="checklist">
+        <li><strong>What goes in L1 — threshold-based promotion:</strong> A URL gets promoted to L1 when its request rate crosses a threshold — say, more than 100 requests per minute on a given web server. This is measured in the web server itself. Below the threshold, URLs are served from Redis. Above it, they live in L1 until traffic drops back down.</li>
+        <li><strong>Why threshold-based rather than just caching everything:</strong> If you promoted every URL to L1, you'd have thousands of entries per server consuming significant memory. L1 is valuable precisely because it's small and hot — fill it with cold URLs and you've wasted memory that could be used for JVM heap. Only viral URLs earn their spot in L1.</li>
+        <li><strong>Size:</strong> Small — 1,000 entries per server is plenty. If the top 1,000 URLs are in L1, those URLs account for a disproportionate fraction of total traffic. Everything else hits Redis.</li>
+        <li><strong>Eviction:</strong> LRU. A URL whose traffic drops below threshold ages out of L1 naturally. The next request for that URL misses L1 and goes to Redis — which is the right fallback.</li>
+      </ul>
+
+      <div class="sub-heading">L2 — Shared Redis Cache</div>
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px">Redis is the workhorse of the read path. It's shared across all web servers, so a URL cached in Redis is available to any server that handles that URL's traffic. The key insight for sizing is that URL traffic is highly skewed — you don't need to cache 35TB of URLs, just the active fraction.</p>
+      <ul class="checklist">
+        <li><strong>Size calculation:</strong> Assume 20% of all URLs account for the vast majority of traffic — these are "active" URLs (clicked at least once in the past 30 days). If there are ~50M URLs total, 20% = 10M active URLs × 100 bytes each = ~1GB. With Redis key overhead and headroom, budget 2GB. That's a single Redis instance — no sharding needed at this scale.</li>
+        <li><strong>Eviction policy — LRU:</strong> When Redis reaches capacity, evict the least recently used URL. Cold URLs that nobody has clicked in weeks naturally age out. Hot URLs that are clicked frequently stay in cache. This is the right eviction policy for a system where recency of access correlates strongly with future access.</li>
+        <li><strong>TTL — 30 days:</strong> Set a hard TTL of 30 days on every cache entry regardless of access frequency. This ensures that if a long URL is ever updated (even though we said URL editing is out of scope — a future feature), the cache doesn't serve stale data indefinitely. It also aligns with the reclamation service's inactivity threshold.</li>
+        <li><strong>Cache population on DB hit:</strong> When a request misses both L1 and Redis and hits the database, populate both Redis and L1 on the way back. The next request for that URL will hit L1 immediately — no additional network hops for the follow-up requests that often cluster around a newly-active URL.</li>
+      </ul>
+    </section>
+
+    <!-- ══ 5D ══════════════════════════════════════════════════ -->
+    <section id="s5d" class="step">
+      <div class="step-header">
+        <span class="step-num">5D</span>
+        <span class="step-title">Deep Dive — Duplicate URL Handling</span>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">Here's a question that seems simple but has a non-obvious answer: what happens when two different users submit the same long URL? Do they get the same short code, or different ones?</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The instinct is to say "return the same short code" — it saves storage, it's efficient, same URL means same destination anyway. But this instinct is wrong when analytics is in scope. Here's why: if User A and User B both shorten the same URL and get the same short code, then every click on that short code is attributed to both of them. Their analytics are merged. You cannot tell how many of those 500 clicks came from User A's Instagram post versus User B's newsletter. The analytics data becomes meaningless for per-user attribution.</p>
+
+      <div class="diagram-wrap">
+        <div class="diagram-label">Same URL submitted by two different users</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="arr5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+            </defs>
+            <!-- User A -->
+            <rect x="10" y="20" width="100" height="40" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="60" y="38" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">User A</text>
+            <text x="60" y="52" text-anchor="middle" font-size="10" fill="#8896AA">submits URL X</text>
+
+            <!-- User B -->
+            <rect x="10" y="90" width="100" height="40" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="60" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">User B</text>
+            <text x="60" y="122" text-anchor="middle" font-size="10" fill="#8896AA">submits URL X</text>
+
+            <line x1="110" y1="40" x2="200" y2="75" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr5)"/>
+            <line x1="110" y1="110" x2="200" y2="85" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr5)"/>
+
+            <!-- Decision -->
+            <rect x="202" y="55" width="120" height="50" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="262" y="74" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Same URL?</text>
+            <text x="262" y="89" text-anchor="middle" font-size="10" fill="#8896AA">different users</text>
+            <text x="262" y="102" text-anchor="middle" font-size="10" fill="#8896AA">same URL X</text>
+
+            <line x1="322" y1="80" x2="362" y2="80" stroke="#8896AA" stroke-width="1.3" marker-end="url(#arr5)"/>
+
+            <!-- Two codes -->
+            <rect x="364" y="40" width="120" height="40" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="424" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Code A → URL X</text>
+            <text x="424" y="72" text-anchor="middle" font-size="10" fill="#2E7D52">User A's analytics ✓</text>
+
+            <rect x="364" y="90" width="120" height="40" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="424" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Code B → URL X</text>
+            <text x="424" y="122" text-anchor="middle" font-size="10" fill="#2E7D52">User B's analytics ✓</text>
+
+            <!-- Why -->
+            <rect x="524" y="55" width="140" height="50" rx="7" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="594" y="73" text-anchor="middle" font-size="10" fill="#4A5568">Two codes preserve</text>
+            <text x="594" y="87" text-anchor="middle" font-size="10" fill="#4A5568">per-user click analytics</text>
+            <text x="594" y="101" text-anchor="middle" font-size="10" fill="#C87533">Deliberate design choice</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-label">Same user, same URL → same code</div>
+          <ul class="mini-list">
+            <li>Check: does this user already have a code for this exact URL?</li>
+            <li>Yes → return the existing code</li>
+            <li>No duplicate storage created</li>
+            <li>Makes the API idempotent — safe to retry</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Different users, same URL → new code</div>
+          <ul class="mini-list">
+            <li>Each user gets their own unique short code</li>
+            <li>Both codes point to the same long URL</li>
+            <li>Each user's clicks are tracked under their code</li>
+            <li>Analytics attribution stays clean per-user</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The same-user deduplication is a product expectation: if you shorten the same URL twice, you should get the same short link back. It would be confusing to get a different code. And since both clicks would be attributed to you anyway, there's no analytics reason to create a new code — just return the one you already have.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The different-user case is where the design decision is actually interesting. Sharing a code between users conflates their analytics — you'd see 502 total clicks but have no way to know 500 were from User A and 2 were from User B. Separate codes solve this completely. Each code maps to one owner; all clicks on that code are attributed to that owner.</p>
+
+      <div class="decision">
+        <div class="decision-icon">🎯</div>
+        <div>
+          <div class="decision-label">The tradeoff — analytics wins over storage</div>
+          <p><strong>The storage cost is real but small:</strong> Multiple records pointing to the same long URL means some redundant storage. At 100 bytes per record, even a URL shared by 1,000 users only costs 100KB of extra storage. At 35TB total over 10 years, this is noise.<br/><br/><strong>The analytics benefit is significant:</strong> Per-user attribution is the whole point of the analytics system. If User A is a marketing manager running a campaign and User B is a developer testing a link, merging their click data makes both users' analytics useless. Separate codes preserve the integrity of the analytics data that the 302 decision was made to collect in the first place.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 6 ══════════════════════════════════════════════════ -->
+    <section id="s6" class="step">
+      <div class="step-header">
+        <span class="step-num">06</span>
+        <span class="step-title">Data Model</span>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The data model flows directly from the access patterns established in the design. The primary access pattern on the read path is: given a <code>short_code</code>, return a <code>long_url</code>. This is a pure key-value lookup — no joins, no range scans, no aggregations. That access pattern points toward a simple, indexed table where <code>short_code</code> is the primary key.</p>
+
+      <p style="font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:16px">The write path adds two pieces of context: <code>user_id</code> (for same-user deduplication and analytics attribution) and <code>state</code> (for the soft-delete reclamation lifecycle). The data model is intentionally simple — complexity lives in the application logic, not the schema.</p>
+
+      <div class="sub-heading">URLs Table — primary store</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>id</td><td>BIGINT</td><td>Auto-increment primary key</td></tr>
+            <tr><td>short_code</td><td>VARCHAR(7)</td><td><strong>UNIQUE constraint</strong> — safety net for concurrency. Indexed.</td></tr>
+            <tr><td>long_url</td><td>TEXT</td><td>Original URL (up to 2048 chars)</td></tr>
+            <tr><td>user_id</td><td>VARCHAR</td><td>Owner — enables same-user deduplication check</td></tr>
+            <tr><td>state</td><td>ENUM</td><td><code>ACTIVE</code>, <code>INACTIVE</code>, <code>DELETED</code></td></tr>
+            <tr><td>created_at</td><td>TIMESTAMP</td><td>UTC. Immutable.</td></tr>
+            <tr><td>last_accessed_at</td><td>TIMESTAMP</td><td>Updated on every redirect. Used by DW to flag inactive URLs.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Code Pool Table — pre-generated codes</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>code</td><td>VARCHAR(7)</td><td>Primary key. Pre-generated Base62 code, not yet assigned.</td></tr>
+            <tr><td>created_at</td><td>TIMESTAMP</td><td>When the nanny generated this code</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">Why the code pool is a separate table — not part of URLs</div>
+        <p>Mixing pre-generated codes with assigned URLs would mean the URLs table contains both live records and "reserved" records that aren't real URLs yet. That complicates every query: reads would need to filter out reserved entries, analytics would need to exclude them. Keeping them separate means the URLs table is clean — every row is a real, assigned short URL. The pool table is ephemeral and small: at 10,000 entries × ~10 bytes per code, it's essentially nothing. The clean separation is worth it.</p>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">Storage choice — SQL vs NoSQL</div>
+        <p>The primary access pattern (point lookup by short_code) maps naturally to either SQL or NoSQL. At this scale — ~35TB over 10 years, 10K reads/sec — a well-configured SQL database (PostgreSQL, MySQL) handles this comfortably. NoSQL (Cassandra, DynamoDB) becomes more compelling at significantly higher scale where horizontal sharding is needed, or if write throughput is dramatically higher. For TinyURL at the stated scale, SQL is the simpler and perfectly adequate choice. The UNIQUE constraint on short_code, the ability to do the duplicate-check query (SELECT by user_id + long_url), and the soft-delete state management all benefit from SQL semantics.</p>
+      </div>
+
+      <div class="open-q">
+        <div class="open-q-label">Session ended here — data model not fully completed</div>
+        <p>The session covered the URLs table and Code Pool table. The analytics event schema (what gets stored after Kafka consumers process click events), a User table (if auth is extended), and detailed index strategy (composite index on user_id + long_url for duplicate detection) were not reached. These will be added in a follow-up session.</p>
+      </div>
+    </section>
+
+  </main>
 </div>
 
 <footer>
   <div class="footer-inner">
-    <div class="footer-copy">akshit.ahuja.js.org · system-design · 2026</div>
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · tinyurl · 2026</span>
     <div class="footer-links">
-      <a href="index.html">← All Designs</a>
+      <a href="/system-design/">← All Designs</a>
+      <a href="concepts/code-generator.html">Code Generator →</a>
       <a href="framework.html">Framework</a>
-      <a href="https://github.com/akshit101" target="_blank">GitHub ↗</a>
     </div>
   </div>
 </footer>
 
+<script>
+  const spineItems = document.querySelectorAll('.spine-item');
+  const targets = {};
+  spineItems.forEach(item => {
+    const id = item.dataset.target;
+    if (id) { const el = document.getElementById(id); if (el) targets[id] = el; }
+  });
+  function updateSpine() {
+    const y = window.scrollY + 100;
+    let active = null;
+    for (const [id, el] of Object.entries(targets)) { if (el.offsetTop <= y) active = id; }
+    spineItems.forEach(item => item.classList.toggle('active', item.dataset.target === active));
+  }
+  window.addEventListener('scroll', updateSpine, { passive: true });
+  updateSpine();
+</script>
 </body>
 </html>
