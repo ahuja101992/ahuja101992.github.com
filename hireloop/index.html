@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HireLoop — Akshit Ahuja</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+      --shadow:0 4px 16px rgba(28,35,51,0.09);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
+
+    .hero{padding:64px 48px 48px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero-grid{display:grid;grid-template-columns:1fr 320px;gap:48px;align-items:start}
+    .hero h1{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:700;line-height:1.2;margin-bottom:14px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:580px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .tag.green{color:var(--green);background:var(--green-light);border-color:var(--green-border)}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;transition:all 0.15s}
+    .btn-primary{background:var(--blue);color:white}
+    .btn-primary:hover{background:#2F4880}
+    .btn-secondary{background:var(--bg-card);color:var(--text-mid);border:1px solid var(--border)}
+    .btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+
+    /* stat card */
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--amber);border-radius:10px;padding:22px 24px;box-shadow:var(--shadow-sm)}
+    .stat-card-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .stat-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border)}
+    .stat-row:last-child{border-bottom:none}
+    .stat-label{font-size:13px;color:var(--text-mid)}
+    .stat-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
+    .stat-val.blue{color:var(--blue)}
+    .stat-val.amber{color:var(--amber)}
+    .stat-val.green{color:var(--green)}
+
+    /* body */
+    .body{padding:48px 48px 80px;display:grid;grid-template-columns:1fr 280px;gap:48px;align-items:start}
+    .main-col{}
+    .side-col{position:sticky;top:72px}
+
+    .section{margin-bottom:40px}
+    .section-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .section h2{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.3}
+    .section p{font-size:14px;color:var(--text-mid);line-height:1.8;margin-bottom:12px}
+    .section p:last-child{margin-bottom:0}
+
+    /* phase cards */
+    .phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+    .phase-card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:8px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+    .phase-num{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+    .phase-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+    .phase-desc{font-size:12.5px;color:var(--text-mid);line-height:1.65}
+
+    /* feature list */
+    .feature-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:0}
+    .feature-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .feature-list li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .feature-list li strong{color:var(--text);font-weight:600}
+
+    /* tech table */
+    .tech-table{width:100%;border-collapse:collapse;font-size:13px}
+    .tech-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+    .tech-table tr:last-child td{border-bottom:none}
+    .tech-table td:first-child{font-family:var(--mono);font-size:11px;color:var(--text-muted);white-space:nowrap;width:130px}
+    .tech-table td:last-child{color:var(--text-mid)}
+    .tech-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm)}
+
+    /* callout */
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.7}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+
+    /* sidebar cards */
+    .side-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .side-card-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .side-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .side-list li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative;line-height:1.5}
+    .side-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px}
+
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+
+    @media(max-width:900px){
+      .hero-grid{grid-template-columns:1fr}.stat-card{display:none}
+      .body{grid-template-columns:1fr;padding:32px 24px 60px}
+      .side-col{position:static}
+      .phase-grid{grid-template-columns:1fr}
+      nav{padding:0 20px}.nav-links{display:none}
+      .hero{padding:40px 24px 32px}
+      footer{padding:20px 24px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">akshit.ahuja.js.org</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">System Design</a></li>
+    <li><a href="/market-dashboard/">Market Dashboard</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/">akshit.ahuja.js.org</a> / Projects / HireLoop</div>
+  <div class="hero-grid">
+    <div>
+      <h1><em>HireLoop</em></h1>
+      <p class="hero-desc">A personal career intelligence platform that automates the job search pipeline end-to-end — from scraping interview intel and tracking prep readiness, to discovering jobs, tailoring resumes, and managing applications. Human-in-the-loop confirmation before every submission.</p>
+      <div class="tag-row">
+        <span class="tag blue">Java 26</span>
+        <span class="tag blue">Spring Boot 3</span>
+        <span class="tag blue">React</span>
+        <span class="tag blue">Claude API</span>
+        <span class="tag blue">PostgreSQL</span>
+        <span class="tag blue">Railway</span>
+        <span class="tag green">Deployed</span>
+        <span class="tag amber">Personal Project</span>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a>
+        <a class="btn btn-secondary" href="/">← Home</a>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">At a glance</div>
+      <div class="stat-row"><span class="stat-label">Stack</span><span class="stat-val blue">Java + React</span></div>
+      <div class="stat-row"><span class="stat-label">LLM</span><span class="stat-val">Claude API</span></div>
+      <div class="stat-row"><span class="stat-label">Database</span><span class="stat-val">PostgreSQL</span></div>
+      <div class="stat-row"><span class="stat-label">Hosting</span><span class="stat-val green">Railway</span></div>
+      <div class="stat-row"><span class="stat-label">Phases</span><span class="stat-val amber">4 total</span></div>
+      <div class="stat-row"><span class="stat-label">Apply style</span><span class="stat-val">Human confirms</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="body">
+  <div class="main-col">
+
+    <!-- WHY -->
+    <div class="section">
+      <div class="section-eyebrow">The Problem</div>
+      <h2>Job searching is a full-time job. It shouldn't be.</h2>
+      <p>The standard job search is manual, repetitive, and signal-poor — scrolling job boards, tailoring resumes by hand, losing track of where you applied. HireLoop automates the high-effort / low-judgment parts while keeping you in control of every decision that matters.</p>
+      <p>The core design rule: <strong>no autonomous applying</strong>. The system researches, scores, discovers, and prepares — but a human confirms before anything is submitted. No spam applies, no mismatched applications, no embarrassing auto-submits.</p>
+    </div>
+
+    <!-- PHASES -->
+    <div class="section">
+      <div class="section-eyebrow">Architecture</div>
+      <h2>Four phases, one pipeline</h2>
+      <p>The system was designed in four phases that activate sequentially based on your readiness score — company-specific job polling only turns on once you're ready for that company.</p>
+      <div class="phase-grid">
+        <div class="phase-card">
+          <div class="phase-num">Phase 1</div>
+          <div class="phase-title">Interview Intel + Prep Tracking</div>
+          <p class="phase-desc">Scrapes interview signals from Glassdoor, Blind, LeetCode, Reddit. Dynamically calculates global and per-company readiness scores (0–100) based on topic coverage weights. Dashboard shows prep gaps in real time.</p>
+        </div>
+        <div class="phase-card">
+          <div class="phase-num">Phase 2</div>
+          <div class="phase-title">Job Discovery + Fit Scoring</div>
+          <p class="phase-desc">Polls company career pages directly — no LinkedIn/Indeed. Filters by posting age (max 7 days), role level, and location. Claude scores job-resume fit and flags top matches.</p>
+        </div>
+        <div class="phase-card">
+          <div class="phase-num">Phase 3</div>
+          <div class="phase-title">Resume Tailoring</div>
+          <p class="phase-desc">Per-job resume tailoring using Claude API. Parses your base DOCX via Apache POI, rewrites relevant bullets to match the JD, produces a tailored version for review before submission.</p>
+        </div>
+        <div class="phase-card">
+          <div class="phase-num">Phase 4</div>
+          <div class="phase-title">Application Pipeline</div>
+          <p class="phase-desc">Gmail API integration auto-tracks recruiter responses. Dashboard shows pipeline state per company — applied, responded, scheduled, rejected. Human confirms every application before it sends.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY DESIGN DECISIONS -->
+    <div class="section">
+      <div class="section-eyebrow">Design Decisions</div>
+      <h2>What makes it different</h2>
+      <ul class="feature-list">
+        <li><strong>Config-driven rules engine:</strong> targets.yml defines which companies to target and at what readiness threshold. filters.yml defines job filters. Change behavior without touching code.</li>
+        <li><strong>Pluggable LLM provider strategy:</strong> LLM calls go through a provider interface — swap between Claude API and Gemini without touching business logic. Designed for cost flexibility.</li>
+        <li><strong>Readiness-gated job polling:</strong> Job polling for a company only activates when your readiness score for that company crosses its configured threshold. You don't see Apple jobs until you're ready for Apple.</li>
+        <li><strong>Direct career page targeting:</strong> All job discovery hits company career pages directly, not aggregators. Avoids stale listings, fake roles, and the noise of Easy Apply spam.</li>
+        <li><strong>Human-in-the-loop by design:</strong> Every application requires explicit dashboard confirmation. The agent prepares everything; you pull the trigger.</li>
+      </ul>
+    </div>
+
+    <!-- TECH -->
+    <div class="section">
+      <div class="section-eyebrow">Tech Stack</div>
+      <h2>What it's built on</h2>
+      <div class="tech-wrap">
+        <table class="tech-table">
+          <tr><td>Language</td><td>Java 26 · Spring Boot 3</td></tr>
+          <tr><td>Scheduler</td><td>Spring @Scheduled — batch scrape runs, not real-time</td></tr>
+          <tr><td>LLM</td><td>Claude API (claude-sonnet-4-6) via RestTemplate — fit scoring, resume tailoring, intel summarization</td></tr>
+          <tr><td>Browser</td><td>Playwright for Java — career page scraping</td></tr>
+          <tr><td>Database</td><td>PostgreSQL via Spring Data JPA · Flyway migrations</td></tr>
+          <tr><td>Resume</td><td>Apache POI — parses DOCX, stores as JSON, rewrites bullets per JD</td></tr>
+          <tr><td>Gmail</td><td>Gmail API v1 (OAuth2) — auto-tracks recruiter responses</td></tr>
+          <tr><td>Frontend</td><td>React SPA at localhost:8080/ui — pipeline, prep tracker, job feed</td></tr>
+          <tr><td>Hosting</td><td>Railway — Java backend + managed PostgreSQL</td></tr>
+          <tr><td>Config</td><td>application.yml + targets.yml + filters.yml</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <div class="callout-label">Design philosophy</div>
+      <p>Code is cheap. Design first. The entire system was designed through a PRD-first approach — 23 sections, 24-step phased delivery order — before a single line of code was written. Claude Code was used for autonomous development from the PRD spec.</p>
+    </div>
+
+  </div>
+
+  <div class="side-col">
+    <div class="side-card">
+      <div class="side-card-label">Targets</div>
+      <ul class="side-list">
+        <li>Meta, Google, Apple, Amazon</li>
+        <li>CrowdStrike, Indeed, Dell</li>
+        <li>Direct career pages only</li>
+        <li>Max 7-day posting age</li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Readiness scoring</div>
+      <ul class="side-list">
+        <li>COVERED = 1.0 weight</li>
+        <li>IN_PROGRESS = 0.5</li>
+        <li>WEAK = 0.3</li>
+        <li>NOT_STARTED = 0.0</li>
+        <li>Global + per-company score</li>
+        <li>Job polling gates on threshold</li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Non-goals</div>
+      <ul class="side-list">
+        <li>No LinkedIn / Indeed apply</li>
+        <li>No autonomous submission</li>
+        <li>No real-time intel</li>
+        <li>No chat UI</li>
+      </ul>
+    </div>
+    <div class="side-card">
+      <div class="side-card-label">Related projects</div>
+      <ul class="side-list">
+        <li><a href="/orderai/" style="color:var(--blue);text-decoration:none">OrderAI →</a></li>
+        <li><a href="/system-design/" style="color:var(--blue);text-decoration:none">System Design Notes →</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · hireloop · 2026</span>
+    <div class="footer-links">
+      <a href="/">← Home</a>
+      <a href="/orderai/">OrderAI</a>
+      <a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
