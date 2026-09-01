@@ -203,6 +203,40 @@
     </div>
   </a>
 
+  <a class="card" href="newsfeed.html">
+    <div class="card-num">02</div>
+    <div class="card-body">
+      <div class="card-tag">Social Feed · Fan-Out · Social Graph · Feed Ranking · OLTP vs OLAP</div>
+      <h3>Design a News Feed</h3>
+      <p>300M DAU, 58 writes/sec, 5,800 reads/sec. Hybrid fan-out (push under 1M followers, pull for celebrities), engagement-based ranking, two-phase read path, and five-database data model justified by access pattern.</p>
+      <span class="card-status status-done">Complete</span>
+    </div>
+  </a>
+
+  <a class="card" href="rate-limiter.html">
+    <div class="card-num">03</div>
+    <div class="card-body">
+      <div class="card-tag">Infrastructure · API Gateway · Redis · Sliding Window · Token Bucket</div>
+      <h3>Design a Rate Limiter</h3>
+      <p>10M DAU, 1M requests/sec at API gateway. All five algorithms compared — token bucket, leaking bucket, fixed window, sliding window log, sliding window counter (chosen). Config-driven rules engine with polling worker, Redis failure edge case handled.</p>
+      <span class="card-status status-done">Complete</span>
+    </div>
+  </a>
+
+  <div class="card-placeholder">
+    <div class="card-num">04</div>
+    <div class="card-body">
+      <h3>Design a Chat System — coming soon</h3>
+    </div>
+  </div>
+
+  <div class="card-placeholder">
+    <div class="card-num">05</div>
+    <div class="card-body">
+      <h3>Design YouTube — coming soon</h3>
+    </div>
+  </div>
+
 </div>
 
 <!-- CONCEPTS -->
@@ -223,45 +257,30 @@
     </div>
   </a>
 
-  <div class="card-placeholder">
-    <div class="card-num">C2</div>
+  <a class="card" href="concepts/fan-out.html">
+    <div class="card-num" style="color:var(--blue)">C2</div>
     <div class="card-body">
-      <h3>Sharding — coming soon</h3>
+      <div class="card-tag">Write Amplification · Social Systems · Message Queues</div>
+      <h3>Fan-Out Pattern</h3>
+      <p>One event that must reach many recipients. Push vs pull vs hybrid — tradeoffs, the celebrity threshold decision, inactive follower filtering, and when eventual consistency unlocks the entire async architecture. Referenced from News Feed.</p>
+      <span class="card-status status-done">Complete</span>
     </div>
-  </div>
+  </a>
 
-  <div class="card-placeholder">
-    <div class="card-num">C3</div>
+  <a class="card" href="concepts/oltp-vs-olap.html">
+    <div class="card-num" style="color:var(--blue)">C3</div>
     <div class="card-body">
-      <h3>Consistent Hashing — coming soon</h3>
+      <div class="card-tag">Database Selection · Storage Patterns · Columnar vs Row</div>
+      <h3>OLTP vs OLAP</h3>
+      <p>Two types of read workloads with opposite performance characteristics. Row-oriented vs columnar storage internals, when each applies, and the feed table mistake that comes up in every News Feed session. Referenced from News Feed and TinyURL.</p>
+      <span class="card-status status-done">Complete</span>
     </div>
-  </div>
+  </a>
 
   <div class="card-placeholder">
     <div class="card-num">C4</div>
     <div class="card-body">
-      <h3>Caching Patterns — coming soon</h3>
-    </div>
-  </div>
-
-  <div class="card-placeholder">
-    <div class="card-num">02</div>
-    <div class="card-body">
-      <h3>Design a Rate Limiter — coming soon</h3>
-    </div>
-  </div>
-
-  <div class="card-placeholder">
-    <div class="card-num">03</div>
-    <div class="card-body">
-      <h3>Design Instagram Feed — coming soon</h3>
-    </div>
-  </div>
-
-  <div class="card-placeholder">
-    <div class="card-num">04</div>
-    <div class="card-body">
-      <h3>Design a Notification Service — coming soon</h3>
+      <h3>Sharding — coming soon</h3>
     </div>
   </div>
 
