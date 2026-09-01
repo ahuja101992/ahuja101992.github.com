@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fan-Out Pattern — System Design Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;--border:#E2E6EF;--border-mid:#C8D0E0;--text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;--blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;--amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;--green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;--red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;--sans:'Inter',system-ui,sans-serif;--serif:'Playfair Display',Georgia,serif;--mono:'JetBrains Mono',monospace;--shadow-sm:0 1px 3px rgba(28,35,51,0.06)}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:680px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:200px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
+    .section{margin-bottom:52px;scroll-margin-top:80px}
+    .section-header{margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .section-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+    .section h2{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .prose{font-size:14px;color:var(--text-mid);line-height:1.85;margin-bottom:14px}
+    .prose strong{color:var(--text);font-weight:600}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .approach-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .approach-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+    .approach-card.chosen{border-color:var(--green-border);background:var(--green-light)}
+    .approach-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+    .approach-label.amber{color:var(--amber)}
+    .approach-label.blue{color:var(--blue)}
+    .approach-label.green{color:var(--green)}
+    .approach-label.red{color:var(--red)}
+    .pro-con-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+    .pro-con-list li{font-size:12.5px;color:var(--text-mid);padding-left:18px;position:relative;line-height:1.55}
+    .pro-con-list li::before{position:absolute;left:0;font-size:11px;top:1px}
+    .pro-con-list.pros li::before{content:'✓';color:var(--green)}
+    .pro-con-list.cons li::before{content:'✗';color:var(--red)}
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .checklist li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .checklist li strong{color:var(--text);font-weight:600}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    td.green{color:var(--green)!important}
+    td.red{color:var(--red)!important}
+    td.amber{color:var(--amber)!important}
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:22px}
+    .used-in{background:var(--blue-light);border:1px solid #D3DCF0;border-radius:8px;padding:16px 20px;margin-bottom:16px}
+    .used-in-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+    .used-in-list{display:flex;flex-wrap:wrap;gap:8px}
+    .used-in-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:var(--bg-card);border:1px solid #D3DCF0;border-radius:5px;padding:5px 12px;text-decoration:none;transition:all 0.15s}
+    .used-in-tag:hover{background:var(--blue);color:white}
+    .used-in-tag.soon{opacity:0.5;cursor:default;pointer-events:none}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){.spine{display:none}.main{padding:24px 20px 60px}.hero{padding:40px 20px 32px}.approach-grid{grid-template-columns:1fr}nav{padding:0 20px}.nav-links{display:none}footer{padding:20px}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="../newsfeed.html">News Feed</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/system-design/">System Design Notes</a> / <a href="/system-design/#concepts">Concepts</a> / Fan-Out Pattern</div>
+  <h1>The <em>Fan-Out</em> Pattern</h1>
+  <p class="hero-desc">One event that needs to reach many recipients. The fan-out problem appears in social feeds, email systems, notification pipelines, and any system where a single write must propagate to many downstream targets. How you solve it determines whether your system is fast for readers, for writers, or breaks under celebrity-scale load.</p>
+  <div class="tag-row">
+    <span class="tag amber">Concept</span>
+    <span class="tag blue">Write Amplification</span>
+    <span class="tag blue">Social Systems</span>
+    <span class="tag blue">Message Queues</span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="problem"><div class="spine-dot"></div><a class="spine-link" href="#problem">The Problem</a></div>
+      <div class="spine-item" data-target="push"><div class="spine-dot"></div><a class="spine-link" href="#push">Fan-out on Write (Push)</a></div>
+      <div class="spine-item" data-target="pull"><div class="spine-dot"></div><a class="spine-link" href="#pull">Fan-out on Read (Pull)</a></div>
+      <div class="spine-item" data-target="hybrid"><div class="spine-dot"></div><a class="spine-link" href="#hybrid">Hybrid Approach ✓</a></div>
+      <div class="spine-item" data-target="inactive"><div class="spine-dot"></div><a class="spine-link" href="#inactive">Inactive Follower Filter</a></div>
+      <div class="spine-item" data-target="comparison"><div class="spine-dot"></div><a class="spine-link" href="#comparison">Comparison Table</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="usedin"><div class="spine-dot"></div><a class="spine-link" href="#usedin">Used In</a></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section id="problem" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">The Core Problem</div>
+        <h2>One write, many recipients</h2>
+      </div>
+      <p class="prose">When a user posts something in a social system, every one of their followers needs to see it. At 100 followers, this is trivially solved — just write 100 records. At 100 million followers (a celebrity account), writing 100 million records synchronously before returning to the user would take hours. The system would be unusable.</p>
+      <p class="prose">This is the fan-out problem: <strong>one event that must propagate to many targets.</strong> The three approaches — push, pull, and hybrid — are fundamentally different tradeoffs between write-time complexity and read-time complexity. You can't optimize both simultaneously. Whatever you don't pay on the write path, you pay on the read path.</p>
+      <div class="callout amber">
+        <div class="callout-label">Why eventual consistency is the key enabler</div>
+        <p>Every fan-out solution other than synchronous push depends on the system tolerating a delay between when something is written and when all recipients see it. In a news feed, 3–5 seconds is acceptable. In a stock trading system, it isn't. <strong>Always confirm the consistency requirement before choosing a fan-out strategy.</strong> The acceptable lag is what determines which approaches are on the table.</p>
+      </div>
+    </section>
+
+    <section id="push" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 1</div>
+        <h2>Fan-out on Write — Push</h2>
+      </div>
+      <p class="prose">When a user posts, immediately write a record into every follower's feed table. By the time any follower loads their feed, their posts are already pre-computed and waiting. Reading the feed is trivially fast — just query by userId and return pre-sorted records.</p>
+      <div class="approach-grid">
+        <div class="approach-card">
+          <div class="approach-label green">What works</div>
+          <ul class="pro-con-list pros">
+            <li>Feed reads are instant — pre-computed</li>
+            <li>Read path is simple: query by userId, return results</li>
+            <li>No computation at read time</li>
+            <li>Works well for users with small follower counts</li>
+          </ul>
+        </div>
+        <div class="approach-card">
+          <div class="approach-label red">What breaks</div>
+          <ul class="pro-con-list cons">
+            <li>Write amplification: one post → N writes (one per follower)</li>
+            <li>Celebrity post → millions of writes simultaneously</li>
+            <li>Feed table grows proportionally to followers × posts</li>
+            <li>Inactive followers still receive writes they may never read</li>
+          </ul>
+        </div>
+      </div>
+      <p class="prose">Push-only works well when the follower graph is sparse and relatively balanced — no single user has dramatically more followers than the average. It breaks under celebrity load because one post triggers unbounded write amplification. A Kafka queue can make the push async (post service returns immediately, fan-out happens in background), but the total write volume is unchanged.</p>
+    </section>
+
+    <section id="pull" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 2</div>
+        <h2>Fan-out on Read — Pull</h2>
+      </div>
+      <p class="prose">Don't pre-compute anything at write time. When a user loads their feed, fetch posts in real time from everyone they follow, merge them, sort them, and return the result. Write path is trivially simple — just write the post to the post table. The read path is where all the work happens.</p>
+      <div class="approach-grid">
+        <div class="approach-card">
+          <div class="approach-label green">What works</div>
+          <ul class="pro-con-list pros">
+            <li>Write path is simple: one write to post table</li>
+            <li>No write amplification — celebrity posts are free to write</li>
+            <li>Feed is always up-to-date — no staleness</li>
+            <li>No storage for pre-computed feeds</li>
+          </ul>
+        </div>
+        <div class="approach-card">
+          <div class="approach-label red">What breaks</div>
+          <ul class="pro-con-list cons">
+            <li>Read path is expensive: N queries for N followees</li>
+            <li>If user follows 1,000 people: 1,000 lookups on every feed load</li>
+            <li>5,800 reads/sec × 1,000 queries each = 5.8M DB queries/sec</li>
+            <li>Merge and sort at read time adds latency</li>
+          </ul>
+        </div>
+      </div>
+      <p class="prose">Pull-only works when the follow graph is dense but the number of followees per user is small. It breaks at scale because the read-time computation — N lookups + merge + sort — grows with the number of followees. At Facebook scale where users follow hundreds of people, this is functionally impossible at acceptable latency.</p>
+    </section>
+
+    <section id="hybrid" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Approach 3 — Used in News Feed</div>
+        <h2>Hybrid — Push for regular, Pull for celebrities</h2>
+      </div>
+      <p class="prose">The hybrid approach recognizes that the push and pull models have complementary failure modes: push fails at high follower counts (celebrity writes), pull fails at high followee counts (expensive reads). Apply each where the other fails.</p>
+      <p class="prose">The threshold is the key decision. In the News Feed session, 1M followers was chosen as the cutoff. Below 1M — fan-out service pushes to all eligible followers' feed tables. Above 1M — skip fan-out entirely. On the read path, the get service identifies which followees are celebrities (flagged in user table), fetches their recent posts directly from post cache via the hybrid get service, and merges with the pre-computed regular friend feed.</p>
+      <div class="callout green">
+        <div class="callout-label">Why celebrity posts are cheap to pull</div>
+        <p>Celebrity posts get millions of read requests — they will always be at the top of the post cache's LRU eviction list. Pulling them on the read path is not expensive in practice: one cache hit per celebrity per feed load. If the celebrity had 100 followers, their post wouldn't be cache-hot and pull would be expensive. <strong>The inversion only works because celebrity posts are always cached.</strong> The same logic does not apply to a user with 1M followers who posts rarely — their posts may not be cache-hot, and pulling them would be slow.</p>
+      </div>
+      <div class="sub-heading">The threshold question</div>
+      <p class="prose">The 1M threshold is a starting point, not a law. The right threshold is the point at which fan-out volume becomes a capacity problem for your fan-out service. At 58 write QPS and an average of 500 followers, fan-out handles ~29,000 feed writes per second — manageable. A single user with 100M followers posting would add 100M writes instantly. The threshold keeps any single post from dominating fan-out capacity. Tune it based on fan-out service throughput and acceptable lag.</p>
+    </section>
+
+    <section id="inactive" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Optimization</div>
+        <h2>Inactive follower filtering</h2>
+      </div>
+      <p class="prose">Even below the celebrity threshold, not all followers should receive fan-out writes. A user who hasn't opened the app in 30 days doesn't need their feed pre-populated — they'll get a fresh pull when they return. Skipping inactive users reduces fan-out volume significantly, because inactive users often represent a large fraction of total followers.</p>
+      <p class="prose">The fan-out service checks the <code>is_active</code> flag on each follower before writing to the feed table. The analytics service maintains this flag — updated from app open events. When an inactive user returns, their first feed load is a pull (slightly slower) but subsequent loads benefit from push once they're marked active again.</p>
+      <div class="callout">
+        <div class="callout-label">Why this matters more than it looks</div>
+        <p>Studies of social platforms consistently show that a large fraction of registered users are inactive at any given time — sometimes 40–60%. If your fan-out service is writing to inactive users' feed tables, it's doing 40–60% more work than necessary. At scale, that's the difference between a manageable fan-out service and one that's permanently overloaded. <strong>Inactive follower filtering is a real production optimization that most textbook answers miss.</strong></p>
+      </div>
+    </section>
+
+    <section id="comparison" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Quick Reference</div>
+        <h2>Comparison table</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dimension</th><th>Push (write)</th><th>Pull (read)</th><th>Hybrid ✓</th></tr></thead>
+          <tbody>
+            <tr><td>Write cost</td><td class="red">High (N writes)</td><td class="green">Low (1 write)</td><td class="amber">Medium (N writes for non-celebrity)</td></tr>
+            <tr><td>Read cost</td><td class="green">Low (pre-computed)</td><td class="red">High (N lookups at read time)</td><td class="green">Low (pre-computed + cache pull)</td></tr>
+            <tr><td>Celebrity handling</td><td class="red">Breaks (100M writes)</td><td class="green">Fine (1 write)</td><td class="green">Pull model above threshold</td></tr>
+            <tr><td>Inactive users</td><td class="red">Wasteful writes</td><td class="green">No waste</td><td class="green">Filter inactive from push</td></tr>
+            <tr><td>Feed freshness</td><td class="green">Always current</td><td class="green">Always current</td><td class="green">3-5s eventual consistency</td></tr>
+            <tr><td>Complexity</td><td class="green">Low</td><td class="green">Low</td><td class="red">High (two paths, threshold logic)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="usedin" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Cross-reference</div>
+        <h2>Systems that use this concept</h2>
+      </div>
+      <div class="used-in">
+        <div class="used-in-label">Referenced from these designs</div>
+        <div class="used-in-list">
+          <a class="used-in-tag" href="../newsfeed.html">News Feed — fan-out service deep dive</a>
+          <span class="used-in-tag soon">Notification System — coming soon</span>
+          <span class="used-in-tag soon">Email Campaign System — coming soon</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · concepts · 2026</span>
+    <div class="footer-links">
+      <a href="/system-design/">All Designs</a>
+      <a href="../newsfeed.html">News Feed</a>
+      <a href="/system-design/#concepts">All Concepts</a>
+    </div>
+  </div>
+</footer>
+<script>
+  const spineItems=document.querySelectorAll('.spine-item');const targets={};
+  spineItems.forEach(item=>{const id=item.dataset.target;if(id){const el=document.getElementById(id);if(el)targets[id]=el;}});
+  function updateSpine(){const y=window.scrollY+100;let active=null;for(const[id,el]of Object.entries(targets)){if(el.offsetTop<=y)active=id;}spineItems.forEach(item=>item.classList.toggle('active',item.dataset.target===active));}
+  window.addEventListener('scroll',updateSpine,{passive:true});updateSpine();
+</script>
+</body>
+</html>
