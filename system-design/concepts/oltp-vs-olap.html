@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OLTP vs OLAP — System Design Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;--border:#E2E6EF;--border-mid:#C8D0E0;--text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;--blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;--amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;--green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;--red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;--sans:'Inter',system-ui,sans-serif;--serif:'Playfair Display',Georgia,serif;--mono:'JetBrains Mono',monospace;--shadow-sm:0 1px 3px rgba(28,35,51,0.06)}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:680px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:200px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
+    .section{margin-bottom:52px;scroll-margin-top:80px}
+    .section-header{margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .section-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+    .section h2{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .prose{font-size:14px;color:var(--text-mid);line-height:1.85;margin-bottom:14px}
+    .prose strong{color:var(--text);font-weight:600}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .compare-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:20px;box-shadow:var(--shadow-sm)}
+    .compare-card.oltp{border-top:3px solid var(--amber)}
+    .compare-card.olap{border-top:3px solid var(--blue)}
+    .compare-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px}
+    .compare-label.amber{color:var(--amber)}
+    .compare-label.blue{color:var(--blue)}
+    .compare-card h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+    .fact-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+    .fact-list li{font-size:13px;color:var(--text-mid);padding-left:16px;position:relative;line-height:1.55}
+    .fact-list li::before{position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px;content:'▸'}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:22px}
+    .used-in{background:var(--blue-light);border:1px solid #D3DCF0;border-radius:8px;padding:16px 20px;margin-bottom:16px}
+    .used-in-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+    .used-in-list{display:flex;flex-wrap:wrap;gap:8px}
+    .used-in-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:var(--bg-card);border:1px solid #D3DCF0;border-radius:5px;padding:5px 12px;text-decoration:none;transition:all 0.15s}
+    .used-in-tag:hover{background:var(--blue);color:white}
+    .used-in-tag.soon{opacity:0.5;cursor:default;pointer-events:none}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){.spine{display:none}.main{padding:24px 20px 60px}.hero{padding:40px 20px 32px}.compare-grid{grid-template-columns:1fr}nav{padding:0 20px}.nav-links{display:none}footer{padding:20px}}
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="../newsfeed.html">News Feed</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/system-design/">System Design Notes</a> / <a href="/system-design/#concepts">Concepts</a> / OLTP vs OLAP</div>
+  <h1><em>OLTP</em> vs <em>OLAP</em></h1>
+  <p class="hero-desc">Two types of database read workloads with completely different performance characteristics. Both are described as "read-heavy" — but they are optimized for opposite access patterns. Confusing them leads to choosing the wrong database for a workload, which produces queries that are either too slow in production or fundamentally impossible at scale.</p>
+  <div class="tag-row">
+    <span class="tag amber">Concept</span>
+    <span class="tag blue">Database Selection</span>
+    <span class="tag blue">Storage Patterns</span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="distinction"><div class="spine-dot"></div><a class="spine-link" href="#distinction">The Key Distinction</a></div>
+      <div class="spine-item" data-target="oltp"><div class="spine-dot"></div><a class="spine-link" href="#oltp">OLTP in depth</a></div>
+      <div class="spine-item" data-target="olap"><div class="spine-dot"></div><a class="spine-link" href="#olap">OLAP in depth</a></div>
+      <div class="spine-item" data-target="storage"><div class="spine-dot"></div><a class="spine-link" href="#storage">Row vs Columnar</a></div>
+      <div class="spine-item" data-target="decision"><div class="spine-dot"></div><a class="spine-link" href="#decision">Decision Table</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="usedin"><div class="spine-dot"></div><a class="spine-link" href="#usedin">Used In</a></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section id="distinction" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Core Concept</div>
+        <h2>The key distinction</h2>
+      </div>
+      <p class="prose">Both OLTP and OLAP databases can be described as "read-heavy." The difference is in <strong>what kind of reads they're optimized for.</strong> This is the single most important thing to understand before choosing a database in a system design.</p>
+      <div class="compare-grid">
+        <div class="compare-card oltp">
+          <div class="compare-label amber">OLTP</div>
+          <h4>Online Transaction Processing</h4>
+          <ul class="fact-list">
+            <li>Fetch one user's data right now</li>
+            <li>Small result sets (1–100 rows)</li>
+            <li>Latency must be &lt;50ms</li>
+            <li>Happens thousands of times per second</li>
+            <li>Row-level operations: insert, update, delete</li>
+            <li>ACID transactions often required</li>
+          </ul>
+        </div>
+        <div class="compare-card olap">
+          <div class="compare-label blue">OLAP</div>
+          <h4>Online Analytical Processing</h4>
+          <ul class="fact-list">
+            <li>Aggregate across millions of rows</li>
+            <li>Large result sets or summarized output</li>
+            <li>Latency of seconds to minutes is fine</li>
+            <li>Runs infrequently (batch jobs, reports)</li>
+            <li>Read-only scans of historical data</li>
+            <li>No ACID requirement</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout amber">
+        <div class="callout-label">The mental model to lock in</div>
+        <p><strong>OLTP = "give me this specific thing right now."</strong> <strong>OLAP = "summarize everything for me over time."</strong> If your query is about one user or one record, it's OLTP. If your query is about all users or all records, it's OLAP. The former needs a row-oriented database. The latter needs a columnar store.</p>
+      </div>
+    </section>
+
+    <section id="oltp" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Deep Dive</div>
+        <h2>OLTP — when and why</h2>
+      </div>
+      <p class="prose">OLTP workloads are what most application code produces. Every time a user logs in, loads their profile, fetches their feed, or places an order — that's OLTP. The query fetches a small, specific set of records by a key, returns quickly, and happens thousands of times per second across your entire user base.</p>
+      <p class="prose">Row-oriented databases store all columns for a row together on disk. When you query by userId, the database reads one contiguous block off disk and returns the row. This is optimal for OLTP because you typically need all or most columns of a specific row. Reading the entire row in one disk seek is fast.</p>
+      <div class="sub-heading">Example queries — OLTP</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Query</th><th>Pattern</th><th>Why OLTP</th></tr></thead>
+          <tbody>
+            <tr><td>SELECT * FROM users WHERE id = 12345</td><td>Point lookup</td><td>One row, fast, by key</td></tr>
+            <tr><td>SELECT postId FROM feed WHERE userId = 12345 ORDER BY createdAt DESC LIMIT 20</td><td>Range scan by partition key</td><td>Small result set, per-user, must be fast</td></tr>
+            <tr><td>UPDATE users SET is_active = false WHERE id = 12345</td><td>Single row update</td><td>Row-level mutation</td></tr>
+            <tr><td>INSERT INTO feed (userId, postId, createdAt) VALUES (...)</td><td>Single row insert</td><td>ACID write</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose">All of these queries operate on a small, specific subset of data identified by a key. They are time-sensitive — users are waiting for these responses. They may also involve writes and require consistency guarantees. Row-oriented databases (PostgreSQL, MySQL, Cassandra, DynamoDB) handle these optimally.</p>
+    </section>
+
+    <section id="olap" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Deep Dive</div>
+        <h2>OLAP — when and why</h2>
+      </div>
+      <p class="prose">OLAP workloads are what analytics dashboards, data scientists, and business intelligence systems produce. "How many posts were created in the last 30 days broken down by region?" requires scanning every post created in that period, grouping by region, and aggregating counts. That's potentially billions of rows.</p>
+      <p class="prose">Columnar databases store all values for a single column together on disk. When you run a SUM or COUNT across millions of rows, the database reads only the column(s) you're aggregating — not the entire row. This is far more efficient for analytics queries because you're typically interested in one or two columns across millions of rows, not all columns of specific rows.</p>
+      <div class="sub-heading">Example queries — OLAP</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Query</th><th>Pattern</th><th>Why OLAP</th></tr></thead>
+          <tbody>
+            <tr><td>SELECT region, COUNT(*) FROM posts WHERE createdAt &gt; '2026-01-01' GROUP BY region</td><td>Full scan + group by</td><td>Millions of rows, aggregation, not time-sensitive</td></tr>
+            <tr><td>SELECT DAY(timestamp), COUNT(DISTINCT userId) FROM events WHERE eventType='FEED_LOAD'</td><td>Time-series aggregation</td><td>Batch report, runs nightly</td></tr>
+            <tr><td>SELECT AVG(session_duration) FROM sessions WHERE device='mobile'</td><td>Column aggregation</td><td>Only needs one column across all rows</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose">These queries don't need to return fast — analysts and dashboards can wait seconds or minutes. They also don't write data — they read historical event records. Columnar stores (Snowflake, BigQuery, OCI ADW, Redshift) are specifically optimized for this access pattern: scanning entire columns efficiently, compressing column data (similar values compress well), and executing aggregations in parallel across many nodes.</p>
+    </section>
+
+    <section id="storage" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Internals</div>
+        <h2>Row-oriented vs columnar storage</h2>
+      </div>
+      <p class="prose">The performance difference comes from how data is physically stored on disk. Understanding this makes the OLTP/OLAP choice obvious rather than arbitrary.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dimension</th><th>Row-oriented (OLTP)</th><th>Columnar (OLAP)</th></tr></thead>
+          <tbody>
+            <tr><td>Disk layout</td><td>All columns for row 1, then row 2, etc.</td><td>All values for col 1, then col 2, etc.</td></tr>
+            <tr><td>Best for</td><td>Fetch all columns of specific rows</td><td>Aggregate one column across all rows</td></tr>
+            <tr><td>Worst for</td><td>Aggregating one column across millions of rows</td><td>Fetching a single specific row quickly</td></tr>
+            <tr><td>Compression</td><td>Moderate (mixed values per block)</td><td>Excellent (similar values in same block)</td></tr>
+            <tr><td>Write speed</td><td>Fast (append a row)</td><td>Slow (must update column store)</td></tr>
+            <tr><td>Examples</td><td>PostgreSQL, MySQL, Cassandra</td><td>Snowflake, BigQuery, OCI ADW</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout red">
+        <div class="callout-label">The feed table mistake — from the News Feed session</div>
+        <p>During the News Feed design, the feed table was initially proposed as a candidate for a data warehouse (ADW). The feed table is queried 5,800 times per second with "give me userId=X's last 20 posts." That is a point lookup — pure OLTP. A columnar data warehouse reconstructs rows by reading across multiple column stores — this is much slower than a row-oriented lookup. Using ADW for the feed table would produce a system where loading a user's feed takes seconds instead of milliseconds. <strong>Always identify the access pattern before choosing storage.</strong></p>
+      </div>
+    </section>
+
+    <section id="decision" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Quick Reference</div>
+        <h2>Decision table — which database, when</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Workload type</th><th>DB choice</th><th>News Feed example</th></tr></thead>
+          <tbody>
+            <tr><td>Structured, ACID, low volume</td><td>SQL (PostgreSQL, MySQL)</td><td>User table</td></tr>
+            <tr><td>Semi-structured, variable schema</td><td>Document DB (MongoDB)</td><td>Post table</td></tr>
+            <tr><td>High frequency key lookups, scale</td><td>NoSQL (Cassandra, DynamoDB)</td><td>Feed table</td></tr>
+            <tr><td>Graph traversal — who follows whom</td><td>Graph DB (Neo4j)</td><td>Social graph</td></tr>
+            <tr><td>Batch analytics, aggregations, reporting</td><td>ADW / Columnar (Snowflake, BigQuery)</td><td>Analytics events</td></tr>
+            <tr><td>Hot key-value cache, sub-millisecond</td><td>Redis</td><td>Feed cache, post cache</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="usedin" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Cross-reference</div>
+        <h2>Systems that use this concept</h2>
+      </div>
+      <div class="used-in">
+        <div class="used-in-label">Referenced from these designs</div>
+        <div class="used-in-list">
+          <a class="used-in-tag" href="../newsfeed.html">News Feed — DB selection deep dive</a>
+          <a class="used-in-tag" href="../tinyurl.html">TinyURL — Lambda architecture</a>
+          <span class="used-in-tag soon">Rate Limiter — coming soon</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · concepts · 2026</span>
+    <div class="footer-links">
+      <a href="/system-design/">All Designs</a>
+      <a href="../newsfeed.html">News Feed</a>
+      <a href="/system-design/#concepts">All Concepts</a>
+    </div>
+  </div>
+</footer>
+<script>
+  const spineItems=document.querySelectorAll('.spine-item');const targets={};
+  spineItems.forEach(item=>{const id=item.dataset.target;if(id){const el=document.getElementById(id);if(el)targets[id]=el;}});
+  function updateSpine(){const y=window.scrollY+100;let active=null;for(const[id,el]of Object.entries(targets)){if(el.offsetTop<=y)active=id;}spineItems.forEach(item=>item.classList.toggle('active',item.dataset.target===active));}
+  window.addEventListener('scroll',updateSpine,{passive:true});updateSpine();
+</script>
+</body>
+</html>
