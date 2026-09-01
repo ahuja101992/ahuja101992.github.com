@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Design a Rate Limiter — System Design Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:700px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .snav{display:flex;gap:7px;flex-wrap:wrap;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--bg-card)}
+    .snav a{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);text-decoration:none;transition:all 0.15s}
+    .snav a:hover,.snav a.done{color:var(--green);border-color:var(--green-border);background:var(--green-light)}
+    .snav a.deep{color:var(--blue);border-color:#D3DCF0;background:var(--blue-light)}
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:200px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4;transition:color 0.15s}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
+    .step{margin-bottom:52px;scroll-margin-top:80px}
+    .step-header{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .step-num{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)}
+    .step-title{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .step-time{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;margin-left:auto}
+    .prose{font-size:14px;color:var(--text-mid);line-height:1.85;margin-bottom:14px}
+    .prose strong{color:var(--text);font-weight:600}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .card.blue{border-left-color:var(--blue)}
+    .card.green{border-left-color:var(--green)}
+    .card.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
+    .decision{background:var(--amber-light);border:1px solid var(--amber-border);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start}
+    .decision-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+    .decision-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+    .decision p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .decision p strong{color:var(--text);font-weight:600}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    tr.nfr td:first-child{color:var(--amber)}
+    tr.out td{opacity:0.5}
+    tr.out td:first-child{text-decoration:line-through;color:var(--text-muted)}
+    .scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .scale-cell{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+    .scale-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+    .scale-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text)}
+    .scale-sub{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.4}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    .mini-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+    .mini-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .mini-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .mini-list li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative}
+    .mini-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px}
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .checklist li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .checklist li strong{color:var(--text);font-weight:600}
+    code{font-family:var(--mono);font-size:12px;background:var(--blue-light);color:var(--blue);border:1px solid #D3DCF0;border-radius:3px;padding:1px 5px}
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:22px}
+    .diagram-wrap{margin-bottom:20px}
+    .diagram-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .diagram-box{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+    .algo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .algo-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+    .algo-card.chosen{border-color:var(--green-border);background:var(--green-light)}
+    .algo-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+    .algo-label.green{color:var(--green)}
+    .algo-label.amber{color:var(--amber)}
+    .algo-label.blue{color:var(--blue)}
+    .algo-card h4{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px}
+    .pro-con{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .pro-con li{font-size:12.5px;color:var(--text-mid);padding-left:16px;position:relative;line-height:1.5}
+    .pro-con li::before{position:absolute;left:0;font-size:11px;top:1px}
+    .pro-con.pros li::before{content:'✓';color:var(--green)}
+    .pro-con.cons li::before{content:'✗';color:var(--red)}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){.spine{display:none}.main{padding:24px 20px 60px}.hero,.snav{padding-left:20px;padding-right:20px}.scale-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.algo-grid{grid-template-columns:1fr}nav{padding:0 20px}.nav-links{display:none}footer{padding:20px}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="/system-design/framework.html">Framework</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/system-design/">System Design Notes</a> / Worked Examples / 03</div>
+  <h1>Design a <em>Rate Limiter</em></h1>
+  <p class="hero-desc">A distributed rate limiting service that sits at the API gateway layer. 10M DAU, 1M requests/sec. This page documents the full design session — every decision, every algorithm, every tradeoff — exactly as it was reasoned through. The central challenge is choosing a limiting algorithm that is accurate, memory efficient, and handles distributed counter state cleanly at scale.</p>
+  <div class="tag-row">
+    <span class="tag amber">Infrastructure System</span>
+    <span class="tag blue">API Gateway</span>
+    <span class="tag blue">Redis</span>
+    <span class="tag blue">Sliding Window</span>
+    <span class="tag blue">Token Bucket</span>
+    <span class="tag">~90 min session</span>
+  </div>
+</header>
+
+<div class="snav">
+  <a class="done" href="#s1a">1A Requirements</a>
+  <a class="done" href="#s1b">1B Personas</a>
+  <a class="done" href="#s2">2 Estimations</a>
+  <a class="done" href="#s3">3 API Design</a>
+  <a class="done" href="#s4">4 High-Level Design</a>
+  <a class="deep" href="#s5a">5A Algorithms</a>
+  <a class="deep" href="#s5b">5B Distributed Counting</a>
+  <a class="deep" href="#s5c">5C Rules Engine</a>
+  <a class="done" href="#s6">6 Data Model</a>
+</div>
+
+<div class="layout">
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="s1a"><div class="spine-dot"></div><a class="spine-link" href="#s1a">1A · Requirements</a></div>
+      <div class="spine-item" data-target="s1b"><div class="spine-dot"></div><a class="spine-link" href="#s1b">1B · Personas</a></div>
+      <div class="spine-item" data-target="s2"><div class="spine-dot"></div><a class="spine-link" href="#s2">2 · Estimations</a></div>
+      <div class="spine-item" data-target="s3"><div class="spine-dot"></div><a class="spine-link" href="#s3">3 · API Design</a></div>
+      <div class="spine-item" data-target="s4"><div class="spine-dot"></div><a class="spine-link" href="#s4">4 · High-Level Design</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s5a"><div class="spine-dot"></div><a class="spine-link" href="#s5a">5A · Algorithms</a></div>
+      <div class="spine-item" data-target="s5b"><div class="spine-dot"></div><a class="spine-link" href="#s5b">5B · Distributed Counting</a></div>
+      <div class="spine-item" data-target="s5c"><div class="spine-dot"></div><a class="spine-link" href="#s5c">5C · Rules Engine</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s6"><div class="spine-dot"></div><a class="spine-link" href="#s6">6 · Data Model</a></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══ 1A ══ -->
+    <section id="s1a" class="step">
+      <div class="step-header">
+        <span class="step-num">1A</span>
+        <span class="step-title">Requirements Clarification</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
+      <p class="prose">Rate limiters are infrastructure, not products — users never interact with them directly. This changes how you gather requirements. Instead of asking "what does the user do?", you ask "what does the system protect?" and "what behavior counts as excess?" The scope of the rate limiter is defined by the APIs it protects and the limits placed on each.</p>
+
+      <p class="prose">The first critical scope decision is <strong>where the rate limiter lives</strong>. Three options were considered: embedded inside each API server, as a standalone service before the API servers, or at the API gateway layer. API gateway was chosen because it is centralized (all traffic flows through it), independently scalable (can be bought off-shelf or built), and avoids the coordination problem of multiple API servers each running their own counter. If each API server maintained its own limit, a user could send 5 requests to server A and 5 to server B and exceed the limit without either server knowing.</p>
+
+      <p class="prose">The second scope decision is <strong>identifier type</strong>. IP-based limiting (block by IP address) vs user ID-based limiting. User ID was chosen for this session to keep scope manageable — IP-based adds complexity around proxies, shared IPs, and VPNs. The architecture supports both; user ID is the cleaner starting point.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Requirement</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr><td>Placement</td><td>API gateway layer — centralized, independently scalable, avoids multi-server counter sync</td></tr>
+            <tr><td>Identifier</td><td>User ID based for this session. IP-based is extensible but adds VPN/proxy complexity.</td></tr>
+            <tr><td>Limit: login</td><td>5 login requests per minute per user</td></tr>
+            <tr><td>Limit: post</td><td>3 post requests per minute per user</td></tr>
+            <tr><td>Response: allowed</td><td>Pass through. Return <code>X-RateLimit-Remaining: N</code> header on every response.</td></tr>
+            <tr><td>Response: throttled</td><td>HTTP 429 Too Many Requests. Return <code>X-RateLimit-Reset: &lt;timestamp&gt;</code> header.</td></tr>
+            <tr class="out"><td>IP-based limiting</td><td>Out of scope for this session — extensible later</td></tr>
+            <tr class="out"><td>Per-endpoint limiting</td><td>Login and post are the two types covered. Other endpoints extensible.</td></tr>
+            <tr class="nfr"><td>DAU</td><td>10M daily active users</td></tr>
+            <tr class="nfr"><td>Peak RPS</td><td>1M requests per second at the API gateway</td></tr>
+            <tr class="nfr"><td>Latency</td><td>Rate limiter must add &lt;1ms to each request. Must not be user-perceptible.</td></tr>
+            <tr class="nfr"><td>Availability</td><td>Fail open — if rate limiter is down, allow requests through rather than blocking all traffic</td></tr>
+            <tr class="nfr"><td>Accuracy</td><td>Slight over-counting acceptable at boundaries. Burst control more important than exact precision.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">Why fail open is the right default</div>
+        <p>If the rate limiter goes down and we fail closed (block all requests), we've taken down our own system to prevent abuse. That's worse than the abuse itself. Fail open means a brief window of uncontrolled traffic while the rate limiter recovers — acceptable. In practice, this is mitigated by adding a fallback local counter at each gateway node (see edge cases in step 6). The organization can also run a backup application-level rate limiter as a secondary defense for critical APIs.</p>
+      </div>
+    </section>
+
+    <!-- ══ 1B ══ -->
+    <section id="s1b" class="step">
+      <div class="step-header">
+        <span class="step-num">1B</span>
+        <span class="step-title">Personas &amp; Use Cases</span>
+        <span class="step-time">⏱ ~2 min</span>
+      </div>
+
+      <p class="prose">Rate limiters are unusual because the most important persona is not the legitimate user — it's the bad actor. This is one of the rare systems where a negative persona (someone trying to abuse the system) is the primary design driver. Without the bad actor, there's no reason to build a rate limiter at all.</p>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-label">Persona 1 — Legitimate User</div>
+          <ul class="mini-list">
+            <li>Makes normal API calls within limits</li>
+            <li>Expects fast response (sub-millisecond gate)</li>
+            <li>Should never see a 429 under normal use</li>
+            <li>May benefit from seeing X-RateLimit-Remaining to manage API usage</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Persona 2 — Bad Actor / Bot</div>
+          <ul class="mini-list">
+            <li>Makes automated, high-frequency requests</li>
+            <li>Credential stuffing (repeated login attempts)</li>
+            <li>DDoS — flood specific endpoints</li>
+            <li>Scraping — systematically fetch all content</li>
+            <li>Must be blocked quickly with 429 + reset time</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">The negative persona insight</div>
+        <p>Most system design sessions only consider happy-path users. For security infrastructure like a rate limiter, the threat model IS the design spec. Credential stuffing (bots trying username/password combos at scale) is why login limits exist. DDoS is why overall request limits exist. Naming the bad actor persona explicitly forces you to design the system for its actual purpose, not just its normal usage. This same thinking applies to any security-adjacent system — fraud detection, auth services, content moderation APIs.</p>
+      </div>
+    </section>
+
+    <!-- ══ 2 ══ -->
+    <section id="s2" class="step">
+      <div class="step-header">
+        <span class="step-num">02</span>
+        <span class="step-title">Capacity Estimation</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
+      <p class="prose">The key estimation for a rate limiter is different from a data service. You are not estimating media storage or read/write ratios — you are estimating <strong>Redis memory for counter storage</strong> and <strong>Redis operation throughput</strong>. These two numbers determine whether a single Redis node suffices or whether you need a cluster.</p>
+
+      <p class="prose">A critical reframe from the session: a rate limiter does not store the full request. It stores a tiny counter per user per request type. The initial instinct of "500KB per request" was immediately wrong — a counter entry is closer to 70–100 bytes. At 10M active users, this means Redis needs under 1GB of memory. That's the order-of-magnitude difference between a correct and incorrect estimation.</p>
+
+      <div class="scale-grid">
+        <div class="scale-cell">
+          <div class="scale-label">Peak RPS</div>
+          <div class="scale-val">1M</div>
+          <div class="scale-sub">requests/sec at gateway</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Active users</div>
+          <div class="scale-val">10M</div>
+          <div class="scale-sub">DAU at peak simultaneously</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Counter entry size</div>
+          <div class="scale-val">~100B</div>
+          <div class="scale-sub">userId + count + expiry + Redis overhead</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Redis memory</div>
+          <div class="scale-val">~1 GB</div>
+          <div class="scale-sub">10M users × 100B — fits single node</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Redis ops/sec</div>
+          <div class="scale-val">1M</div>
+          <div class="scale-sub">one increment + check per request</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Redis node limit</div>
+          <div class="scale-val">~1M</div>
+          <div class="scale-sub">ops/sec per node — at the boundary</div>
+        </div>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">The Redis throughput boundary</div>
+        <p>At 1M requests/sec and 1M Redis ops/sec capacity per node, a single Redis node is at its operational limit. The practical design needs either: (1) Redis Cluster to distribute load across multiple nodes, or (2) local counters at each gateway node that sync to Redis periodically (trading accuracy for throughput). For the base design, centralized Redis is correct. The distributed counting deep dive covers how to handle node-level throughput constraints.</p>
+      </div>
+    </section>
+
+    <!-- ══ 3 ══ -->
+    <section id="s3" class="step">
+      <div class="step-header">
+        <span class="step-num">03</span>
+        <span class="step-title">API Design</span>
+        <span class="step-time">⏱ ~3 min</span>
+      </div>
+
+      <p class="prose">The rate limiter does not expose user-facing APIs — it intercepts existing ones. There is no "call the rate limiter" endpoint. Instead, the rate limiter adds headers to every response and a specific HTTP status code when throttled. These are the contracts that matter.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Scenario</th><th>HTTP Status</th><th>Response Headers</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Request allowed</td>
+              <td>Pass through (200/201/etc)</td>
+              <td><code>X-RateLimit-Remaining: N</code> — how many requests are left in this window</td>
+            </tr>
+            <tr>
+              <td>Request throttled</td>
+              <td><strong>429 Too Many Requests</strong></td>
+              <td><code>X-RateLimit-Reset: &lt;unix_timestamp&gt;</code> — when the window resets and requests will be allowed again</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="prose">The <code>X-RateLimit-Remaining</code> header on every successful response lets clients manage their own usage. A well-behaved client can throttle itself before hitting 429. The <code>X-RateLimit-Reset</code> timestamp on a 429 tells the client exactly when to retry — preventing retry storms where clients hammer the endpoint immediately after being blocked.</p>
+
+      <div class="callout">
+        <div class="callout-label">Why 429 and not 503 or 400</div>
+        <p>HTTP 429 is the correct and specific status code for rate limiting (defined in RFC 6585). Using 503 (Service Unavailable) would imply the server is overloaded or down — wrong signal. Using 400 (Bad Request) implies the client sent an invalid request — also wrong. 429 signals specifically "your request was syntactically correct, but you've sent too many." Clients and monitoring systems know exactly what to do with a 429.</p>
+      </div>
+    </section>
+
+    <!-- ══ 4 ══ -->
+    <section id="s4" class="step">
+      <div class="step-header">
+        <span class="step-num">04</span>
+        <span class="step-title">High-Level Design</span>
+        <span class="step-time">⏱ ~10 min</span>
+      </div>
+
+      <p class="prose">The rate limiter sits at the API gateway — every request passes through it before reaching the application servers. The design has three core components: the rate limiting logic itself (at the gateway), Redis for counter storage, and a rules engine that tells the rate limiter what the limits actually are.</p>
+
+      <!-- HLD DIAGRAM -->
+      <div class="diagram-wrap">
+        <div class="diagram-label">High-level architecture — request flow with short-circuit 429 path</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 740 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="a" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+              <marker id="ab" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3D5A99"/></marker>
+              <marker id="ar" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#C0392B"/></marker>
+              <marker id="ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2E7D52"/></marker>
+              <marker id="aam" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#C87533"/></marker>
+            </defs>
+
+            <!-- Client -->
+            <rect x="10" y="90" width="70" height="50" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="45" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Client</text>
+            <text x="45" y="127" text-anchor="middle" font-size="10" fill="#8896AA">Any request</text>
+
+            <line x1="80" y1="115" x2="100" y2="115" stroke="#8896AA" stroke-width="1.5" marker-end="url(#a)"/>
+
+            <!-- API Gateway + Rate Limiter -->
+            <rect x="102" y="60" width="130" height="110" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="167" y="84" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">API Gateway</text>
+            <rect x="112" y="90" width="110" height="70" rx="4" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="167" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Rate Limiter</text>
+            <text x="167" y="126" text-anchor="middle" font-size="10" fill="#8896AA">1. get rules</text>
+            <text x="167" y="140" text-anchor="middle" font-size="10" fill="#8896AA">2. check Redis counter</text>
+            <text x="167" y="154" text-anchor="middle" font-size="10" fill="#8896AA">3. allow or block</text>
+
+            <!-- Redis -->
+            <rect x="280" y="55" width="100" height="55" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="330" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#2E7D52">Redis</text>
+            <text x="330" y="94" text-anchor="middle" font-size="10" fill="#8896AA">counters + expiry</text>
+            <text x="330" y="105" text-anchor="middle" font-size="10" fill="#8896AA">&lt;1ms latency</text>
+
+            <line x1="232" y1="105" x2="280" y2="80" stroke="#2E7D52" stroke-width="1.5" marker-end="url(#ag)"/>
+            <text x="250" y="87" font-size="9" fill="#2E7D52">incr + check</text>
+
+            <!-- Rules config -->
+            <rect x="280" y="135" width="100" height="55" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="330" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Rules Cache</text>
+            <text x="330" y="173" text-anchor="middle" font-size="10" fill="#8896AA">loaded from config</text>
+            <text x="330" y="184" text-anchor="middle" font-size="10" fill="#8896AA">refreshed periodically</text>
+
+            <line x1="232" y1="135" x2="280" y2="155" stroke="#C87533" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#aam)"/>
+
+            <!-- Rules worker + config file -->
+            <rect x="430" y="135" width="100" height="55" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="480" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Rules Worker</text>
+            <text x="480" y="170" text-anchor="middle" font-size="10" fill="#8896AA">polls config file</text>
+            <text x="480" y="182" text-anchor="middle" font-size="10" fill="#C87533">every few hours</text>
+
+            <line x1="380" y1="162" x2="430" y2="162" stroke="#8896AA" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#a)"/>
+
+            <rect x="570" y="135" width="80" height="55" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="610" y="158" text-anchor="middle" font-size="10" font-weight="600" fill="#4A5568">Config File</text>
+            <text x="610" y="172" text-anchor="middle" font-size="9" fill="#8896AA">login: 5/min</text>
+            <text x="610" y="184" text-anchor="middle" font-size="9" fill="#8896AA">post: 3/min</text>
+
+            <line x1="530" y1="162" x2="570" y2="162" stroke="#8896AA" stroke-width="1.3" marker-end="url(#a)"/>
+
+            <!-- App servers -->
+            <rect x="430" y="55" width="100" height="55" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="480" y="78" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">App Server</text>
+            <text x="480" y="93" text-anchor="middle" font-size="10" fill="#8896AA">only reached</text>
+            <text x="480" y="105" text-anchor="middle" font-size="10" fill="#8896AA">if allowed</text>
+
+            <line x1="380" y1="78" x2="430" y2="78" stroke="#3D5A99" stroke-width="1.5" marker-end="url(#ab)"/>
+            <text x="405" y="70" font-size="9" fill="#2E7D52">✓ allowed</text>
+
+            <!-- Kafka analytics -->
+            <rect x="570" y="55" width="80" height="55" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="610" y="75" text-anchor="middle" font-size="10" font-weight="600" fill="#4A5568">Kafka</text>
+            <text x="610" y="89" text-anchor="middle" font-size="9" fill="#8896AA">all events</text>
+            <text x="610" y="101" text-anchor="middle" font-size="9" fill="#8896AA">fire &amp; forget</text>
+
+            <line x1="530" y1="78" x2="570" y2="78" stroke="#8896AA" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#a)"/>
+
+            <!-- 429 short circuit path -->
+            <path d="M 167 60 Q 167 20 80 20 Q 45 20 45 90" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ar)"/>
+            <text x="130" y="16" font-size="9" fill="#C0392B" font-weight="600">429 short-circuit (never reaches app server)</text>
+
+            <!-- Legend -->
+            <rect x="10" y="195" width="680" height="38" rx="5" fill="#F7F8FA" stroke="#E2E6EF" stroke-width="1"/>
+            <line x1="24" y1="214" x2="50" y2="214" stroke="#3D5A99" stroke-width="2"/>
+            <text x="56" y="218" font-size="10" fill="#4A5568">Allowed path</text>
+            <line x1="130" y1="214" x2="156" y2="214" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="162" y="218" font-size="10" fill="#4A5568">429 short-circuit</text>
+            <line x1="270" y1="214" x2="296" y2="214" stroke="#2E7D52" stroke-width="1.5"/>
+            <text x="302" y="218" font-size="10" fill="#4A5568">Redis counter check</text>
+            <line x1="420" y1="214" x2="446" y2="214" stroke="#C87533" stroke-width="1.3" stroke-dasharray="4,2"/>
+            <text x="452" y="218" font-size="10" fill="#4A5568">Rules (eventual consistency)</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">Request flow — allowed path</div>
+      <ul class="checklist">
+        <li><strong>Client sends request to API gateway.</strong> The rate limiter intercepts before routing.</li>
+        <li><strong>Rate limiter loads rules from local cache.</strong> Rules are pre-loaded from Redis/config — no synchronous call to rules service on every request.</li>
+        <li><strong>Rate limiter increments counter in Redis.</strong> Atomic <code>INCR</code> + check against limit. If under limit, allow. Counter has a TTL that matches the window size (e.g., 60s for per-minute limits).</li>
+        <li><strong>Request passes through to app server.</strong> Response includes <code>X-RateLimit-Remaining: N</code> header calculated from Redis counter.</li>
+        <li><strong>Fire-and-forget analytics event to Kafka.</strong> Request type, userId, allowed/blocked, region, timestamp. Used for operational intelligence — where to scale Redis, which regions see the most throttling.</li>
+      </ul>
+
+      <div class="sub-heading">Request flow — throttled path (429 short-circuit)</div>
+      <p class="prose">When the counter exceeds the limit, the rate limiter returns <code>HTTP 429</code> directly to the client — the app server is <strong>never reached</strong>. This is the whole point. Blocked requests must not consume application server resources. The short-circuit path is what makes the rate limiter effective as a protection mechanism rather than just a measurement tool.</p>
+    </section>
+
+    <!-- ══ 5A ══ -->
+    <section id="s5a" class="step">
+      <div class="step-header">
+        <span class="step-num">5A</span>
+        <span class="step-title">Deep Dive — Rate Limiting Algorithms</span>
+      </div>
+
+      <p class="prose">The algorithm determines how "excess" is defined and how accurately burst traffic is controlled. Five algorithms exist. The session covered all four widely known ones; the fifth (sliding window counter) was explained and understood by session end. Knowing the toolbox and being able to defend one choice is what matters.</p>
+
+      <div class="algo-grid">
+        <div class="algo-card">
+          <div class="algo-label amber">Algorithm 1</div>
+          <h4>Token Bucket</h4>
+          <p style="font-size:12.5px;color:var(--text-mid);margin-bottom:8px;line-height:1.6">Each user has a bucket of tokens. Each request consumes one token. Tokens refill at a fixed rate up to a max bucket size. If the bucket is empty, the request is rejected.</p>
+          <ul class="pro-con pros">
+            <li>Simple to understand and implement</li>
+            <li>Memory efficient — just two numbers (count + refill timestamp)</li>
+            <li>Allows bursts up to bucket size</li>
+          </ul>
+          <ul class="pro-con cons" style="margin-top:6px">
+            <li>Two parameters to tune (bucket size + refill rate) — hard to calibrate for varying load</li>
+            <li>Allows burst at window boundaries: empty bucket end of min 1, refilled at start of min 2 → double burst in short window</li>
+          </ul>
+        </div>
+
+        <div class="algo-card">
+          <div class="algo-label amber">Algorithm 2</div>
+          <h4>Leaking Bucket</h4>
+          <p style="font-size:12.5px;color:var(--text-mid);margin-bottom:8px;line-height:1.6">Requests enter a FIFO queue. The queue processes N requests per second at a fixed rate regardless of arrival pattern. Overflow is rejected.</p>
+          <ul class="pro-con pros">
+            <li>Smooth output — processes at constant rate</li>
+            <li>Protects backend from bursts (absorbs spikes)</li>
+          </ul>
+          <ul class="pro-con cons" style="margin-top:6px">
+            <li>More memory than token bucket (stores queue, not just counter)</li>
+            <li>Under burst: old requests fill the queue, new bursts rejected even after old requests expire</li>
+            <li>Queue adds latency to all requests</li>
+          </ul>
+        </div>
+
+        <div class="algo-card">
+          <div class="algo-label amber">Algorithm 3</div>
+          <h4>Fixed Window Counter</h4>
+          <p style="font-size:12.5px;color:var(--text-mid);margin-bottom:8px;line-height:1.6">Time divided into fixed windows (e.g., per second, per minute). Each window has its own counter. Counter resets at the window boundary.</p>
+          <ul class="pro-con pros">
+            <li>Very simple — one counter per window per user</li>
+            <li>Memory efficient</li>
+            <li>Easy to understand and debug</li>
+          </ul>
+          <ul class="pro-con cons" style="margin-top:6px">
+            <li>Boundary burst: 3 requests at end of window + 3 at start of next = 6 in 2 seconds on a 3/min limit</li>
+            <li>Can allow 2× the intended rate at window boundaries</li>
+          </ul>
+        </div>
+
+        <div class="algo-card">
+          <div class="algo-label amber">Algorithm 4</div>
+          <h4>Sliding Window Log</h4>
+          <p style="font-size:12.5px;color:var(--text-mid);margin-bottom:8px;line-height:1.6">Store a timestamp for every request in a sorted set. On each new request, remove timestamps outside the window and count what remains. Reject if count ≥ limit.</p>
+          <ul class="pro-con pros">
+            <li>Accurate — no boundary burst problem</li>
+            <li>Exact window tracking regardless of when requests arrive</li>
+          </ul>
+          <ul class="pro-con cons" style="margin-top:6px">
+            <li>Memory expensive — stores every timestamp even for rejected requests</li>
+            <li>At 1M requests/sec, billions of timestamps → Redis memory explodes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="algo-card chosen" style="margin-bottom:16px">
+        <div class="algo-label green">✓ Algorithm 5 — Chosen</div>
+        <h4>Sliding Window Counter (Hybrid)</h4>
+        <p style="font-size:13.5px;color:var(--text-mid);margin-bottom:12px;line-height:1.75">Combines accuracy of sliding window log with memory efficiency of fixed window counter. Instead of storing timestamps, stores just two integers: previous window count and current window count. Uses a weighted formula to estimate traffic in the current sliding window.</p>
+        <div class="card blue" style="margin-bottom:12px">
+          <pre style="font-family:var(--mono);font-size:12.5px;color:var(--text-mid);line-height:1.9;overflow-x:auto">requests_in_window = 
+  current_count + (previous_count × % of previous window still overlapping)
+
+Example:
+  Limit: 3 requests per minute
+  Previous window count: 2 requests
+  Current window (30 seconds in): 1 request
+  Overlap: 50% of previous window still within the rolling window
+
+  requests_in_window = 1 + (2 × 0.5) = 2.0  → under limit → allow</pre>
+        </div>
+        <ul class="pro-con pros">
+          <li>Only 2 integers per user per window — memory efficient at 1M requests/sec</li>
+          <li>Smooths boundary bursts — no double-hit at window transitions</li>
+          <li>Close enough to sliding window log accuracy for production use</li>
+          <li>Twitter and Cloudflare use this approach in production</li>
+        </ul>
+        <ul class="pro-con cons" style="margin-top:6px">
+          <li>Small remaining edge case: if all previous window requests clustered at the very end, overlap calculation slightly undercounts them</li>
+          <li>Slightly more complex formula than fixed window</li>
+        </ul>
+      </div>
+
+      <div class="decision">
+        <div class="decision-icon">🎯</div>
+        <div>
+          <div class="decision-label">Interview one-liner for algorithm choice</div>
+          <p><strong>"I'd use sliding window counter — two integers per user per window in Redis, weighted formula for boundary overlap. Memory efficient at 1M req/sec, accurate enough for production, no boundary burst problem. Twitter and Cloudflare use this. The remaining edge case at window boundaries is an acceptable known tradeoff."</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 5B ══ -->
+    <section id="s5b" class="step">
+      <div class="step-header">
+        <span class="step-num">5B</span>
+        <span class="step-title">Deep Dive — Distributed Counter Accuracy</span>
+      </div>
+
+      <p class="prose">With multiple gateway nodes handling requests, each node could maintain its own local counter. This creates a subtle accuracy problem: if a user makes 3 requests to gateway A and 3 requests to gateway B, each server sees only 3 requests and allows all of them — even though the user made 6 total. The limit is violated without either server knowing.</p>
+
+      <div class="sub-heading">Solution 1 — Centralized Redis (base design)</div>
+      <p class="prose">All gateway nodes read and write to the same Redis cluster. Every request does an atomic <code>INCR</code> on the shared counter. No local caching — every request hits Redis. This is the clean, correct baseline solution. At sub-millisecond latency per Redis operation and Redis's throughput capacity, this handles the stated scale. The counter is always accurate across all nodes.</p>
+
+      <div class="sub-heading">Solution 2 — Eventual consistency with local counters (optimization)</div>
+      <p class="prose">At very high scale, centralized Redis becomes the bottleneck. An alternative: each gateway node maintains a local in-memory counter and syncs to Redis every 100ms. Requests check the local counter first. If local counter is under limit, allow. Sync pushes local deltas to Redis periodically.</p>
+
+      <p class="prose">The tradeoff: a user could send 3 requests to node A and 3 to node B within the same 100ms sync window. Both nodes see only 3 locally, both allow. The user makes 6 requests on a limit of 5. This over-counting is bounded and small — the "error" is at most N_nodes × limit for a brief window. For most use cases (login limiting, spam prevention), this is acceptable. For financial or safety-critical APIs, it is not.</p>
+
+      <div class="callout">
+        <div class="callout-label">Which solution to use when</div>
+        <p><strong>Centralized Redis</strong> — default for most systems. Accurate, simple, proven. Start here. <strong>Local counters + eventual sync</strong> — only when Redis throughput is the measured bottleneck in production. Don't over-engineer preemptively. The cost of slight over-counting must be weighed against the benefit of reduced Redis load per request.</p>
+      </div>
+    </section>
+
+    <!-- ══ 5C ══ -->
+    <section id="s5c" class="step">
+      <div class="step-header">
+        <span class="step-num">5C</span>
+        <span class="step-title">Deep Dive — Rules Engine</span>
+      </div>
+
+      <p class="prose">The rate limiter needs to know what the limits are. Hardcoding limits into the rate limiter service means a code deployment every time limits change. That's operationally painful and creates unnecessary risk — deploying code to change a number. The rules should be externalized.</p>
+
+      <div class="sub-heading">Rules storage — config file approach</div>
+      <p class="prose">Limits are stored in a YAML/JSON config file: <code>login: 5/min, post: 3/min, search: 100/min</code>. A polling worker reads this file periodically and pushes the values into Redis. The rate limiter reads limits from Redis at startup and caches them in-process. Rule updates are eventually consistent — there's a lag between updating the config file and the new limit taking effect across all nodes.</p>
+
+      <div class="card blue">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:10px">Config file — rate_limits.yaml</div>
+        <pre style="font-family:var(--mono);font-size:12.5px;color:var(--text-mid);line-height:1.9;overflow-x:auto">rate_limits:
+  login:
+    limit: 5
+    window: 60s        # 5 per minute
+    algorithm: sliding_window_counter
+  post:
+    limit: 3
+    window: 60s        # 3 per minute
+    algorithm: sliding_window_counter
+  search:
+    limit: 100
+    window: 60s        # 100 per minute (example)
+    algorithm: token_bucket  # bursts OK for search</pre>
+      </div>
+
+      <div class="sub-heading">The polling worker — how eventual consistency works here</div>
+      <ul class="checklist">
+        <li><strong>Worker runs periodically</strong> (every few hours, configurable). Reads the config file, compares to current Redis values, pushes any changes to Redis.</li>
+        <li><strong>Rule changes are not immediate.</strong> If you lower the login limit from 10 to 5, it takes up to one polling cycle to propagate. For most limit changes, this lag is fine — you're not doing emergency response with a config file.</li>
+        <li><strong>Deployment of the config file is independent</strong> — infrastructure deployment, not code deployment. Much lower risk. Can be rolled back instantly by reverting the file.</li>
+        <li><strong>Future improvement:</strong> replace config file with a rules database and admin UI for real-time updates without any deployment. The worker would poll the DB instead of a file. This is how Kong, AWS API Gateway, and most enterprise rate limiters work.</li>
+      </ul>
+
+      <div class="callout green">
+        <div class="callout-label">Why this is the right architecture pattern</div>
+        <p>Externalized configuration with a polling worker is a widely used production pattern — not just for rate limiters, but for any service that needs runtime configurability without code deploys. Feature flags, A/B test weights, circuit breaker thresholds all use similar patterns. The key principle: <strong>the service reads config from a fast local store (Redis or in-process cache), never from the config file directly.</strong> The config file is the source of truth; the fast store is the runtime view. The worker bridges them asynchronously.</p>
+      </div>
+    </section>
+
+    <!-- ══ 6 ══ -->
+    <section id="s6" class="step">
+      <div class="step-header">
+        <span class="step-num">06</span>
+        <span class="step-title">Data Model &amp; Edge Cases</span>
+      </div>
+
+      <p class="prose">The rate limiter's data lives entirely in Redis — no persistent database. Redis is the right choice because counters are transient (they expire with each window), must be read and written at sub-millisecond latency, and Redis's native atomic operations (<code>INCR</code>, <code>EXPIRE</code>) map directly to counter management.</p>
+
+      <div class="sub-heading">Redis data model — sliding window counter</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key pattern</th><th>Value</th><th>TTL</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>rl:{userId}:{requestType}:current</td><td>INT — current window count</td><td>window size (e.g., 60s)</td><td>Main counter. INCR on each request.</td></tr>
+            <tr><td>rl:{userId}:{requestType}:previous</td><td>INT — previous window count</td><td>2× window size</td><td>Stored when current window expires and rolls over. Used in weighted formula.</td></tr>
+            <tr><td>rl:{userId}:{requestType}:reset</td><td>UNIX timestamp — when current window resets</td><td>window size</td><td>Returned as X-RateLimit-Reset header on 429.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Redis data model — token bucket (for reference)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key pattern</th><th>Value</th><th>TTL</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>rl:{userId}:{requestType}:tokens</td><td>INT — current token count</td><td>bucket refill period</td><td>Decremented on each allowed request.</td></tr>
+            <tr><td>rl:{userId}:{requestType}:refill_at</td><td>UNIX timestamp</td><td>same as tokens key</td><td>When tokens were last refilled. Used to calculate how many tokens to add on next request.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Edge case — Redis goes down mid-request</div>
+      <p class="prose">This is the most important failure mode to reason through. If Redis is unavailable, the rate limiter cannot check or increment counters. Two options:</p>
+      <ul class="checklist">
+        <li><strong>Fail open (chosen):</strong> Allow the request to pass. Start a local in-memory counter as a temporary fallback on each gateway node. Accept that limits will be imprecise during the outage window. This maintains availability.</li>
+        <li><strong>Fail closed:</strong> Reject all requests with 429. This is correct behavior but takes down the system — unacceptable for most products.</li>
+      </ul>
+      <p class="prose">When Redis recovers, the local counters accumulated during the outage are flushed to Redis. The key insight: the system is designed with headroom — if the limit is 5 requests/min, the backend can handle 10 comfortably. The brief period of uncontrolled traffic during a Redis outage will not overwhelm the backend.</p>
+
+      <p class="prose">Importantly, every Redis outage event should be fired as a Kafka analytics event. The analytics pipeline detects frequent Redis failures and triggers an alert. The operational response: add a Redis replica or switch to Redis Cluster. The detection mechanism (Kafka events from the outage) is already built into the system.</p>
+
+      <div class="sub-heading">Edge case — rule update propagation delay</div>
+      <p class="prose">When limits are changed in the config file, the new values don't propagate until the polling worker runs (every few hours). During this window, old limits are enforced. This is acceptable for routine limit changes. For emergency changes (a DDoS attack requiring immediate limit reduction), a manual trigger to force a polling worker run — or a direct Redis write — should be available as an operational escape hatch.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · rate-limiter · 2026</span>
+    <div class="footer-links">
+      <a href="/system-design/">← All Designs</a>
+      <a href="newsfeed.html">News Feed</a>
+      <a href="framework.html">Framework</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const spineItems=document.querySelectorAll('.spine-item');const targets={};
+  spineItems.forEach(item=>{const id=item.dataset.target;if(id){const el=document.getElementById(id);if(el)targets[id]=el;}});
+  function updateSpine(){const y=window.scrollY+100;let active=null;for(const[id,el]of Object.entries(targets)){if(el.offsetTop<=y)active=id;}spineItems.forEach(item=>item.classList.toggle('active',item.dataset.target===active));}
+  window.addEventListener('scroll',updateSpine,{passive:true});updateSpine();
+</script>
+</body>
+</html>
