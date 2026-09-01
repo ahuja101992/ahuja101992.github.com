@@ -196,9 +196,9 @@
       <div class="spine-item" data-target="step1"><div class="spine-dot"></div><a class="spine-link" href="#step1">01 · Requirements</a></div>
       <div class="spine-item" data-target="step2"><div class="spine-dot"></div><a class="spine-link" href="#step2">02 · Estimation</a></div>
       <div class="spine-item" data-target="step3"><div class="spine-dot"></div><a class="spine-link" href="#step3">03 · API Design</a></div>
-      <div class="spine-item" data-target="step4"><div class="spine-dot"></div><a class="spine-link" href="#step4">04 · Data Model</a></div>
-      <div class="spine-item" data-target="step5"><div class="spine-dot"></div><a class="spine-link" href="#step5">05 · High-Level Design</a></div>
-      <div class="spine-item" data-target="step6"><div class="spine-dot"></div><a class="spine-link" href="#step6">06 · Deep Dive</a></div>
+      <div class="spine-item" data-target="step4"><div class="spine-dot"></div><a class="spine-link" href="#step4">04 · High-Level Design</a></div>
+      <div class="spine-item" data-target="step5"><div class="spine-dot"></div><a class="spine-link" href="#step5">05 · Architecture Deep Dive</a></div>
+      <div class="spine-item" data-target="step6"><div class="spine-dot"></div><a class="spine-link" href="#step6">06 · Data Model &amp; Edge Cases</a></div>
     </div>
   </aside>
 
@@ -248,10 +248,10 @@
             <line x1="378" y1="95" x2="398" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
 
             <!-- 04 -->
-            <rect x="400" y="60" width="108" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-            <text x="454" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">04</text>
-            <text x="454" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Data Model</text>
-            <text x="454" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
+            <rect x="400" y="60" width="108" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="454" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">04</text>
+            <text x="454" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">High-Level</text>
+            <text x="454" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~10 min</text>
 
             <!-- arrow -->
             <line x1="508" y1="95" x2="528" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
@@ -259,17 +259,17 @@
             <!-- 05 -->
             <rect x="530" y="60" width="108" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
             <text x="584" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">05</text>
-            <text x="584" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">High-Level</text>
-            <text x="584" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~10 min</text>
+            <text x="584" y="98" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Deep Dive</text>
+            <text x="584" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~15 min</text>
 
             <!-- arrow down to 06 -->
             <line x1="584" y1="130" x2="584" y2="170" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr)"/>
 
             <!-- 06 -->
-            <rect x="400" y="172" width="348" height="70" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-            <text x="574" y="194" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#3D5A99">06</text>
-            <text x="574" y="210" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Deep Dive &amp; Tradeoffs</text>
-            <text x="574" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~15 min · discussion-driven</text>
+            <rect x="400" y="172" width="348" height="70" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="574" y="194" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#C87533">06</text>
+            <text x="574" y="210" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#1C2333">Data Model &amp; Edge Cases</text>
+            <text x="574" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">~5 min</text>
 
             <!-- feedback arrow: deep dive back to high-level -->
             <path d="M 400 207 Q 360 207 360 155 Q 360 95 400 95" fill="none" stroke="#C8D0E0" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
@@ -280,8 +280,8 @@
             <text x="65" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Scope</text>
             <text x="194" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Size</text>
             <text x="324" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Contract</text>
-            <text x="454" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Schema</text>
-            <text x="584" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Architecture</text>
+            <text x="454" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Architecture</text>
+            <text x="584" y="42" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Deep Dive</text>
 
             <!-- phase bracket -->
             <line x1="10" y1="155" x2="508" y2="155" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,3"/>
@@ -298,17 +298,17 @@
             <div class="timing-seg" style="width:11%;background:#C87533;" title="Requirements ~5min">Req</div>
             <div class="timing-seg" style="width:11%;background:#D4894A;" title="Estimation ~5min">Est</div>
             <div class="timing-seg" style="width:11%;background:#DC9660;" title="API ~5min">API</div>
-            <div class="timing-seg" style="width:11%;background:#E3A070;" title="Data ~5min">Data</div>
-            <div class="timing-seg" style="width:22%;background:#3D5A99;" title="High-Level ~10min">High-Level Design</div>
-            <div class="timing-seg" style="width:34%;background:#2A4180;" title="Deep Dive ~15min">Deep Dive &amp; Tradeoffs</div>
+            <div class="timing-seg" style="width:22%;background:#3D5A99;" title="High-Level Design ~10min">High-Level Design</div>
+            <div class="timing-seg" style="width:34%;background:#2A4180;" title="Deep Dive ~15min">Deep Dive</div>
+            <div class="timing-seg" style="width:11%;background:#E3A070;" title="Data Model ~5min">Data</div>
           </div>
           <div class="timing-legend">
             <div class="legend-item"><div class="legend-dot" style="background:#C87533"></div>Requirements (5m)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#D4894A"></div>Estimation (5m)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#DC9660"></div>API Design (5m)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#E3A070"></div>Data Model (5m)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#3D5A99"></div>High-Level Design (10m)</div>
             <div class="legend-item"><div class="legend-dot" style="background:#2A4180"></div>Deep Dive (15m)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#E3A070"></div>Data Model (5m)</div>
           </div>
         </div>
       </div>
@@ -609,88 +609,37 @@
         <div class="step-num">04</div>
         <div class="step-header-text">
           <div class="step-eyebrow">Step Four</div>
-          <div class="step-title">Data Model</div>
-          <div class="step-sub">Schema, storage type, and access patterns</div>
+          <div class="step-title">High-Level Design</div>
+          <div class="step-sub">Draw the full system end-to-end before going deep</div>
         </div>
-        <div class="step-time">⏱ ~5 min</div>
+        <div class="step-time">⏱ ~10 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">Most design flaws trace back to a mismatched data model. The most common version of this mistake is choosing a storage technology before defining the access patterns — "we'll use Cassandra" before you know whether the primary query is a key lookup, a range scan, or a full-text search. The storage choice should be the last decision in this step, not the first.</p>
+        <p class="step-desc">This is where you put boxes on the board — but only after the three steps above have grounded you. Your goal is a working end-to-end sketch that satisfies the core functional requirements at the estimated scale. Resist the urge to go deep on any single component here. Deep dives come in step 5. Step 4 is about getting the full picture on the board first.</p>
 
-        <p class="step-desc">Start with your entities and their relationships. Then ask: how will this data actually be read and written? What are the hot query patterns? Who reads what, how often, and in what shape? A query that needs to join five tables on every read is not a Redis problem. A query that always fetches a record by a single key and never joins anything is not a Postgres problem either — but Postgres handles it fine, so you might still use it for simplicity.</p>
+        <p class="step-desc">Think of this step as proving your system can work — not that it works perfectly. Can a write request get from client to database? Can a read request get served without hitting the database every time? Can background operations (analytics, cleanup jobs) happen without blocking user-facing requests? If you can trace those flows end-to-end on your diagram, you have a working High-Level Design.</p>
 
-        <p class="step-desc">The access pattern drives everything: which fields to index, whether to normalize or denormalize, which storage engine fits, and where the bottlenecks will appear at scale. Get this right and step 5 becomes much easier. Get it wrong and your High-Level Design will have a data layer that quietly cannot serve the traffic pattern you committed to in step 2.</p>
+        <p class="step-desc">Label everything. Every box should have a name and a one-line description of its role. Every arrow should show what protocol or data is being passed. Show both the write path and the read path explicitly — they are often different, and showing both demonstrates you understand the system's traffic patterns. If your diagram has unlabeled boxes or arrows, you have an incomplete design.</p>
 
-        <!-- STORAGE DECISION DIAGRAM -->
-        <div class="diagram-wrap">
-          <div class="diagram-label">Storage decision tree — start with access patterns</div>
-          <div class="diagram-box">
-            <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs>
-                <marker id="arr3" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-                  <polygon points="0 0,7 2.5,0 5" fill="#8896AA"/>
-                </marker>
-              </defs>
-
-              <!-- ROOT -->
-              <rect x="260" y="10" width="180" height="42" rx="8" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
-              <text x="350" y="35" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#3D5A99">What's your primary access pattern?</text>
-
-              <!-- branches -->
-              <line x1="295" y1="52" x2="200" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-              <line x1="350" y1="52" x2="350" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-              <line x1="405" y1="52" x2="500" y2="90" stroke="#8896AA" stroke-width="1.5" marker-end="url(#arr3)"/>
-
-              <text x="220" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Key lookup</text>
-              <text x="350" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Complex joins</text>
-              <text x="480" y="78" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Full-text / range</text>
-
-              <!-- KV box -->
-              <rect x="120" y="92" width="160" height="50" rx="8" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
-              <text x="200" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#C87533">Key-Value / NoSQL</text>
-              <text x="200" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Redis · DynamoDB · Cassandra</text>
-
-              <!-- SQL box -->
-              <rect x="270" y="92" width="160" height="50" rx="8" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
-              <text x="350" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#3D5A99">Relational SQL</text>
-              <text x="350" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Postgres · MySQL · Aurora</text>
-
-              <!-- Search box -->
-              <rect x="420" y="92" width="160" height="50" rx="8" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
-              <text x="500" y="113" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#2E7D52">Search / Time-Series</text>
-              <text x="500" y="129" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#8896AA">Elasticsearch · InfluxDB</text>
-
-              <!-- consideration row -->
-              <line x1="200" y1="142" x2="200" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="200" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">High write throughput</text>
-              <text x="200" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Flexible schema</text>
-              <text x="200" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Horizontal sharding</text>
-
-              <line x1="350" y1="142" x2="350" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="350" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">ACID transactions</text>
-              <text x="350" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Relational integrity</text>
-              <text x="350" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Complex queries</text>
-
-              <line x1="500" y1="142" x2="500" y2="170" stroke="#E2E6EF" stroke-width="1" stroke-dasharray="3,2"/>
-              <text x="500" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Text search / ranking</text>
-              <text x="500" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Time-series queries</text>
-              <text x="500" y="209" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#4A5568">Analytics aggregations</text>
-            </svg>
-          </div>
-        </div>
+        <p class="step-desc">The single most important discipline in this step: <strong>name your own bottleneck before anyone else does.</strong> Look at your diagram and ask "where does this break under 10× load?" Point to it. Say "the database write path is the bottleneck here — I'll address this in the deep dive." This is the difference between someone who designed a system and someone who just drew a picture.</p>
 
         <ul class="checklist">
-          <li><strong>Core entities:</strong> What are the 3–5 primary data objects? Sketch their key fields.</li>
-          <li><strong>Relationships:</strong> One-to-many, many-to-many — does this need foreign keys or denormalization?</li>
-          <li><strong>Access patterns:</strong> Read by ID? Range scans? Full-text search? Time-series queries? This is the most important question in this step. Every other decision flows from it.</li>
-          <li><strong>SQL vs NoSQL — justify the choice:</strong> SQL when you need ACID transactions, complex joins, or relational integrity. NoSQL when you need horizontal scale, a flexible schema, or your access pattern is purely key-value or document-based. The mistake is defaulting to one without reasoning from the access pattern.</li>
-          <li><strong>Indexes:</strong> What are your hot query patterns? Which fields will you search or filter on? An unindexed column in a 35TB table is effectively unusable for queries. Name your indexes explicitly.</li>
-          <li><strong>Partitioning key:</strong> For distributed storage — what's your shard key and why? A bad shard key creates hot spots (one partition gets all the traffic). A good shard key distributes load evenly. This is the hardest data model decision at scale.</li>
+          <li><strong>DNS + CDN:</strong> Where does traffic enter the system? Static assets (JS, CSS, images) should be served from a CDN — they never need to reach your application servers. Dynamic requests go through DNS to your load balancer. Calling this out explicitly shows you understand the traffic hierarchy.</li>
+          <li><strong>Load balancer:</strong> L4 (TCP-level, fast, dumb) vs L7 (HTTP-level, can route by path or header). Most application load balancers are L7. Mention the routing strategy: round robin, least connections, or consistent hashing if you need sticky sessions.</li>
+          <li><strong>Application servers:</strong> Stateless by default — session state lives in Redis or the DB, not on the server. Stateless servers can be replaced or scaled without coordination. Call out how many you need at peak RPS: at 10K RPS and ~1K RPS per server, that's ~10 servers plus buffer.</li>
+          <li><strong>Cache layer:</strong> Redis for most cases. Explain the caching strategy: read-through (check cache first, fetch DB on miss), write-through (write to cache and DB simultaneously), or cache-aside (application manages both explicitly). Each has different consistency tradeoffs.</li>
+          <li><strong>Primary datastore:</strong> Name your storage choice with a one-line justification. Read replicas handle read traffic. The primary handles writes. Mention replication — synchronous (strong consistency) or asynchronous (eventual consistency).</li>
+          <li><strong>Message queue:</strong> Any operation that does not need to be synchronous should be async. Analytics events, email notifications, cleanup jobs — these do not need to block the user's request. Kafka for high-throughput ordered streams. SQS for simpler task queues.</li>
         </ul>
+
+        <div class="callout amber">
+          <div class="callout-label">Drawing discipline</div>
+          <p>Label every arrow with the protocol or data being passed. Show data flow for <strong>both the write path and the read path</strong> — they are often completely different components in different sequences. If you have a cache, show the cache hit flow separately from the cache miss flow. If you have an async queue, show what feeds it and what consumes it. An unlabeled diagram is an incomplete design.</p>
+        </div>
 
         <div class="callout">
           <div class="callout-label">Key Signal</div>
-          <p>Picking a storage type without mentioning access patterns is the most common data model mistake. It suggests the storage choice is based on familiarity or preference, not the requirements of the system. The right pattern is: describe the access pattern first, then say "this maps naturally to X because…" As a concrete example: <strong>"My primary read pattern is lookup by short code — always a point lookup by a single key, never a join, never a range scan. This maps to a key-value store. I'll use Cassandra because I also need horizontal write scale and built-in TTL support."</strong> The choice follows the reasoning.</p>
+          <p>Proactively calling out the bottleneck in your own design is one of the strongest signals of architectural ownership. Anyone can draw boxes and arrows. The person who built the system knows where it breaks. Before finishing this step, look at your diagram and say out loud: <em>"The write path has a bottleneck here at the database — at 10× current load this would be the first thing to fail. I'll address this in the deep dive."</em> This shows you are not just presenting a design — you are owning it.</p>
         </div>
       </div>
     </section>
@@ -703,19 +652,19 @@
         <div class="step-num">05</div>
         <div class="step-header-text">
           <div class="step-eyebrow">Step Five</div>
-          <div class="step-title">High-Level Design</div>
-          <div class="step-sub">Draw the system end-to-end before going deep</div>
+          <div class="step-title">Architecture Deep Dive</div>
+          <div class="step-sub">Go deep on the hardest problems — own the tradeoffs</div>
         </div>
-        <div class="step-time">⏱ ~10 min</div>
+        <div class="step-time">⏱ ~15 min</div>
       </div>
       <div class="step-body">
-        <p class="step-desc">This is where you put boxes on the board — but only after the four steps above have grounded you. Your goal is a working end-to-end sketch that satisfies the core functional requirements at the estimated scale. Resist the urge to go deep on any single component here. Deep dives come in step 6. Step 5 is about getting the full picture on the board first.</p>
+        <p class="step-desc">This is where the design gets interesting. You have drawn a working system — now you go deep on the hardest parts. The best designs proactively address the most interesting tradeoffs rather than leaving gaps unexplored. This step is also where you transition from "presenting a design" to "owning a system."</p>
 
-        <p class="step-desc">Think of this step as proving your system can work — not that it works perfectly. Can a write request get from client to database? Can a read request get served without hitting the database every time? Can background operations (analytics, cleanup jobs) happen without blocking user-facing requests? If you can trace those flows end-to-end on your diagram, you have a working High-Level Design.</p>
+        <p class="step-desc">The key discipline is prioritization. You have 15 minutes. You cannot go deep on everything. The right approach: start with the bottleneck you already called out in step 4, pick 2–3 additional areas that matter most for this specific system, go genuinely deep on each one (not a surface-level mention), and leave time for questions. Covering 6 areas in 2 minutes each is far weaker than covering 3 areas in 5 minutes each. Depth signals mastery. Breadth signals survey reading.</p>
 
-        <p class="step-desc">Label everything. Every box should have a name and a one-line description of its role. Every arrow should show what protocol or data is being passed. Show both the write path and the read path explicitly — they are often different, and showing both demonstrates you understand the system's traffic patterns. If your diagram has unlabeled boxes or arrows, you have an incomplete design.</p>
+        <p class="step-desc">Name tradeoffs explicitly. Every deep dive area has at least two reasonable approaches, and every approach gives something up to gain something else. <strong>"I could use synchronous replication for strong consistency, but at the cost of write latency — so I'll use asynchronous replication and accept eventual consistency on reads, because the user-visible impact is acceptable."</strong> That is how you talk about a tradeoff. Not "I chose async replication" — that's a decision without reasoning. Not "there are tradeoffs with replication" — that's a placeholder without content.</p>
 
-        <p class="step-desc">The single most important discipline in this step: <strong>name your own bottleneck before anyone else does.</strong> Look at your diagram and ask "where does this break under 10× load?" Point to it. Say "the database write path is the bottleneck here — I'll address this in the deep dive." This is the difference between someone who designed a system and someone who just drew a picture.</p>
+        <p class="step-desc">The most powerful thing you can do in this step is demonstrate <strong>intellectual honesty about your own design's weaknesses.</strong> Pointing out a flaw before someone else asks about it, then explaining how you'd address it, signals that you understand the system at a level beyond what's drawn on the board. Pretending the design has no weaknesses signals the opposite.</p>
 
         <!-- GENERIC HLD DIAGRAM -->
         <div class="diagram-wrap">
@@ -816,23 +765,18 @@
         </div>
 
         <ul class="checklist">
-          <li><strong>Client layer:</strong> Web, mobile, SDK — what initiates requests?</li>
-          <li><strong>DNS + CDN:</strong> Where does traffic enter the system? Static assets (JS, CSS, images) should be served from a CDN — they never need to reach your application servers. Dynamic requests go through DNS to your load balancer. Calling this out explicitly shows you understand the traffic hierarchy.</li>
-          <li><strong>Load balancer:</strong> L4 (TCP-level, fast, dumb) vs L7 (HTTP-level, can route by path or header). Most application load balancers are L7. Mention the routing strategy: round robin, least connections, or consistent hashing if you need sticky sessions.</li>
-          <li><strong>Application servers:</strong> Stateless by default — session state lives in Redis or the DB, not on the server. Stateless servers can be replaced or scaled without coordination. Call out how many you need at peak RPS: at 10K RPS and ~1K RPS per server, that's ~10 servers plus buffer.</li>
-          <li><strong>Cache layer:</strong> Redis for most cases. Explain the caching strategy: read-through (check cache first, fetch DB on miss), write-through (write to cache and DB simultaneously), or cache-aside (application manages both explicitly). Each has different consistency tradeoffs.</li>
-          <li><strong>Primary datastore:</strong> Your choice from step 4, now with replicas called out. Read replicas handle read traffic. The primary handles writes. Mention replication — synchronous (strong consistency) or asynchronous (eventual consistency).</li>
-          <li><strong>Message queue:</strong> Any operation that does not need to be synchronous should be async. Analytics events, email notifications, cleanup jobs — these do not need to block the user's request. Kafka for high-throughput ordered streams. SQS for simpler task queues.</li>
+          <li><strong>Scalability bottlenecks:</strong> Where does the system break under 10× load? Name the specific component, explain why it breaks there, and describe the mitigation — read replicas, sharding, horizontal scaling, tiered caching.</li>
+          <li><strong>Failure modes:</strong> What happens when a DB replica lags? When the cache is cold after a restart? When a downstream service is down? Explain which failures are acceptable (stale cache) and which are not (lost writes).</li>
+          <li><strong>Consistency tradeoffs:</strong> Where did you accept eventual consistency, and what is the concrete user-visible impact? Name the user experience — not just the technical property.</li>
+          <li><strong>Hot spots / thundering herd:</strong> What if a single resource receives 1,000× normal traffic? What if the cache restarts and thousands of requests simultaneously try to populate it? Name the pattern and the mitigation.</li>
+          <li><strong>ID generation:</strong> UUID vs auto-increment vs Snowflake-style IDs — the choice matters for indexing performance, distribution across shards, and debugging.</li>
+          <li><strong>Security:</strong> Rate limiting, input validation, auth scope. Name the attack surface, not just the mitigation.</li>
+          <li><strong>Monitoring &amp; observability:</strong> What metrics would tell you the system is unhealthy before users notice? Cache hit rate, write latency p99, queue consumer lag.</li>
         </ul>
-
-        <div class="callout amber">
-          <div class="callout-label">Drawing discipline</div>
-          <p>Label every arrow with the protocol or data being passed. Show data flow for <strong>both the write path and the read path</strong> — they are often completely different components in different sequences. If you have a cache, show the cache hit flow separately from the cache miss flow. If you have an async queue, show what feeds it and what consumes it. An unlabeled diagram is an incomplete design.</p>
-        </div>
 
         <div class="callout">
           <div class="callout-label">Key Signal</div>
-          <p>Proactively calling out the bottleneck in your own design is one of the strongest signals of architectural ownership. Anyone can draw boxes and arrows. The person who built the system knows where it breaks. Before finishing this step, look at your diagram and say out loud: <em>"The write path has a bottleneck here at the database — at 10× current load this would be the first thing to fail. I'll address this in the deep dive."</em> This shows you are not just presenting a design — you are owning it.</p>
+          <p>Intellectual honesty about your own design's weaknesses is the clearest signal of deep system understanding. Saying <em>"this design has a write bottleneck at the DB layer — here are three ways to address it: read replicas for read-heavy load, connection pooling to reduce connection overhead, and sharding if we need to scale writes — I'd start with read replicas because it's lowest complexity for the biggest gain"</em> is not an admission of a flawed design. It is evidence that you understand the system at a level beyond what's drawn on the board.</p>
         </div>
       </div>
     </section>
@@ -845,10 +789,10 @@
         <div class="step-num">06</div>
         <div class="step-header-text">
           <div class="step-eyebrow">Step Six</div>
-          <div class="step-title">Deep Dive &amp; Tradeoffs</div>
-          <div class="step-sub">Own the hard problems — don't hide from them</div>
+          <div class="step-title">Data Model &amp; Edge Cases</div>
+          <div class="step-sub">Schema, storage choices, and failure modes</div>
         </div>
-        <div class="step-time">⏱ ~15 min</div>
+        <div class="step-time">⏱ ~5 min</div>
       </div>
       <div class="step-body">
         <p class="step-desc">This is where the design gets interesting. You have drawn a working system — now you go deep on the hardest parts. The best designs proactively address the most interesting tradeoffs rather than leaving gaps unexplored. This step is also where you transition from "presenting a design" to "owning a system."</p>
@@ -912,19 +856,25 @@
           </div>
         </div>
 
+        <p class="step-desc">Most design flaws trace back to a mismatched data model. The most common version of this mistake is choosing a storage technology before defining the access patterns — "we'll use Cassandra" before you know whether the primary query is a key lookup, a range scan, or a full-text search. The storage choice should be the last decision in this step, not the first.</p>
+
+        <p class="step-desc">Start with your entities and their relationships. Then ask: how will this data actually be read and written? What are the hot query patterns? Who reads what, how often, and in what shape? A query that needs to join five tables on every read is not a Redis problem. A query that always fetches a record by a single key and never joins anything is not a Postgres problem either — but Postgres handles it fine, so you might still use it for simplicity.</p>
+
+        <p class="step-desc">The access pattern drives everything: which fields to index, whether to normalize or denormalize, which storage engine fits, and where the bottlenecks will appear at scale.</p>
+
         <ul class="checklist">
-          <li><strong>Scalability bottlenecks:</strong> Where does the system break under 10× load? Is it the database write throughput? The cache memory? The message queue consumer lag? Name the specific bottleneck, explain why it breaks there, and describe the mitigation — read replicas, sharding, horizontal scaling, tiered caching.</li>
-          <li><strong>Failure modes:</strong> What happens when a DB replica lags? When the cache is cold after a restart? When a downstream service is down? The best designs fail gracefully — they degrade rather than crash. Explain which failures are acceptable (a momentarily stale cache) and which are not (lost writes).</li>
-          <li><strong>Consistency tradeoffs:</strong> Where did you accept eventual consistency, and what is the user-visible impact? "User A creates a URL and User B tries to follow it 50ms later — in the worst case, User B gets a 404 before the replica catches up." Naming the concrete user experience of an eventual consistency window is much stronger than abstractly saying "I used eventual consistency."</li>
-          <li><strong>Hot spots / thundering herd:</strong> What if a single URL receives 1,000× normal traffic because a celebrity tweeted it? What if your cache restarts and 10,000 requests simultaneously try to populate it from the DB? These are real failure patterns with specific mitigations — L1 local cache for hot URLs, probabilistic early expiry for thundering herd.</li>
-          <li><strong>ID generation:</strong> UUID vs auto-increment vs Snowflake-style IDs — the choice matters for indexing performance, distribution across shards, and debugging. Auto-increment IDs are predictable (security risk), UUID inserts fragment B-tree indexes, Snowflake IDs are time-ordered and shard-friendly.</li>
-          <li><strong>Security:</strong> Rate limiting (token bucket per IP at the load balancer), input validation (reject malformed URLs, known malicious domains), auth scope (what can an anonymous user do vs. an authenticated user). Name the attack surface, not just the mitigation.</li>
-          <li><strong>Monitoring &amp; observability:</strong> What metrics would tell you the system is unhealthy before users notice? Cache hit rate dropping means either the cache is too small or traffic patterns changed. Write latency p99 spiking means the DB is under pressure. Define your SLIs and what their violation looks like in practice.</li>
+          <li><strong>Core entities:</strong> What are the 3–5 primary data objects? Sketch their key fields and types.</li>
+          <li><strong>Relationships:</strong> One-to-many, many-to-many — does this need foreign keys or denormalization?</li>
+          <li><strong>Access patterns:</strong> Read by ID? Range scans? Full-text search? Time-series queries? This is the most important question. Every other decision flows from it.</li>
+          <li><strong>SQL vs NoSQL — justify the choice:</strong> SQL when you need ACID transactions, complex joins, or relational integrity. NoSQL when you need horizontal scale, a flexible schema, or your access pattern is purely key-value or document-based. The mistake is defaulting to one without reasoning from the access pattern.</li>
+          <li><strong>Indexes:</strong> Which fields will you search or filter on? Name them explicitly. An unindexed column in a large table is effectively unusable for queries.</li>
+          <li><strong>Partitioning key:</strong> For distributed storage — what's your shard key and why? A bad shard key creates hot spots. A good shard key distributes load evenly.</li>
+          <li><strong>Edge cases:</strong> What happens when a component fails? Cold start (empty cache, new user)? Thundering herd (cache restart)? Name the failure mode and your mitigation.</li>
         </ul>
 
         <div class="callout">
           <div class="callout-label">Key Signal</div>
-          <p>Intellectual honesty about your own design's weaknesses is the clearest signal of deep system understanding. Saying <em>"this design has a write bottleneck at the DB layer — here are three ways to address it: read replicas for read-heavy load, connection pooling to reduce connection overhead, and sharding if we need to scale writes — I'd start with read replicas because it's lowest complexity for the biggest gain"</em> is not an admission of a flawed design. It is evidence that you understand the system at a level beyond what's drawn on the board. That is what separates a good design from a great one.</p>
+          <p>Picking a storage type without mentioning access patterns is the most common data model mistake. The right pattern is: describe the access pattern first, then say "this maps naturally to X because…" <strong>"My primary read pattern is lookup by short code — always a point lookup by a single key, never a join, never a range scan. This maps to a key-value store. I'll use Cassandra because I also need horizontal write scale and built-in TTL support."</strong> The choice follows the reasoning.</p>
         </div>
       </div>
     </section>
