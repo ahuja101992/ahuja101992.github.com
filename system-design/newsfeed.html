@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Design News Feed — System Design Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <!-- <script defer data-domain="akshit.ahuja.js.org" src="https://plausible.io/js/script.js"></script> -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F7F8FA;--bg-card:#FFFFFF;--bg-alt:#F0F2F7;
+      --border:#E2E6EF;--border-mid:#C8D0E0;
+      --text:#1C2333;--text-mid:#4A5568;--text-muted:#8896AA;
+      --blue:#3D5A99;--blue-light:#EBF0FA;--blue-mid:#6B85BD;
+      --amber:#C87533;--amber-light:#FDF3E9;--amber-border:#EDCFA8;
+      --green:#2E7D52;--green-light:#E8F5EE;--green-border:#B8DCCA;
+      --red:#C0392B;--red-light:#FDECEA;--red-border:#F0B8B3;
+      --sans:'Inter',system-ui,sans-serif;
+      --serif:'Playfair Display',Georgia,serif;
+      --mono:'JetBrains Mono',monospace;
+      --shadow-sm:0 1px 3px rgba(28,35,51,0.06);
+      --shadow:0 4px 16px rgba(28,35,51,0.09);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+    nav{border-top:3px solid var(--amber);position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
+    .nav-brand{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);text-decoration:none}
+    .nav-links{display:flex;gap:28px;list-style:none}
+    .nav-links a{font-size:13px;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color 0.15s}
+    .nav-links a:hover{color:var(--blue)}
+    .hero{padding:56px 48px 40px;border-bottom:1px solid var(--border)}
+    .breadcrumb{font-family:var(--mono);font-size:12px;color:var(--text-muted);margin-bottom:16px}
+    .breadcrumb a{color:var(--blue);text-decoration:none}
+    .hero h1{font-family:var(--serif);font-size:clamp(26px,4vw,40px);font-weight:700;line-height:1.2;margin-bottom:12px}
+    .hero h1 em{font-style:italic;color:var(--amber)}
+    .hero-desc{font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:20px;max-width:700px}
+    .tag-row{display:flex;gap:7px;flex-wrap:wrap}
+    .tag{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg-alt);border:1px solid var(--border);border-radius:4px;padding:3px 9px}
+    .tag.amber{color:var(--amber);background:var(--amber-light);border-color:var(--amber-border)}
+    .tag.blue{color:var(--blue);background:var(--blue-light);border-color:#D3DCF0}
+    .tag.green{color:var(--green);background:var(--green-light);border-color:var(--green-border)}
+    .snav{display:flex;gap:7px;flex-wrap:wrap;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--bg-card)}
+    .snav a{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);text-decoration:none;transition:all 0.15s}
+    .snav a:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-light)}
+    .snav a.done{color:var(--green);border-color:var(--green-border);background:var(--green-light)}
+    .snav a.deep{color:var(--blue);border-color:#D3DCF0;background:var(--blue-light)}
+    .layout{display:flex;gap:0;align-items:flex-start}
+    .spine{position:sticky;top:57px;width:200px;flex-shrink:0;padding:32px 0 32px 48px;border-right:1px solid var(--border);min-height:calc(100vh - 57px)}
+    .spine-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px}
+    .spine-track{position:relative;padding-left:18px}
+    .spine-line{position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--border)}
+    .spine-item{position:relative;margin-bottom:2px}
+    .spine-dot{position:absolute;left:-15px;top:8px;width:7px;height:7px;border-radius:50%;border:2px solid var(--border-mid);background:var(--bg);transition:all 0.2s}
+    .spine-item.active .spine-dot{border-color:var(--amber);background:var(--amber)}
+    .spine-link{display:block;font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;padding:4px 0;line-height:1.4;transition:color 0.15s}
+    .spine-item.active .spine-link{color:var(--amber);font-weight:600}
+    .spine-link:hover{color:var(--text-mid)}
+    .spine-divider{height:1px;background:var(--border);margin:10px 0}
+    .main{flex:1;padding:40px 48px 80px;min-width:0}
+    .step{margin-bottom:52px;scroll-margin-top:80px}
+    .step-header{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--amber)}
+    .step-num{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber)}
+    .step-title{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);line-height:1.25}
+    .step-time{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;margin-left:auto}
+    .prose{font-size:14px;color:var(--text-mid);line-height:1.85;margin-bottom:14px}
+    .prose strong{color:var(--text);font-weight:600}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:20px 24px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+    .card.blue{border-left-color:var(--blue)}
+    .card.green{border-left-color:var(--green)}
+    .card.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout{border-left:3px solid var(--blue);background:var(--blue-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:16px}
+    .callout-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+    .callout p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .callout p strong{color:var(--text);font-weight:600}
+    .callout.amber{border-left-color:var(--amber);background:var(--amber-light)}
+    .callout.amber .callout-label{color:var(--amber)}
+    .callout.green{border-left-color:var(--green);background:var(--green-light)}
+    .callout.green .callout-label{color:var(--green)}
+    .callout.red{border-left-color:var(--red);background:var(--red-light)}
+    .callout.red .callout-label{color:var(--red)}
+    .decision{background:var(--amber-light);border:1px solid var(--amber-border);border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start}
+    .decision-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+    .decision-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin-bottom:5px}
+    .decision p{font-size:13.5px;color:var(--text-mid);line-height:1.75}
+    .decision p strong{color:var(--text);font-weight:600}
+    .table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:8px 14px;background:var(--bg-alt);border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+    tr:last-child td{border-bottom:none}
+    td:first-child{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:500;white-space:nowrap}
+    tr.nfr td:first-child{color:var(--amber)}
+    tr.out td{opacity:0.5}
+    tr.out td:first-child{text-decoration:line-through;color:var(--text-muted)}
+    .scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .scale-cell{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+    .scale-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+    .scale-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text)}
+    .scale-sub{font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.4}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    .mini-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:7px;padding:14px 16px}
+    .mini-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+    .mini-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .mini-list li{font-size:13px;color:var(--text-mid);padding-left:14px;position:relative}
+    .mini-list li::before{content:'—';position:absolute;left:0;color:var(--text-muted);font-size:10px;top:2px}
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.65}
+    .checklist li::before{content:'▸';color:var(--blue);font-size:11px;margin-top:4px;flex-shrink:0}
+    .checklist li strong{color:var(--text);font-weight:600}
+    code{font-family:var(--mono);font-size:12px;background:var(--blue-light);color:var(--blue);border:1px solid #D3DCF0;border-radius:3px;padding:1px 5px}
+    .sub-heading{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:14px;margin-top:22px}
+    .diagram-wrap{margin-bottom:20px}
+    .diagram-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+    .diagram-box{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;box-shadow:var(--shadow-sm)}
+    .concept-link{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:1px solid #D3DCF0;border-radius:7px;padding:10px 16px;font-size:13px;font-weight:500;color:var(--blue);text-decoration:none;transition:all 0.15s;margin-top:4px}
+    .concept-link:hover{background:var(--blue);color:white}
+    .open-q{background:var(--bg-alt);border:1px dashed var(--border-mid);border-radius:8px;padding:14px 18px;margin-bottom:16px}
+    .open-q-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+    footer{border-top:1px solid var(--border);padding:24px 48px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .footer-copy{font-family:var(--mono);font-size:12px;color:var(--text-muted)}
+    .footer-links{display:flex;gap:20px}
+    .footer-links a{font-size:13px;color:var(--text-muted);text-decoration:none;transition:color 0.15s}
+    .footer-links a:hover{color:var(--blue)}
+    @media(max-width:900px){.spine{display:none}.main{padding:24px 20px 60px}.hero,.snav{padding-left:20px;padding-right:20px}.scale-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}nav{padding:0 20px}.nav-links{display:none}footer{padding:20px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/system-design/">System Design Notes</a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/system-design/">All Designs</a></li>
+    <li><a href="/system-design/framework.html">Framework</a></li>
+    <li><a href="https://github.com/ahuja101992" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <div class="breadcrumb"><a href="/system-design/">System Design Notes</a> / Worked Examples / 02</div>
+  <h1>Design a <em>News Feed</em></h1>
+  <p class="hero-desc">A Facebook-style social news feed at scale. 300M DAU, 58 writes/sec, 5,800 reads/sec. This page documents the full design session — every decision, every pushback, every correction — exactly as it was reasoned through. The central challenge is the fan-out problem: one post must reach thousands of followers without creating a write amplification crisis.</p>
+  <div class="tag-row">
+    <span class="tag amber">Fan-Out Problem</span>
+    <span class="tag blue">Hybrid Push/Pull</span>
+    <span class="tag blue">Social Graph</span>
+    <span class="tag blue">Feed Ranking</span>
+    <span class="tag blue">OLTP vs OLAP</span>
+    <span class="tag">~90 min session</span>
+  </div>
+</header>
+
+<div class="snav">
+  <a class="done" href="#s1a">1A Requirements</a>
+  <a class="done" href="#s1b">1B Personas</a>
+  <a class="done" href="#s2">2 Estimations</a>
+  <a class="done" href="#s3">3 API Design</a>
+  <a class="done" href="#s4">4 High-Level Design</a>
+  <a class="deep" href="#s5a">5A Fan-Out Service</a>
+  <a class="deep" href="#s5b">5B Feed Ranking</a>
+  <a class="deep" href="#s5c">5C DB Selection</a>
+  <a class="done" href="#s6">6 Data Model</a>
+</div>
+
+<div class="layout">
+  <aside class="spine" id="spine">
+    <div class="spine-label">On this page</div>
+    <div class="spine-track">
+      <div class="spine-line"></div>
+      <div class="spine-item" data-target="s1a"><div class="spine-dot"></div><a class="spine-link" href="#s1a">1A · Requirements</a></div>
+      <div class="spine-item" data-target="s1b"><div class="spine-dot"></div><a class="spine-link" href="#s1b">1B · Personas</a></div>
+      <div class="spine-item" data-target="s2"><div class="spine-dot"></div><a class="spine-link" href="#s2">2 · Estimations</a></div>
+      <div class="spine-item" data-target="s3"><div class="spine-dot"></div><a class="spine-link" href="#s3">3 · API Design</a></div>
+      <div class="spine-item" data-target="s4"><div class="spine-dot"></div><a class="spine-link" href="#s4">4 · High-Level Design</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s5a"><div class="spine-dot"></div><a class="spine-link" href="#s5a">5A · Fan-Out Service</a></div>
+      <div class="spine-item" data-target="s5b"><div class="spine-dot"></div><a class="spine-link" href="#s5b">5B · Feed Ranking</a></div>
+      <div class="spine-item" data-target="s5c"><div class="spine-dot"></div><a class="spine-link" href="#s5c">5C · DB Selection</a></div>
+      <div class="spine-divider"></div>
+      <div class="spine-item" data-target="s6"><div class="spine-dot"></div><a class="spine-link" href="#s6">6 · Data Model</a></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══ 1A ══ -->
+    <section id="s1a" class="step">
+      <div class="step-header">
+        <span class="step-num">1A</span>
+        <span class="step-title">Requirements Clarification</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
+      <p class="prose">The problem statement is: <em>"Design a news feed system like Facebook — users can publish posts and see a ranked feed of posts from people they follow."</em> That is deliberately ambiguous. The first job is to narrow it to a workable scope and surface the constraints that will drive every subsequent decision.</p>
+
+      <p class="prose">The most important scope call in this step is <strong>the follow model</strong>. One-way follow (Twitter-style: User A can follow User B without B following back) vs. two-way friendship (Facebook-style: both must accept). This matters enormously for the fan-out logic — one-way follow allows celebrities with millions of followers, which changes the architecture fundamentally. Two-way friendship has natural limits on fan-out because the social graph is denser but smaller per user.</p>
+
+      <p class="prose">The second critical call is <strong>whether feed is ranked or chronological</strong>. Chronological is trivial to implement — just sort by timestamp. Ranked requires an engagement model, a ranking service, and a more complex read path. Agreeing on ranked up front sets the expectation that step 5 will go deep on ranking logic.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Requirement</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr><td>Publish post</td><td>Users can post text, images, and video. Media stored in object store (S3/OSS). Focus is on the feed, not media pipeline.</td></tr>
+            <tr><td>Read feed</td><td>Ranked feed of posts from people you follow. Not purely chronological — engagement signals drive ordering.</td></tr>
+            <tr><td>Like / comment</td><td>Exists in the system (drives ranking signals) but not designed in detail today. Out of deep scope.</td></tr>
+            <tr><td>Follow model</td><td>One-way follow, Twitter-style. User A follows User B without B needing to accept. No mutual follow requirement.</td></tr>
+            <tr><td>Follower limit</td><td>No hard limit. Small percentage of users (celebrities) can have millions of followers. This drives the hybrid fan-out.</td></tr>
+            <tr><td>Privacy / mute</td><td>Out of scope. All posts visible to all followers. No hidden posts, no mute.</td></tr>
+            <tr><td>Notification</td><td>In scope as an analytics/tracking service, not as push notifications to devices.</td></tr>
+            <tr class="out"><td>Media pipeline</td><td>Out of scope. Object store (S3) assumed for media. Not designing CDN or transcoding today.</td></tr>
+            <tr class="nfr"><td>DAU</td><td>300M daily active users</td></tr>
+            <tr class="nfr"><td>Posts/day</td><td>5M new posts per day across all users</td></tr>
+            <tr class="nfr"><td>Availability</td><td>High — feed should always be readable even if slightly stale</td></tr>
+            <tr class="nfr"><td>Consistency</td><td>Eventual consistency acceptable. A new post can take 3–5 seconds to appear in all followers' feeds. This is a key product decision that enables the async fan-out design.</td></tr>
+            <tr class="nfr"><td>Feed latency</td><td>Feed should load fast — initial posts from cache within milliseconds, full ranked feed within ~500ms</td></tr>
+            <tr class="nfr"><td>Feed size</td><td>20 posts per API call, infinite scroll. Prefetch triggered at post 10.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">The eventual consistency call changes everything</div>
+        <p>Agreeing that 3–5 seconds of lag is acceptable is not a minor detail — it unlocks the entire async fan-out architecture. If you required strong consistency (post visible to all followers within milliseconds), you'd need synchronous fan-out, which at celebrity scale means millions of synchronous writes blocking every post. The 3–5 second window is what allows Kafka + async fan-out service to work. Always surface this tradeoff explicitly in requirements rather than assuming it.</p>
+      </div>
+    </section>
+
+    <!-- ══ 1B ══ -->
+    <section id="s1b" class="step">
+      <div class="step-header">
+        <span class="step-num">1B</span>
+        <span class="step-title">Personas &amp; Use Cases</span>
+        <span class="step-time">⏱ ~3 min</span>
+      </div>
+
+      <p class="prose">For a news feed, personas matter more than they did for TinyURL because the user type directly drives the architectural split. Two fundamental user behaviors produce two completely different system paths.</p>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-label">Poster — Regular User</div>
+          <ul class="mini-list">
+            <li>Has ≤ ~1M followers</li>
+            <li>POST /feed/posts</li>
+            <li>Fan-out service pushes to all followers' feeds</li>
+            <li>Feed table written per follower</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Poster — Celebrity</div>
+          <ul class="mini-list">
+            <li>Has &gt; 1M followers</li>
+            <li>Same POST /feed/posts</li>
+            <li>Fan-out is SKIPPED — too expensive</li>
+            <li>Pull model on read path instead</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Reader — Active Scroller</div>
+          <ul class="mini-list">
+            <li>Opens feed multiple times daily</li>
+            <li>Likely to have warm cache</li>
+            <li>Infinite scroll — prefetch at post 10</li>
+            <li>Worth pushing their feed proactively</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Reader — Inactive User</div>
+          <ul class="mini-list">
+            <li>Opens feed infrequently</li>
+            <li>Cache cold on arrival</li>
+            <li>Not worth wasting fan-out writes for</li>
+            <li>Pull model on demand instead</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">The inactive follower insight</div>
+        <p>The celebrity threshold (push vs pull based on follower count) is the textbook answer. But there is a subtler extension: <strong>inactive followers should also not receive fan-out writes.</strong> If a user hasn't opened their feed in 30 days, writing their userId+postId to the feed table on every post from every person they follow is pure waste — they may never read it. The notification/analytics service tracks activity and marks users accordingly. Active flag drives whether fan-out service writes to that user's feed. This is a real production optimization that most textbook answers miss.</p>
+      </div>
+    </section>
+
+    <!-- ══ 2 ══ -->
+    <section id="s2" class="step">
+      <div class="step-header">
+        <span class="step-num">02</span>
+        <span class="step-title">Capacity Estimation</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
+      <p class="prose">Estimation starts from DAU and post frequency and chains through to the numbers that constrain architecture. The key insight for news feed: this is a massively read-heavy system. The ratio of reads to writes is not 10:1 like TinyURL — it's more like 100:1 because every active user opens their feed multiple times per day, but only a fraction of users post anything.</p>
+
+      <p class="prose">Media storage is the number that surprises people. At 10MB per post (assuming video), the numbers are enormous. The session corrected this to 1MB average after accounting for the fact that most posts are text or images, not video. Even at 1MB average, media storage over 10 years is measured in petabytes — which is why object storage (S3, OSS) is mandatory, not optional. You cannot put 18PB in a relational database.</p>
+
+      <div class="scale-grid">
+        <div class="scale-cell">
+          <div class="scale-label">Write QPS</div>
+          <div class="scale-val">~58</div>
+          <div class="scale-sub">5M posts ÷ 86,400s</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Read QPS</div>
+          <div class="scale-val">~5,800</div>
+          <div class="scale-sub">100:1 read:write ratio</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">DAU</div>
+          <div class="scale-val">300M</div>
+          <div class="scale-sub">active users per day</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Media storage / day</div>
+          <div class="scale-val">5 TB</div>
+          <div class="scale-sub">5M posts × 1MB avg</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Media storage / 10yr</div>
+          <div class="scale-val">~18 PB</div>
+          <div class="scale-sub">5TB × 365 × 10 → object store</div>
+        </div>
+        <div class="scale-cell">
+          <div class="scale-label">Text/metadata DB</div>
+          <div class="scale-val">~1 TB</div>
+          <div class="scale-sub">user accounts, post text, feed records</div>
+        </div>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">The initial estimate mistake — and how to catch it</div>
+        <p>The session initially assumed 10MB per post (accounting for video), which produced 50TB/day and over 180PB over 10 years. That's not wrong — it's technically valid for a worst-case assumption. But it's worth sanity-checking: <strong>what fraction of posts actually contain video?</strong> If it's 10%, then average post size is closer to 1MB, and the 10-year storage drops to 18PB. The sanity check habit matters — producing an obviously unreasonable number and not questioning it is a signal that you're calculating without reasoning.</p>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">What these numbers tell us</div>
+        <p>Write QPS of 58 is low — a single application server handles thousands of QPS. Writes are not the bottleneck here. Read QPS of 5,800 is where the system must be optimized. The 100:1 ratio means every architectural decision should ask: <strong>"does this make the read path faster?"</strong> Caching, pre-computation, feed table design, ranking service placement — all driven by the read asymmetry.</p>
+      </div>
+    </section>
+
+    <!-- ══ 3 ══ -->
+    <section id="s3" class="step">
+      <div class="step-header">
+        <span class="step-num">03</span>
+        <span class="step-title">API Design</span>
+        <span class="step-time">⏱ ~5 min</span>
+      </div>
+
+      <p class="prose">Two core endpoints cover the full functional scope: one for publishing, one for reading. The publish endpoint is straightforward. The read endpoint has one important detail — pagination.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method + Path</th><th>Request</th><th>Response</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>POST /api/v1/feed/posts</td>
+              <td>Body: <code>userId</code>, optional <code>text</code>, optional <code>imageUrl[]</code>, optional <code>videoUrl</code></td>
+              <td><code>{ postId, createdAt }</code> — 201</td>
+            </tr>
+            <tr>
+              <td>GET /api/v1/feed</td>
+              <td>Query: <code>userId</code>, <code>limit=20</code>, <code>cursor=&lt;lastPostId&gt;</code></td>
+              <td><code>{ posts[], nextCursor }</code> — 200</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Cursor-based pagination — why not page numbers</div>
+      <p class="prose">Infinite scroll requires the client to tell the server where it left off. Cursor-based pagination uses the ID of the last post seen as the starting point for the next call. This is far superior to offset-based pagination for infinite scroll because:</p>
+      <ul class="checklist">
+        <li><strong>New posts don't shift results:</strong> If you're on "page 3" using offset and 5 new posts arrive, your page 3 is now different. With a cursor, you always get the next 20 posts after the one you last saw — no drift.</li>
+        <li><strong>Works with Cassandra's data model:</strong> Cassandra supports efficient range queries by partition key + clustering key. A cursor maps directly to a Cassandra range query. Offset-based pagination requires a full scan and skip — inefficient at scale.</li>
+        <li><strong>First call behavior:</strong> On first load, cursor is null — return the most recent posts. After each scroll, cursor = the last postId returned. If the app is closed and reopened, cursor resets to null and the feed starts fresh from the top.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">What the client holds vs what the server holds</div>
+        <p>The cursor lives in client memory — browser localStorage or app state. The server is stateless — it doesn't know which page a user is on. This is intentional: stateless servers can be replaced or scaled without coordination. The client always sends its current position to the server, and the server always returns the next batch. <strong>The client owns the scroll state; the server owns the data.</strong></p>
+      </div>
+    </section>
+
+    <!-- ══ 4 ══ -->
+    <section id="s4" class="step">
+      <div class="step-header">
+        <span class="step-num">04</span>
+        <span class="step-title">High-Level Design</span>
+        <span class="step-time">⏱ ~10 min</span>
+      </div>
+
+      <p class="prose">The news feed system has two completely different paths: the write path (publishing a post) and the read path (loading a feed). They share infrastructure but are optimized for opposite workloads — write for reliability and async throughput, read for speed and pre-computation. Drawing and explaining both paths separately is essential.</p>
+
+      <!-- WRITE PATH DIAGRAM -->
+      <div class="diagram-wrap">
+        <div class="diagram-label">Write path — post published to all eligible followers' feeds</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="wa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+              <marker id="wb" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#C87533"/></marker>
+              <marker id="wc" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2E7D52"/></marker>
+            </defs>
+
+            <!-- User -->
+            <rect x="10" y="70" width="70" height="50" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="45" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">User</text>
+            <text x="45" y="107" text-anchor="middle" font-size="10" fill="#8896AA">POST /posts</text>
+
+            <line x1="80" y1="95" x2="100" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#wa)"/>
+
+            <!-- LB -->
+            <rect x="102" y="70" width="70" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="137" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Load</text>
+            <text x="137" y="107" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Balancer</text>
+
+            <line x1="172" y1="95" x2="192" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#wa)"/>
+
+            <!-- Post Service -->
+            <rect x="194" y="55" width="90" height="80" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="239" y="80" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Post Service</text>
+            <text x="239" y="95" text-anchor="middle" font-size="10" fill="#8896AA">→ post cache</text>
+            <text x="239" y="109" text-anchor="middle" font-size="10" fill="#8896AA">→ post DB</text>
+            <text x="239" y="123" text-anchor="middle" font-size="10" fill="#C87533">→ Kafka event</text>
+
+            <!-- Kafka -->
+            <rect x="324" y="70" width="80" height="50" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
+            <text x="364" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Kafka</text>
+            <text x="364" y="107" text-anchor="middle" font-size="10" fill="#8896AA">post.published</text>
+
+            <line x1="284" y1="115" x2="324" y2="100" stroke="#C87533" stroke-width="1.5" marker-end="url(#wb)"/>
+            <text x="300" y="112" font-size="9" fill="#C87533">async</text>
+
+            <!-- Fan-out Service -->
+            <rect x="444" y="55" width="100" height="80" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="494" y="80" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Fan-out</text>
+            <text x="494" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Service</text>
+            <text x="494" y="112" text-anchor="middle" font-size="10" fill="#8896AA">reads social graph</text>
+            <text x="494" y="126" text-anchor="middle" font-size="10" fill="#8896AA">writes feed table</text>
+
+            <line x1="404" y1="95" x2="444" y2="95" stroke="#8896AA" stroke-width="1.5" marker-end="url(#wa)"/>
+
+            <!-- Graph DB -->
+            <rect x="584" y="35" width="90" height="45" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="629" y="55" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Graph DB</text>
+            <text x="629" y="69" text-anchor="middle" font-size="10" fill="#8896AA">who follows whom</text>
+
+            <!-- Feed Table -->
+            <rect x="584" y="105" width="90" height="45" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="629" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Feed Table</text>
+            <text x="629" y="139" text-anchor="middle" font-size="10" fill="#2E7D52">userId + postId</text>
+
+            <line x1="544" y1="75" x2="584" y2="58" stroke="#8896AA" stroke-width="1.3" marker-end="url(#wa)"/>
+            <line x1="544" y1="110" x2="584" y2="120" stroke="#2E7D52" stroke-width="1.5" marker-end="url(#wc)"/>
+
+            <!-- Celebrity bypass label -->
+            <rect x="680" y="60" width="75" height="60" rx="5" fill="#FDECEA" stroke="#F0B8B3" stroke-width="1"/>
+            <text x="717" y="78" text-anchor="middle" font-size="9" font-weight="600" fill="#C0392B">Celebrity?</text>
+            <text x="717" y="92" text-anchor="middle" font-size="9" fill="#4A5568">&gt;1M followers</text>
+            <text x="717" y="105" text-anchor="middle" font-size="9" fill="#C0392B">Skip fan-out</text>
+            <text x="717" y="115" text-anchor="middle" font-size="9" fill="#C0392B">Pull on read</text>
+
+            <line x1="629" y1="58" x2="680" y2="80" stroke="#C0392B" stroke-width="1" stroke-dasharray="3,2"/>
+
+            <!-- Post returns immediately label -->
+            <text x="239" y="155" text-anchor="middle" font-size="9" fill="#3D5A99" font-weight="600">Returns to user immediately ↑</text>
+            <text x="239" y="167" text-anchor="middle" font-size="9" fill="#8896AA">fan-out happens in background</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">Write path — component by component</div>
+      <ul class="checklist">
+        <li><strong>Post Service</strong> — receives the post, writes to post cache and post DB synchronously, then drops ONE event into Kafka. Returns success to the user immediately. Does not wait for fan-out to complete. This is what keeps post latency low regardless of follower count.</li>
+        <li><strong>Kafka (post.published topic)</strong> — decouples post service from fan-out service. The event carries userId and postId. Kafka provides durability, ordering within a partition, and fan-out service can be scaled by adding more consumers without changing post service.</li>
+        <li><strong>Fan-out Service (Kafka consumer)</strong> — consumes the event, queries Graph DB to get the list of followers, applies the active/inactive filter (skip inactive users to avoid waste), checks if user is celebrity (skip fan-out if &gt;1M followers), then writes one record per eligible follower into the Feed Table.</li>
+        <li><strong>Graph DB</strong> — stores the social graph: who follows whom. Fan-out service queries this to get the follower list for a given userId. Separate from user DB because graph traversal queries are different in structure from relational queries.</li>
+        <li><strong>Feed Table</strong> — the most important table in the system. Schema: <code>(userId, postId, createdAt)</code>. Indexed by userId. Fan-out service writes one row per follower per post. The get service reads from here on the read path.</li>
+      </ul>
+
+      <!-- READ PATH DIAGRAM -->
+      <div class="diagram-wrap" style="margin-top:24px">
+        <div class="diagram-label">Read path — feed fetch with hybrid celebrity handling</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs>
+              <marker id="ra" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker>
+              <marker id="rb" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#3D5A99"/></marker>
+              <marker id="rc" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#2E7D52"/></marker>
+            </defs>
+
+            <!-- User -->
+            <rect x="10" y="90" width="70" height="50" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="45" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">User</text>
+            <text x="45" y="127" text-anchor="middle" font-size="10" fill="#8896AA">GET /feed</text>
+
+            <line x1="80" y1="115" x2="100" y2="115" stroke="#8896AA" stroke-width="1.5" marker-end="url(#ra)"/>
+
+            <!-- Get Service -->
+            <rect x="102" y="75" width="95" height="80" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="149" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Get Service</text>
+            <text x="149" y="115" text-anchor="middle" font-size="10" fill="#8896AA">Phase 1: cache</text>
+            <text x="149" y="129" text-anchor="middle" font-size="10" fill="#8896AA">Phase 2: async</text>
+            <text x="149" y="143" text-anchor="middle" font-size="10" fill="#3D5A99">+ celebrity pull</text>
+
+            <!-- Feed Cache -->
+            <rect x="237" y="40" width="90" height="45" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="282" y="60" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Feed Cache</text>
+            <text x="282" y="74" text-anchor="middle" font-size="10" fill="#2E7D52">recent posts</text>
+
+            <!-- Feed DB -->
+            <rect x="237" y="105" width="90" height="45" rx="6" fill="#EBF0FA" stroke="#C4D0EC" stroke-width="1.5"/>
+            <text x="282" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Feed DB</text>
+            <text x="282" y="139" text-anchor="middle" font-size="10" fill="#8896AA">Cassandra</text>
+
+            <line x1="197" y1="100" x2="237" y2="63" stroke="#2E7D52" stroke-width="1.5" marker-end="url(#rc)"/>
+            <line x1="197" y1="125" x2="237" y2="125" stroke="#3D5A99" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#rb)"/>
+            <text x="217" y="94" font-size="9" fill="#2E7D52">sync</text>
+            <text x="217" y="120" font-size="9" fill="#3D5A99">async</text>
+
+            <!-- Graph DB -->
+            <rect x="237" y="170" width="90" height="45" rx="6" fill="#F0F2F7" stroke="#E2E6EF" stroke-width="1.5"/>
+            <text x="282" y="190" text-anchor="middle" font-size="11" font-weight="600" fill="#4A5568">Graph DB</text>
+            <text x="282" y="204" text-anchor="middle" font-size="10" fill="#8896AA">find celebrities</text>
+
+            <line x1="197" y1="140" x2="237" y2="185" stroke="#8896AA" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#ra)"/>
+
+            <!-- Hybrid Get Service -->
+            <rect x="367" y="155" width="110" height="55" rx="6" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="2"/>
+            <text x="422" y="178" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Hybrid Get</text>
+            <text x="422" y="193" text-anchor="middle" font-size="11" font-weight="600" fill="#C87533">Service</text>
+            <text x="422" y="205" text-anchor="middle" font-size="10" fill="#8896AA">pulls celebrity posts</text>
+
+            <line x1="327" y1="192" x2="367" y2="185" stroke="#8896AA" stroke-width="1.3" marker-end="url(#ra)"/>
+
+            <!-- Post Cache -->
+            <rect x="517" y="155" width="90" height="45" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="562" y="175" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Post Cache</text>
+            <text x="562" y="189" text-anchor="middle" font-size="10" fill="#2E7D52">celebrity posts hot</text>
+
+            <line x1="477" y1="182" x2="517" y2="178" stroke="#8896AA" stroke-width="1.3" marker-end="url(#ra)"/>
+
+            <!-- Feed Ranking Service -->
+            <rect x="367" y="60" width="110" height="60" rx="6" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="422" y="82" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Feed Ranking</text>
+            <text x="422" y="97" text-anchor="middle" font-size="11" font-weight="600" fill="#3D5A99">Service</text>
+            <text x="422" y="112" text-anchor="middle" font-size="10" fill="#8896AA">merge + sort</text>
+
+            <!-- arrows to ranking service -->
+            <line x1="327" y1="62" x2="367" y2="82" stroke="#8896AA" stroke-width="1.3" marker-end="url(#ra)"/>
+            <line x1="422" y1="155" x2="422" y2="120" stroke="#8896AA" stroke-width="1.3" marker-end="url(#ra)"/>
+
+            <!-- Return to user -->
+            <rect x="517" y="65" width="90" height="45" rx="6" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="562" y="85" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Top 20 posts</text>
+            <text x="562" y="99" text-anchor="middle" font-size="10" fill="#2E7D52">ranked + merged</text>
+
+            <line x1="477" y1="90" x2="517" y2="88" stroke="#2E7D52" stroke-width="1.5" marker-end="url(#rc)"/>
+
+            <!-- Phase labels -->
+            <text x="282" y="28" text-anchor="middle" font-size="10" fill="#2E7D52" font-weight="600">Phase 1 — instant from cache</text>
+            <text x="422" y="155" text-anchor="middle" font-size="9" fill="#C87533">celebrity posts</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">Read path — two phases</div>
+      <p class="prose"><strong>Phase 1 — Instant from cache:</strong> The get service immediately queries the feed cache for this user's pre-computed feed. This returns within milliseconds. The user sees their first posts almost instantly. This handles the initial scroll without any database calls.</p>
+
+      <p class="prose"><strong>Phase 2 — Async enrichment:</strong> Simultaneously, an async job fetches from the feed DB (Cassandra) to get the full set of recent posts for regular friends. In parallel, the get service queries Graph DB to identify which followees are celebrities (high-volume users, flagged in user table). For each celebrity in the user's follow list, it calls the Hybrid Get Service, which fetches recent posts directly from the post cache. These celebrity posts are recent enough to almost always be cache-hot. Both result sets — regular friend posts from feed DB + celebrity posts from post cache — are sent to the Feed Ranking Service.</p>
+
+      <p class="prose"><strong>Feed Ranking Service:</strong> Receives the merged pool of posts from both sources, applies the engagement scoring model (see deep dive 5B), sorts by score, and returns the top 20. This ranked result is also written back to the feed cache so the next scroll is even faster.</p>
+
+      <div class="callout amber">
+        <div class="callout-label">The critical observation — celebrity posts are cache-hot</div>
+        <p>The pull model for celebrities only works efficiently because their posts are almost guaranteed to be in post cache. A celebrity with 10M followers generates millions of read requests for the same post. That post will be at the top of the LRU cache indefinitely. Pulling it on the read path is not expensive — it's a single cache hit per celebrity per feed load. If the celebrity had 100 followers, they'd get fan-out like everyone else. The inversion only makes sense at celebrity scale.</p>
+      </div>
+    </section>
+
+    <!-- ══ 5A ══ -->
+    <section id="s5a" class="step">
+      <div class="step-header">
+        <span class="step-num">5A</span>
+        <span class="step-title">Deep Dive — Fan-Out Service</span>
+      </div>
+
+      <p class="prose">The fan-out problem is the central challenge of news feed design. When a user posts, every one of their followers needs to see it. At small scale this is trivial. At Facebook scale — where a single celebrity can have 100 million followers — doing this synchronously would take hours and generate millions of writes in a second.</p>
+
+      <p class="prose">The key insight is that fan-out is not urgent. Users can wait 3–5 seconds for a post to appear in their feed — we agreed to this in requirements. This acceptable lag is what enables the entire async architecture. If the requirement were "post visible within 100ms to all followers," the design would be fundamentally different and much harder.</p>
+
+      <!-- FAN-OUT DECISION DIAGRAM -->
+      <div class="diagram-wrap">
+        <div class="diagram-label">Fan-out decision tree — how the fan-out service decides what to do</div>
+        <div class="diagram-box">
+          <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+            <defs><marker id="fa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8896AA"/></marker></defs>
+
+            <!-- Event received -->
+            <rect x="270" y="10" width="160" height="45" rx="7" fill="#EBF0FA" stroke="#3D5A99" stroke-width="2"/>
+            <text x="350" y="30" text-anchor="middle" font-size="12" font-weight="600" fill="#3D5A99">Kafka event received</text>
+            <text x="350" y="46" text-anchor="middle" font-size="10" fill="#8896AA">userId + postId</text>
+
+            <line x1="350" y1="55" x2="350" y2="75" stroke="#8896AA" stroke-width="1.5" marker-end="url(#fa)"/>
+
+            <!-- Check followers -->
+            <rect x="250" y="77" width="200" height="45" rx="7" fill="#FDF3E9" stroke="#EDCFA8" stroke-width="1.5"/>
+            <text x="350" y="97" text-anchor="middle" font-size="12" font-weight="600" fill="#C87533">Get follower count</text>
+            <text x="350" y="113" text-anchor="middle" font-size="10" fill="#8896AA">query Graph DB for this userId</text>
+
+            <!-- Branch: celebrity -->
+            <line x1="250" y1="100" x2="160" y2="140" stroke="#C0392B" stroke-width="1.5" marker-end="url(#fa)"/>
+            <text x="195" y="128" font-size="9" fill="#C0392B">&gt;1M followers</text>
+
+            <rect x="60" y="142" width="140" height="55" rx="7" fill="#FDECEA" stroke="#F0B8B3" stroke-width="1.5"/>
+            <text x="130" y="163" text-anchor="middle" font-size="11" font-weight="600" fill="#C0392B">SKIP fan-out</text>
+            <text x="130" y="178" text-anchor="middle" font-size="10" fill="#4A5568">Post only in post cache</text>
+            <text x="130" y="190" text-anchor="middle" font-size="10" fill="#4A5568">Pull on read path</text>
+
+            <!-- Branch: regular -->
+            <line x1="450" y1="100" x2="540" y2="140" stroke="#2E7D52" stroke-width="1.5" marker-end="url(#fa)"/>
+            <text x="505" y="128" font-size="9" fill="#2E7D52">≤1M followers</text>
+
+            <rect x="490" y="142" width="160" height="55" rx="7" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1.5"/>
+            <text x="570" y="160" text-anchor="middle" font-size="11" font-weight="600" fill="#2E7D52">Fan-out to followers</text>
+            <text x="570" y="175" text-anchor="middle" font-size="10" fill="#4A5568">Get follower list from Graph DB</text>
+            <text x="570" y="188" text-anchor="middle" font-size="10" fill="#4A5568">Filter inactive users</text>
+
+            <line x1="570" y1="197" x2="570" y2="207" stroke="#8896AA" stroke-width="1.3" marker-end="url(#fa)"/>
+
+            <rect x="490" y="208" width="160" height="10" rx="3" fill="#E8F5EE" stroke="#B8DCCA" stroke-width="1"/>
+            <text x="570" y="216" text-anchor="middle" font-size="9" fill="#2E7D52">Write userId+postId to Feed Table</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-heading">The 1M threshold — why that number</div>
+      <p class="prose">The session debated this threshold — it started at 500 followers, moved to 1M. The right number depends on your fan-out service capacity and your SLA. At 58 write QPS for posts, with an average of say 500 followers each, fan-out service handles 29,000 feed writes per second. That's manageable. But one celebrity with 100M followers posting would generate 100M writes — taking hours even with parallelized workers. The threshold is the point at which fan-out becomes a capacity problem, not a latency problem. 1M is a reasonable starting point that can be tuned.</p>
+
+      <div class="sub-heading">Inactive follower filtering</div>
+      <p class="prose">Before writing to the feed table, the fan-out service filters out inactive followers. A user who hasn't opened the app in 30 days doesn't need their feed pre-populated — when they return, their first request will trigger a fresh pull from the feed DB. Skipping inactive users reduces fan-out volume significantly (inactive users are often a large fraction of total followers) and avoids polluting the feed table with records that will never be read. The notification/analytics service maintains the active/inactive flag in the user table, updated from analytics events.</p>
+
+      <div class="sub-heading">Fan-out service scalability</div>
+      <ul class="checklist">
+        <li><strong>Kafka consumer group:</strong> Fan-out service runs as multiple consumer instances in a Kafka consumer group. Each post event is processed by exactly one consumer. Adding more consumers (horizontal scaling) increases fan-out throughput without changing post service.</li>
+        <li><strong>Batch writes to Feed Table:</strong> Instead of writing one row at a time to Cassandra for each follower, batch multiple writes into a single Cassandra batch. This significantly reduces write overhead at high follower counts.</li>
+        <li><strong>Async fan-out within fan-out:</strong> For users with large but sub-threshold follower counts (say 500K followers), the fan-out service can spawn parallel worker threads to write to feed table concurrently rather than serially, completing within seconds.</li>
+      </ul>
+
+      <a class="concept-link" href="concepts/fan-out.html">📖 Fan-Out Pattern — Concept Deep Dive →</a>
+    </section>
+
+    <!-- ══ 5B ══ -->
+    <section id="s5b" class="step">
+      <div class="step-header">
+        <span class="step-num">5B</span>
+        <span class="step-title">Deep Dive — Feed Ranking &amp; Merging</span>
+      </div>
+
+      <p class="prose">Once the read path has assembled posts from two sources — regular friend posts from the feed table and celebrity posts from the post cache — something must merge them into a single ranked list of 20. This is the feed ranking service's job.</p>
+
+      <p class="prose">The key question is: <strong>what does "ranked by relevance" actually mean in implementation?</strong> Purely chronological is easy — sort by timestamp. But Facebook's feed and Twitter's algorithm are not chronological. They surface posts the user is more likely to engage with, which means the system needs a signal about engagement between users.</p>
+
+      <div class="sub-heading">Engagement scoring model</div>
+      <p class="prose">The approach discussed: maintain a per-user-pair engagement score. Every time User A likes, comments on, or shares User B's post, increment a counter stored in the user relationship record (or a separate engagement table). This score reflects the strength of User A's interest in User B's content. Higher score = higher ranking for B's posts in A's feed.</p>
+
+      <div class="card blue">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:10px">Simplified ranking model</div>
+        <pre style="font-family:var(--mono);font-size:12.5px;color:var(--text-mid);line-height:1.9;overflow-x:auto">score(post) = 
+  engagement_score(viewer, author)    // how much viewer likes this author
+  × recency_weight(post.createdAt)    // newer posts score higher
+  × post_engagement(likes + comments) // popular posts score higher
+
+// engagement_score: incremented on like, comment, share
+// decays over time — interaction 6 months ago matters less than last week
+// stored in graph DB on the user-follows-user edge</pre>
+      </div>
+
+      <div class="sub-heading">The merge problem — two sources, one ranked list</div>
+      <p class="prose">The feed ranking service receives two lists:</p>
+      <ul class="checklist">
+        <li><strong>List A:</strong> Posts from regular friends — fetched from feed table (Cassandra), already sorted by createdAt. Maybe 50–200 posts from the last 24 hours.</li>
+        <li><strong>List B:</strong> Posts from celebrities the user follows — fetched from post cache via hybrid get service. 5–10 celebrity posts from recent hours.</li>
+      </ul>
+      <p class="prose">The ranking service combines both lists, scores each post using the engagement model, sorts descending by score, and returns the top 20. The remaining posts (position 21+) are discarded — the next scroll call will re-fetch and re-rank with updated scores and newer posts.</p>
+
+      <div class="callout">
+        <div class="callout-label">Why the ranking service is separate from the get service</div>
+        <p>Separation of concerns. The get service owns data retrieval — know where the data is and fetch it fast. The ranking service owns ranking logic — know how to score and sort posts. Keeping them separate means ranking algorithm changes don't require touching the get service. The ranking model will change frequently as product intuitions evolve — it should be independently deployable. At scale (Meta, Twitter), the ranking service is a sophisticated ML system with its own team. Starting with a simple engagement score is the right MVP, but the architecture should not couple ranking logic with data retrieval.</p>
+      </div>
+
+      <div class="sub-heading">The prefetch optimization</div>
+      <p class="prose">Infinite scroll works best when the next batch is ready before the user reaches the bottom. When the user reaches the 10th post of their current 20, the app triggers a background prefetch call to fetch posts 21–40. These arrive before the user finishes reading posts 11–20, making the scroll feel seamless. The get service writes the prefetched batch to the feed cache tagged by cursor position. This is a client-side trigger — the app knows when to fire it, the server just processes it like any other feed request.</p>
+    </section>
+
+    <!-- ══ 5C ══ -->
+    <section id="s5c" class="step">
+      <div class="step-header">
+        <span class="step-num">5C</span>
+        <span class="step-title">Deep Dive — Database Selection (OLTP vs OLAP)</span>
+      </div>
+
+      <p class="prose">This system uses five different databases — each chosen for a specific access pattern. The instinct to consolidate to fewer databases is understandable (operational simplicity), but each choice is justified by the workload. Using the wrong database type for a workload doesn't just cost performance — it can make certain queries functionally impossible at scale.</p>
+
+      <p class="prose">The critical distinction to understand first: <strong>OLTP vs OLAP</strong>. These are two completely different types of database read workloads, often confused because both are described as "read-heavy."</p>
+
+      <div class="card blue">
+        <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:12px">OLTP vs OLAP — the key distinction</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">OLTP — Online Transaction Processing</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:5px">
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ "Give me this user's 20 posts"</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Single row or small set lookup</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Must return in &lt;50ms</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Runs 5,800 times/sec</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Row-oriented storage optimal</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ <strong style="color:var(--text)">Use: SQL, Cassandra, Redis</strong></li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">OLAP — Online Analytical Processing</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:5px">
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ "How many posts in last 30 days by region?"</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Aggregations across millions of rows</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Seconds to minutes acceptable</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Runs infrequently (batch jobs)</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ Columnar storage optimal</li>
+              <li style="font-size:12.5px;color:var(--text-mid)">▸ <strong style="color:var(--text)">Use: Snowflake, BigQuery, OCI ADW</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout red">
+        <div class="callout-label">The feed table is NOT an OLAP workload</div>
+        <p>During the session, the feed table was initially suggested as a candidate for a data warehouse (ADW). This is incorrect. The feed table is queried 5,800 times per second with requests like "give me all postIds for userId=X, ordered by createdAt, limit 20." That is a point lookup — single partition key, small result set, must return in milliseconds. <strong>A data warehouse is columnar-optimized and scans entire columns to reconstruct a row — it's too slow for this pattern.</strong> Cassandra is the right choice: partitioned by userId, clustered by createdAt, sub-millisecond range queries within a partition.</p>
+      </div>
+
+      <div class="sub-heading">Database selection table — this system</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Table</th><th>DB Type</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>User</td><td>SQL (PostgreSQL)</td><td>Structured, ACID needed for account management (updates, deletes, email uniqueness). Low write volume. Complex queries (find by email, status filter).</td></tr>
+            <tr><td>Post</td><td>Document DB (MongoDB)</td><td>Posts are semi-structured — variable length text, optional arrays of media URLs. Document DB handles flexible schema naturally. Not suited for SQL's rigid column definition.</td></tr>
+            <tr><td>Feed</td><td>NoSQL (Cassandra)</td><td>High frequency key lookups by userId. No joins. Needs horizontal scale. Must handle 5,800 reads/sec. Cassandra partitioned by userId, clustered by createdAt — perfect fit.</td></tr>
+            <tr><td>Social Graph</td><td>Graph DB (Neo4j)</td><td>Who follows whom is a graph traversal query. "Get all followers of userId X" maps naturally to graph DB. Would require expensive self-joins in SQL or denormalization in NoSQL.</td></tr>
+            <tr><td>Analytics Events</td><td>ADW / Columnar (OCI ADW, BigQuery)</td><td>Batch analytics, nightly aggregations, cross-user reporting. Low frequency, high row count, complex aggregations. This IS an OLAP workload. Columnar storage optimal.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout green">
+        <div class="callout-label">Justifying five databases</div>
+        <p>Each database is chosen for a specific access pattern. Mixing them adds operational complexity, but each choice is justified by the workload. In a large organization, each database is owned by a different team. For a smaller system, you'd consolidate — probably SQL for user + post, one NoSQL for feed, graph either in NoSQL or a simple adjacency list in SQL, and skip the dedicated analytics DB until you need it. <strong>The right answer is not "always use X" or "always minimize database types" — it's to match storage to access pattern and scale to actual needs.</strong></p>
+      </div>
+
+      <a class="concept-link" href="concepts/oltp-vs-olap.html">📖 OLTP vs OLAP — Concept Deep Dive →</a>
+    </section>
+
+    <!-- ══ 6 ══ -->
+    <section id="s6" class="step">
+      <div class="step-header">
+        <span class="step-num">06</span>
+        <span class="step-title">Data Model</span>
+      </div>
+
+      <p class="prose">Five tables, five different database types. Each table's schema is driven by the access patterns defined in the design — not by habit or convenience.</p>
+
+      <div class="sub-heading">User Table — SQL</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>id</td><td>BIGINT</td><td>Primary key. Auto-increment or Snowflake-style.</td></tr>
+            <tr><td>username</td><td>VARCHAR(50)</td><td>Unique. Indexed.</td></tr>
+            <tr><td>email</td><td>VARCHAR(255)</td><td>Unique. Indexed. Used for login.</td></tr>
+            <tr><td>follower_count</td><td>INT</td><td>Denormalized counter. Used by fan-out service to check celebrity threshold. Updated on every follow/unfollow.</td></tr>
+            <tr><td>is_celebrity</td><td>BOOLEAN</td><td>Derived flag. True when follower_count &gt; 1M. Fan-out service checks this to decide push vs pull.</td></tr>
+            <tr><td>is_active</td><td>BOOLEAN</td><td>Updated by analytics service. False = user hasn't opened app in 30 days. Fan-out service skips inactive users.</td></tr>
+            <tr><td>last_active_at</td><td>TIMESTAMP</td><td>Updated on each login/feed fetch. Used to compute is_active.</td></tr>
+            <tr><td>created_at</td><td>TIMESTAMP</td><td>Account creation time.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Post Table — MongoDB</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>_id</td><td>ObjectId</td><td>MongoDB auto-generated ID. Used as postId throughout the system.</td></tr>
+            <tr><td>userId</td><td>String (ref User)</td><td>Author of the post. Required — missing in initial design, added after feedback.</td></tr>
+            <tr><td>text</td><td>String</td><td>Post text content. Optional (media-only posts allowed).</td></tr>
+            <tr><td>mediaUrls</td><td>Array[String]</td><td>URLs pointing to S3/OSS objects. Array because a post can have multiple images. External URLs, not blob data.</td></tr>
+            <tr><td>likeCount</td><td>Int</td><td>Denormalized counter for ranking. Incremented on like events.</td></tr>
+            <tr><td>commentCount</td><td>Int</td><td>Denormalized counter for ranking.</td></tr>
+            <tr><td>createdAt</td><td>Date</td><td>Post creation time. Used for recency scoring in ranking.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Feed Table — Cassandra (most critical table)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>userId</td><td>UUID</td><td><strong>Partition key.</strong> All feed records for one user live on the same Cassandra node. Enables single-node range queries.</td></tr>
+            <tr><td>createdAt</td><td>TIMESTAMP</td><td><strong>Clustering key (DESC).</strong> Records within a partition sorted newest-first. Enables efficient "get latest N posts" without full scan.</td></tr>
+            <tr><td>postId</td><td>UUID</td><td>Reference to Post table. Not storing full post — just the ID. Feed table is a pointer table, not a data store.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-label">Why the feed table only stores postId — not the full post</div>
+        <p>Storing full post content in the feed table would make it enormous. Every post gets written to potentially thousands of feed table rows (one per follower). If each row stored 1KB of post content, a celebrity post with 1M eligible followers would write 1GB of duplicated data. By storing only the postId (16 bytes), the feed table stays small and fast. The get service fetches the actual post content from post cache/post DB in a second call, which is fast because it's indexed by postId. <strong>Feed table = index. Post table = data.</strong></p>
+      </div>
+
+      <div class="sub-heading">Social Graph — Graph DB (Neo4j)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Node / Edge</th><th>Properties</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>User node</td><td>userId, username</td><td>Each user is a node in the graph.</td></tr>
+            <tr><td>FOLLOWS edge</td><td>followerId, followeeId, createdAt, engagementScore</td><td>Directed edge. A follows B = edge from A to B. Engagement score lives on this edge — incremented when A engages with B's content. Used by ranking service.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-heading">Analytics Events — ADW (OCI ADW / BigQuery)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>eventId</td><td>UUID</td><td>Auto-generated.</td></tr>
+            <tr><td>userId</td><td>BIGINT</td><td>Who triggered the event.</td></tr>
+            <tr><td>eventType</td><td>VARCHAR</td><td>FEED_LOAD, POST_CREATED, POST_LIKED, POST_COMMENTED, APP_OPEN, APP_CLOSE.</td></tr>
+            <tr><td>deviceType</td><td>VARCHAR</td><td>mobile, web, tablet.</td></tr>
+            <tr><td>geoLocation</td><td>VARCHAR</td><td>Country/region for geo analytics.</td></tr>
+            <tr><td>timestamp</td><td>TIMESTAMP</td><td>Event time.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="prose">A nightly batch job aggregates this raw event data into summary tables: active user counts by region, post engagement rates, feed load latencies by device type. These summaries feed the analytics dashboard and update the is_active flag in the User table. The engagement score on FOLLOWS edges in Graph DB is also updated from this pipeline — likes and comments in the analytics events translate into edge weight increments.</p>
+
+      <div class="open-q">
+        <div class="open-q-label">Items not covered in this session</div>
+        <p style="font-size:13.5px;color:var(--text-muted);line-height:1.7">The post caching strategy (TTL, eviction policy, sizing) was not detailed. The social graph DB query pattern for getting follower lists at scale was discussed but not deep-dived. The ranking ML model (we used a simplified engagement counter — production would use a trained model with many more signals). Rate limiting on the post API (preventing spam) was mentioned but not designed.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span class="footer-copy">akshit.ahuja.js.org · system-design · news-feed · 2026</span>
+    <div class="footer-links">
+      <a href="/system-design/">← All Designs</a>
+      <a href="concepts/fan-out.html">Fan-Out Concept →</a>
+      <a href="concepts/oltp-vs-olap.html">OLTP vs OLAP →</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const spineItems = document.querySelectorAll('.spine-item');
+  const targets = {};
+  spineItems.forEach(item => {
+    const id = item.dataset.target;
+    if (id) { const el = document.getElementById(id); if (el) targets[id] = el; }
+  });
+  function updateSpine() {
+    const y = window.scrollY + 100;
+    let active = null;
+    for (const [id, el] of Object.entries(targets)) { if (el.offsetTop <= y) active = id; }
+    spineItems.forEach(item => item.classList.toggle('active', item.dataset.target === active));
+  }
+  window.addEventListener('scroll', updateSpine, { passive: true });
+  updateSpine();
+</script>
+</body>
+</html>
